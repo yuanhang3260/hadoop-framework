@@ -29,14 +29,17 @@ public class HDFSOutputStream {
 	}
 	
 	public void write(byte[] content) throws IOException {
+		if (this.chunkOffset == this.chunksize && content.length > 0) {
+			//Apply for a new chunk
+			this.chunkCounter++;
+			this.chunkOffset = 0;
+		}
 		
 		int availableBytes = this.chunksize - this.chunkOffset;
 		System.out.println("availabelBytes = " + availableBytes); 
 		int bufferOffset = 0;
 		
 		while (bufferOffset < content.length) {
-			
-//			System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + Math.min((bufferOffset + availableBytes), content.length));
 			
 			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
@@ -51,10 +54,6 @@ public class HDFSOutputStream {
 				System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
 				writeToLocal(writeToDataNodeBuf, "tmp-" + chunkCounter);
 				this.chunkOffset += writeToDataNodeBuf.length;
-				if (this.chunkOffset == this.chunksize) {
-					this.chunkOffset = 0;
-					this.chunkCounter++;
-				}
 				break;
 			} 
 

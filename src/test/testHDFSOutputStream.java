@@ -7,8 +7,8 @@ import hdfs.IO.HDFSOutputStream;
 public class testHDFSOutputStream {
 	public static void main(String[] args) throws IOException {
 		HDFSOutputStream out = new HDFSOutputStream(7);
-		int buff1_len = 8;
-		int buff2_len = 6;
+		int buff1_len = 7;
+		int buff2_len = 0;
 		byte[] buff1 = new byte[buff1_len];
 		for (int i = 0; i < buff1_len; i++) {
 			buff1[i] = (byte)('1' + i);
