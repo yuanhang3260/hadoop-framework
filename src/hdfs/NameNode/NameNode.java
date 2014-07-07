@@ -74,7 +74,7 @@ public class NameNode implements NameNodeRemoteInterface{
 	private class FileMetaData {
 		private List<Long> chunks;
 		private Hashtable<Long, ChunkMetaData> chunkInfoTbl;
-		private int replicaFactor;
+		private int replicaFactor;  
 		
 	}
 	
