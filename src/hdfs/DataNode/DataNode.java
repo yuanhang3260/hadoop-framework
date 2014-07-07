@@ -2,6 +2,10 @@ package hdfs.DataNode;
 
 import hdfs.NameNode.NameNodeRemoteInterface;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
@@ -15,6 +19,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private String nameNodeIp;
 	private int nameNodePort;
 	private int dataNodeName;
+
 	
 	public DataNode(String nameNodeIp, int nameNodePort) {
 		/* Name Node's RMI registry's address */
@@ -60,7 +65,35 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+	}
+
+	@Override
+	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
+		File chunkFile = new File(chunkName);
+		if (!chunkFile.exists()) {
+			try {
+				chunkFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		RandomAccessFile out = null;
+		try {
+			out = new RandomAccessFile(chunkFile, "rws");
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		try {
+			out.seek(offset);
+			out.write(b);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return;
 	}
 	
 }
