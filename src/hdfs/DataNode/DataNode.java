@@ -70,7 +70,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 
 	@Override
 	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
-		File chunkFile = new File("DataNode-" + this.dataNodeName + "-chunk-" + chunkName);
+		File chunkFile = new File("test_tmp/DataNode-" + this.dataNodeName + "-chunk-" + chunkName);
 		if (!chunkFile.exists()) {
 			try {
 				chunkFile.createNewFile();

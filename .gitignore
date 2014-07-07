@@ -1,2 +1,5 @@
 #Ignore /bin
 /bin
+
+#Ignore tmp test file
+/test_tmp
