@@ -1,6 +1,7 @@
 package hdfs.NameNode;
 
 import global.Hdfs;
+import hdfs.IO.HDFSInputStream;
 import hdfs.IO.HDFSOutputStream;
 
 import java.net.Inet4Address;
@@ -22,13 +23,13 @@ public class NameNode implements NameNodeRemoteInterface{
 	private int dataNodeNaming;
 	private long chunkNaming;
 	private Map<Integer, DataNodeInfo> dataNodeTbl;
-	private Map<String, FileMetaData> metaDataTbl;
+	private Map<String, FileMetaData> fileMetaDataTbl;
 	private long chunksize;
 	private int registryPort;
 	
 	public NameNode() {
 		this.dataNodeTbl = new ConcurrentHashMap<Integer, DataNodeInfo>();
-		this.metaDataTbl = new ConcurrentHashMap<String, FileMetaData>();
+		this.fileMetaDataTbl = new ConcurrentHashMap<String, FileMetaData>();
 		this.dataNodeNaming = 1;
 		this.chunkNaming = 1;
 		this.chunksize = 7;
@@ -104,18 +105,31 @@ public class NameNode implements NameNodeRemoteInterface{
 		return out;
 	}
 	
+	public HDFSInputStream open(String path) throws RemoteException{
+		FileMetaData fileMetaData = this.fileMetaDataTbl.get(path);
+		HDFSInputStream in = null;
+		if (fileMetaData != null) {
+			List<ChunkInfo> chunksInfo = new ArrayList<ChunkInfo>();
+			for (long chunkName : fileMetaData.chunks) {
+				
+			}
+			
+		}
+		
+	}
+	
 	private FileMetaData createFileEntry (String path) {
-		if (this.metaDataTbl.get(path) != null) {
+		if (this.fileMetaDataTbl.get(path) != null) {
 			return null;
 		}
 		FileMetaData newFile = new FileMetaData();
-		this.metaDataTbl.put(path, newFile);
+		this.fileMetaDataTbl.put(path, newFile);
 		return newFile;
 	}
 
 	@Override
 	public ChunkInfo applyForNewChunk(String path) throws RemoteException {
-		FileMetaData fileMetaData = this.metaDataTbl.get(path);
+		FileMetaData fileMetaData = this.fileMetaDataTbl.get(path);
 		hdfs.NameNode.NameNode.FileMetaData.ChunkMetaData newChunkMetaData = fileMetaData.addChunk();
 		ChunkInfo handler = new ChunkInfo(newChunkMetaData.chunkName);
 		List<Integer> dataNodes = newChunkMetaData.locations;
@@ -144,11 +158,11 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	private class FileMetaData {
 		private List<Long> chunks;
-		private Hashtable<Long, ChunkMetaData> chunkInfoTbl;
+		private Hashtable<Long, ChunkMetaData> chunkMetaDataTbl;
 		private int replicaFactor;  
 		public FileMetaData() {
 			this.chunks = new ArrayList<Long>();
-			this.chunkInfoTbl = new Hashtable<Long, ChunkMetaData>();
+			this.chunkMetaDataTbl = new Hashtable<Long, ChunkMetaData>();
 			this.replicaFactor = 3;
 		}
 		
@@ -161,7 +175,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		private ChunkMetaData addChunk() {
 			long chunkID = NameNode.this.chunkNaming++;
 			ChunkMetaData chunkMetaData = new ChunkMetaData(chunkID);
-			this.chunkInfoTbl.put(chunkID, chunkMetaData);
+			this.chunkMetaDataTbl.put(chunkID, chunkMetaData);
 			Set<Integer> allDataNode = NameNode.this.dataNodeTbl.keySet();
 			Iterator<Integer> it = allDataNode.iterator();
 			for (int i = 0; it.hasNext() && i < this.replicaFactor; i++) {
