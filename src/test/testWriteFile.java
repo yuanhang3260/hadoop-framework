@@ -11,7 +11,7 @@ import java.rmi.registry.Registry;
 
 public class testWriteFile {
 	public static void main (String[] args) throws RemoteException, NotBoundException {
-		String nameNodeRegistryIP = "localhost";
+		String nameNodeRegistryIP = "128.237.222.59";
 		int nameNodeRegistryPort = 1099;
 		int buff_size1 = 7;
 		int buff_size2 = 9;
