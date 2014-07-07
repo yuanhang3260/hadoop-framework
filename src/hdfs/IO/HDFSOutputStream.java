@@ -102,7 +102,6 @@ public class HDFSOutputStream implements Serializable {
 	}
 	
 	private ChunkInfo newChunk() throws RemoteException, NotBoundException {
-		System.out.println("ip:" + this.nameNodeReigstryIP);
 		Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		ChunkInfo handler = nameNodeStub.applyForNewChunk(this.filePath);
