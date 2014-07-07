@@ -8,12 +8,12 @@ public class Hdfs {
 		public static int nameNodeRegistryPort = 1099;
 	}
 	public static class DataNode1 {
-		public static int dataNode1RegistryPort = 1100;
+		public static int registryPort = 1100;
 	}
 	public static class DataNode2 {
-		public static int dataNode2RegistryPort = 1101;
+		public static int registryPort = 1101;
 	}
 	public static class DataNode3 {
-		public static int dataNode3RegistryPort = 1102;
+		public static int registryPort = 1102;
 	}
 }
