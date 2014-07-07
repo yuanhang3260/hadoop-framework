@@ -100,6 +100,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		return;
 	}
 	
+	@Override
 	public void modifyChunkPermission(String globalChunkName) throws RemoteException {
 		File chunkFile = new File(chunkNameWrapper(globalChunkName));
 		if (!chunkFile.exists()) {
@@ -113,9 +114,22 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		return;
 	}
 	
+	@Override
+	public void deleteChunk(String globalChunkName) throws RemoteException, IOException {
+		try {
+			File chunkFile = new File(chunkNameWrapper(globalChunkName));
+			chunkFile.delete();
+		} catch (SecurityException e) {
+			throw new IOException("Cannot delete the chunk");
+		}
+		
+	}
+	
 	private String chunkNameWrapper(String globalChunkName) {
 		return this.dirPrefix + this.dataNodeName + "-chunk-" + globalChunkName;
 	}
+
+	
 	
 //	private String chunkNameUnwrapper(String localChunkName) {
 //		if (localChunkName == null) {

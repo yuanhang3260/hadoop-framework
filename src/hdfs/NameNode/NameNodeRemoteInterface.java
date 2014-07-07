@@ -3,6 +3,7 @@ package hdfs.NameNode;
 import hdfs.DataStructure.ChunkInfo;
 import hdfs.IO.HDFSOutputStream;
 
+import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -14,4 +15,5 @@ public interface NameNodeRemoteInterface extends Remote{
 	public HDFSOutputStream create(String path) throws RemoteException;
 	public ChunkInfo applyForNewChunk(String path) throws RemoteException;
 	public List<ChunkInfo> getFileChunks(String file) throws RemoteException;
+	public void delete(String path) throws RemoteException, IOException;
 }
