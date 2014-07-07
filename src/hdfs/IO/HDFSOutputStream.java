@@ -2,8 +2,8 @@ package hdfs.IO;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.NameNode.ChunkInfo;
-import hdfs.NameNode.ChunkInfo.DataNodeInfo;
+import hdfs.DataStructure.ChunkInfo;
+import hdfs.DataStructure.DataNodeEntry;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
@@ -13,6 +13,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.List;
 
 public class HDFSOutputStream implements Serializable {
 	/**
@@ -26,7 +27,6 @@ public class HDFSOutputStream implements Serializable {
 	private int chunkCounter;
 	private int chunksize;
 	private ChunkInfo currChunk;
-	private boolean waitForEOL;
 	
 	public HDFSOutputStream (int size, ChunkInfo chunk, String file, String ip, int port) {
 		this.chunksize = size;
@@ -36,7 +36,6 @@ public class HDFSOutputStream implements Serializable {
 		this.filePath = file;
 		this.nameNodeReigstryIP = ip;
 		this.nameNodeRegistryPort = port;
-		this.waitForEOL = false;
 	}
 
 	public void write(byte[] content) throws IOException {
@@ -119,7 +118,20 @@ public class HDFSOutputStream implements Serializable {
 		}
 	}
 	
-	private void writeToDataNode(byte[] content, DataNodeInfo dataNode, String chunkName) throws IOException {
+	public void close() throws IOException{
+		try {
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
+			List<ChunkInfo> allChunks = nameNodeStub.getFileChunks(this.filePath);
+			//TODO: CHANGE PERMISSION
+		} catch (RemoteException e) {
+			throw new IOException("Cannot connect to Name Node");
+		} catch (NotBoundException e) {
+			throw new IOException("Cannot connect to Name Node");
+		}
+	}
+	
+	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG: HDFSOutputStream: Write to DataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
 		}

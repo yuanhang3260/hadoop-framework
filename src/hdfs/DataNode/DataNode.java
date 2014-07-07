@@ -18,7 +18,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	//TODO:Use XML to configure
 	private String nameNodeIp;
 	private int nameNodePort;
-	private int dataNodeName;
+	private String dataNodeName;
 	private int dataNodePort;
 	
 	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
@@ -33,7 +33,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	 */
 	public void init() {
 		try {
-			Registry localRegistry = LocateRegistry.createRegistry(1100);
+			Registry localRegistry = LocateRegistry.createRegistry(this.dataNodePort);
 			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
 			localRegistry.rebind("DataNode", dataNodeStub);
 		} catch (RemoteException e) {
@@ -47,7 +47,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			/* join hdfs cluster */
 			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), 1100);
+			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort);
 			
 			while (true) {
 				Thread.sleep(10000);
@@ -71,7 +71,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 
 	@Override
 	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
-		File chunkFile = new File("test_tmp/DataNode-" + this.dataNodeName + "-chunk-" + chunkName);
+		File chunkFile = new File("test_tmp/" + this.dataNodeName + "-chunk-" + chunkName);
 		if (!chunkFile.exists()) {
 			try {
 				chunkFile.createNewFile();
