@@ -20,12 +20,13 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private String nameNodeIp;
 	private int nameNodePort;
 	private int dataNodeName;
-
+	private int dataNodeRegistryPort;
 	
-	public DataNode(String nameNodeIp, int nameNodePort) {
+	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
+		this.dataNodeRegistryPort = dataNodePort;
 	}
 	
 	/**
@@ -33,7 +34,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	 */
 	public void init() {
 		try {
-			Registry localRegistry = LocateRegistry.createRegistry(1099);
+			Registry localRegistry = LocateRegistry.createRegistry(this.dataNodeRegistryPort);
 			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
 			localRegistry.rebind("DataNode", dataNodeStub);
 		} catch (RemoteException e) {
@@ -47,7 +48,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			/* join hdfs cluster */
 			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), 1099);
+			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodeRegistryPort);
 			
 			while (true) {
 				Thread.sleep(10000);

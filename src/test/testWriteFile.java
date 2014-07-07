@@ -36,6 +36,5 @@ public class testWriteFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 }

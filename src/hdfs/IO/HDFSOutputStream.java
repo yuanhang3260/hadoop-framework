@@ -56,8 +56,7 @@ public class HDFSOutputStream implements Serializable {
 		System.out.println("availabelBytes = " + availableBytes); 
 		int bufferOffset = 0;
 		
-		while (bufferOffset < content.length) {
-			
+		while (bufferOffset < content.length) {	
 			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
 				System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));

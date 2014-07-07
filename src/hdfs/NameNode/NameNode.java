@@ -84,6 +84,9 @@ public class NameNode implements NameNodeRemoteInterface{
 		ChunkInfo handler = new ChunkInfo(firstChunkMetaData.chunkName);
 		List<Integer> dataNodes = firstChunkMetaData.locations;
 		for (int dataNode : dataNodes) {
+			if (Hdfs.DEBUG) {
+				System.out.println("dataNode id=" + dataNode);
+			}
 			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
 			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
 		}
