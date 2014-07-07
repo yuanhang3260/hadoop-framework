@@ -19,12 +19,13 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private String nameNodeIp;
 	private int nameNodePort;
 	private int dataNodeName;
-
+	private int dataNodePort;
 	
-	public DataNode(String nameNodeIp, int nameNodePort) {
+	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
+		this.dataNodePort = dataNodePort;
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package hdfs.IO;
 
+import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
 import hdfs.NameNode.ChunkInfo;
 import hdfs.NameNode.ChunkInfo.DataNodeInfo;
@@ -92,6 +93,9 @@ public class HDFSOutputStream implements Serializable {
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeInfo dataNode, String chunkName) throws IOException {
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG: HDFSOutputStream: Write to DataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
+		}
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
 		try {
 			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
