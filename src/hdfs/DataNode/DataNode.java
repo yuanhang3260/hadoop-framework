@@ -20,12 +20,14 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private int nameNodePort;
 	private String dataNodeName;
 	private int dataNodePort;
+	private String dirPrefix;
 	
 	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
 		this.dataNodePort = dataNodePort;
+		this.dirPrefix = "test_tmp/";
 	}
 	
 	/**
@@ -71,7 +73,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 
 	@Override
 	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
-		File chunkFile = new File("test_tmp/" + this.dataNodeName + "-chunk-" + chunkName);
+		File chunkFile = new File(chunkNameWrapper(chunkName));
 		if (!chunkFile.exists()) {
 			try {
 				chunkFile.createNewFile();
@@ -97,5 +99,30 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		}
 		return;
 	}
+	
+	public void modifyChunkPermission(String globalChunkName) throws RemoteException {
+		File chunkFile = new File(chunkNameWrapper(globalChunkName));
+		if (!chunkFile.exists()) {
+			try {
+				chunkFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		chunkFile.setWritable(false, false);
+		return;
+	}
+	
+	private String chunkNameWrapper(String globalChunkName) {
+		return this.dirPrefix + this.dataNodeName + "-chunk-" + globalChunkName;
+	}
+	
+//	private String chunkNameUnwrapper(String localChunkName) {
+//		if (localChunkName == null) {
+//			return null;
+//		}
+//		String[] array = localChunkName.split("-");
+//		return array[2];
+//	}
 	
 }

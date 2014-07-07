@@ -28,9 +28,11 @@ public class testWriteFile {
 		try {
 			out.write(buff1);
 			out.write(buff2);
+			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		
 	}
 }
