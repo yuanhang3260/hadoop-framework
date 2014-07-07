@@ -3,7 +3,6 @@ package hdfs.NameNode;
 import global.Hdfs;
 import hdfs.IO.HDFSOutputStream;
 
-import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;

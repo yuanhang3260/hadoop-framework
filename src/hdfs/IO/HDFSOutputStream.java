@@ -32,14 +32,10 @@ public class HDFSOutputStream implements Serializable {
 		this.chunkOffset = 0;
 		this.chunkCounter = 1;
 		this.filePath = file;
+		this.nameNodeReigstryIP = ip;
+		this.nameNodeRegistryPort = port;
 	}
-	
-	public HDFSOutputStream(int size) {
-		this.chunksize = size;
-		this.chunkOffset = 0;
-		this.chunkCounter = 1;
-	}
-	
+
 	public void write(byte[] content) throws IOException {
 		
 		if (this.chunkOffset == this.chunksize && content.length > 0) { //Apply for a new chunk
@@ -106,6 +102,7 @@ public class HDFSOutputStream implements Serializable {
 	}
 	
 	private ChunkInfo newChunk() throws RemoteException, NotBoundException {
+		System.out.println("ip:" + this.nameNodeReigstryIP);
 		Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		ChunkInfo handler = nameNodeStub.applyForNewChunk(this.filePath);
