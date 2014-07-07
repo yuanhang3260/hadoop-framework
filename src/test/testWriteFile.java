@@ -13,23 +13,18 @@ public class testWriteFile {
 	public static void main (String[] args) throws RemoteException, NotBoundException {
 		String nameNodeRegistryIP = "localhost";
 		int nameNodeRegistryPort = 1099;
-		int buff_size1 = 7;
-		int buff_size2 = 9;
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
-		HDFSOutputStream out = nameNodeStub.create("test_tmp/test-file-4");
+		HDFSOutputStream out = nameNodeStub.create("test-file-19");
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);
 		}
-		byte[] buff1 = new byte[buff_size1];
-		byte[] buff2 = new byte[buff_size2];
-		for (int i = 0; i < buff_size1; i++) {
-			buff1[i] = (byte) ('1' + i);
-		}
-		for (int i = 0; i < buff_size2; i++) {
-			buff2[i] = (byte) ('a' + i);
-		}
+		String str1 = "abcdefg123\n";
+		String str2 = "\nhijklm\n";
+		byte[] buff1 = str1.getBytes();
+		byte[] buff2 = str2.getBytes();
+		
 		try {
 			out.write(buff1);
 			out.write(buff2);

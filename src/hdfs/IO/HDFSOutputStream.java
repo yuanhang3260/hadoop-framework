@@ -26,6 +26,7 @@ public class HDFSOutputStream implements Serializable {
 	private int chunkCounter;
 	private int chunksize;
 	private ChunkInfo currChunk;
+	private boolean waitForEOL;
 	
 	public HDFSOutputStream (int size, ChunkInfo chunk, String file, String ip, int port) {
 		this.chunksize = size;
@@ -35,6 +36,7 @@ public class HDFSOutputStream implements Serializable {
 		this.filePath = file;
 		this.nameNodeReigstryIP = ip;
 		this.nameNodeRegistryPort = port;
+		this.waitForEOL = false;
 	}
 
 	public void write(byte[] content) throws IOException {
@@ -56,6 +58,7 @@ public class HDFSOutputStream implements Serializable {
 		System.out.println("availabelBytes = " + availableBytes); 
 		int bufferOffset = 0;
 		
+		
 		while (bufferOffset < content.length) {
 			
 			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
@@ -65,31 +68,55 @@ public class HDFSOutputStream implements Serializable {
 				for (int i = 0; i < this.currChunk.getReplicaFactor(); i++) {
 					writeToDataNode(writeToDataNodeBuf, this.currChunk.getDataNode(i), this.currChunk.getChunkName());
 				}
-				
-				/* Apply for new chunk */
-				try {
-					this.currChunk = newChunk();
-				} catch (RemoteException e) {
-					e.printStackTrace();
-					throw new IOException("Unable to locate NameNode");
-				} catch (NotBoundException e) {
-					e.printStackTrace();
-					throw new IOException("Unable to locate NameNode");
+				this.chunkOffset += availableBytes;
+				/* Continue writing till new line feed */
+				if (writeToDataNodeBuf[writeToDataNodeBuf.length - 1] != '\n') {
+					int i = 0;
+					while (bufferOffset < content.length && content[bufferOffset] != '\n') {
+						i++;
+						bufferOffset++;
+					}
+					if (content[bufferOffset] == '\n' && bufferOffset < content.length) {
+						i++;
+						bufferOffset++;
+					}
+					byte[] actualWrittenBuf = Arrays.copyOfRange(content, bufferOffset - i, bufferOffset);
+					for (int j = 0; j < this.currChunk.getReplicaFactor(); j++) {
+						writeToDataNode(actualWrittenBuf, this.currChunk.getDataNode(j), this.currChunk.getChunkName());
+					}
 				}
-				this.chunkOffset = 0;
-				availableBytes = this.chunksize;
+				/* Apply for a new chunk */
+				if (bufferOffset < content.length) {
+					try {
+						this.currChunk = newChunk();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+						throw new IOException("Unable to locate NameNode");
+					} catch (NotBoundException e) {
+						e.printStackTrace();
+						throw new IOException("Unable to locate NameNode");
+					}
+					this.chunkOffset = 0;
+					availableBytes = this.chunksize;
+				} else {
+					break;
+				}
 			} else { // enough to finish write
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, content.length);
-				System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
+				if (Hdfs.DEBUG) {
+					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
+				}
 				for (int i = 0; i < this.currChunk.getReplicaFactor(); i++) {
 					writeToDataNode(writeToDataNodeBuf, this.currChunk.getDataNode(i), this.currChunk.getChunkName());
 				}
 				this.chunkOffset += writeToDataNodeBuf.length;
 				break;
-			} 
+			}
 
 		}
-		System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
+		if (Hdfs.DEBUG) {
+			System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
+		}
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeInfo dataNode, String chunkName) throws IOException {
@@ -111,5 +138,6 @@ public class HDFSOutputStream implements Serializable {
 		ChunkInfo handler = nameNodeStub.applyForNewChunk(this.filePath);
 		return handler;
 	}
+	
 	
 }
