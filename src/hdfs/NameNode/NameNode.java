@@ -73,11 +73,65 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 	}
 	
-	private class DataNodeInfo implements Serializable {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 2436332580712529759L;
+	
+	
+	
+	
+	
+
+	@Override
+	public HDFSOutputStream create(String path) throws RemoteException {
+		FileMetaData newFile = createFileEntry(path);
+		if (newFile == null) {
+			//PATH(file name) already exists
+			return null;
+		}
+		hdfs.NameNode.NameNode.FileMetaData.ChunkMetaData firstChunkMetaData = newFile.addChunk();
+		
+		ChunkInfo handler = new ChunkInfo(firstChunkMetaData.chunkName);
+		List<Integer> dataNodes = firstChunkMetaData.locations;
+		for (int dataNode : dataNodes) {
+			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
+			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
+		}
+		String hostIP = null;
+		try {
+			hostIP = Inet4Address.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			throw new RemoteException("Unknown Host");
+		}
+		HDFSOutputStream out = new HDFSOutputStream((int)this.chunksize, handler, path, hostIP, this.registryPort);
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG NameNode.create(): Invocate create.");
+		}
+		return out;
+	}
+	
+	private FileMetaData createFileEntry (String path) {
+		if (this.metaDataTbl.get(path) != null) {
+			return null;
+		}
+		FileMetaData newFile = new FileMetaData();
+		this.metaDataTbl.put(path, newFile);
+		return newFile;
+	}
+
+	@Override
+	public ChunkInfo applyForNewChunk(String path) throws RemoteException {
+		FileMetaData fileMetaData = this.metaDataTbl.get(path);
+		hdfs.NameNode.NameNode.FileMetaData.ChunkMetaData newChunkMetaData = fileMetaData.addChunk();
+		ChunkInfo handler = new ChunkInfo(newChunkMetaData.chunkName);
+		List<Integer> dataNodes = newChunkMetaData.locations;
+		for (int dataNode : dataNodes) {
+			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
+			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
+		}
+		return handler;
+	}
+	
+	private class DataNodeInfo {
+
 		//TODO:a dataNode stub variable
 		private Date latestHeartBeat;
 		private List<Long> chunks;
@@ -120,70 +174,17 @@ public class NameNode implements NameNodeRemoteInterface{
 			}
 			return chunkMetaData;
 		}
-	
-	}
-	
-	private class ChunkMetaData {
-		private long chunkName;
-		private List<Integer> locations;
 		
-		public ChunkMetaData(long chunkID) {
-			this.chunkName = chunkID;
-			locations = new ArrayList<Integer>();
+		private class ChunkMetaData {
+			private long chunkName;
+			private List<Integer> locations;
+			
+			public ChunkMetaData(long chunkID) {
+				this.chunkName = chunkID;
+				locations = new ArrayList<Integer>();
+			}
 		}
-		
-	}
-
-	@Override
-	public HDFSOutputStream create(String path) throws RemoteException {
-		FileMetaData newFile = createFileEntry(path);
-		if (newFile == null) {
-			//PATH(file name) already exists
-			return null;
-		}
-		ChunkMetaData firstChunkMetaData = newFile.addChunk();
-		
-		ChunkManipulationHandler handler = new ChunkManipulationHandler(firstChunkMetaData.chunkName);
-		List<Integer> dataNodes = firstChunkMetaData.locations;
-		for (int dataNode : dataNodes) {
-			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
-			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
-		}
-		String hostIP = null;
-		try {
-			hostIP = Inet4Address.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			throw new RemoteException("Unknown Host");
-		}
-		HDFSOutputStream out = new HDFSOutputStream((int)this.chunksize, handler, path, hostIP, this.registryPort);
-		if (Hdfs.DEBUG) {
-			System.out.println("DEBUG NameNode.create(): Invocate create.");
-		}
-		return out;
-	}
 	
-	private FileMetaData createFileEntry (String path) {
-		if (this.metaDataTbl.get(path) != null) {
-			return null;
-		}
-		FileMetaData newFile = new FileMetaData();
-		this.metaDataTbl.put(path, newFile);
-		return newFile;
 	}
-
-	@Override
-	public ChunkManipulationHandler applyForNewChunk(String path) throws RemoteException {
-		FileMetaData fileMetaData = this.metaDataTbl.get(path);
-		ChunkMetaData newChunkMetaData = fileMetaData.addChunk();
-		ChunkManipulationHandler handler = new ChunkManipulationHandler(newChunkMetaData.chunkName);
-		List<Integer> dataNodes = newChunkMetaData.locations;
-		for (int dataNode : dataNodes) {
-			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
-			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
-		}
-		return handler;
-	}
-	
 	
 }

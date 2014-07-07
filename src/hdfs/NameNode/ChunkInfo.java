@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChunkManipulationHandler implements Serializable {
+public class ChunkInfo implements Serializable {
 
 	private static final long serialVersionUID = -253895999225595586L;
 	private List<DataNodeInfo> dataNodeList;
 	private long chunkName;
 
 	
-	public ChunkManipulationHandler(long chunkName) {
+	public ChunkInfo(long chunkName) {
 		dataNodeList = new ArrayList<DataNodeInfo>();
 		this.chunkName = chunkName;
 	}
