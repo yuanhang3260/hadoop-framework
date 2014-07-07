@@ -3,6 +3,9 @@ package hdfs.NameNode;
 import global.Hdfs;
 import hdfs.IO.HDFSOutputStream;
 
+import java.io.Serializable;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -21,20 +24,22 @@ public class NameNode implements NameNodeRemoteInterface{
 	private long chunkNaming;
 	private Map<Integer, DataNodeInfo> dataNodeTbl;
 	private Map<String, FileMetaData> metaDataTbl;
-	private long blocksize;
+	private long chunksize;
+	private int registryPort;
 	
 	public NameNode() {
 		this.dataNodeTbl = new ConcurrentHashMap<Integer, DataNodeInfo>();
 		this.metaDataTbl = new ConcurrentHashMap<String, FileMetaData>();
 		this.dataNodeNaming = 1;
 		this.chunkNaming = 1;
-		this.blocksize = 4 * 1024 * 1024;
+		this.chunksize = 7;
+		this.registryPort = 1099;
 	}
 	
 	public void init() {
 		Registry registry;
 		try {
-			registry = LocateRegistry.createRegistry(1099);
+			registry = LocateRegistry.createRegistry(this.registryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
 			registry.rebind("NameNode", nameNodeStub);
 		} catch (RemoteException e) {
@@ -68,7 +73,11 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 	}
 	
-	private class DataNodeInfo {
+	private class DataNodeInfo implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2436332580712529759L;
 		//TODO:a dataNode stub variable
 		private Date latestHeartBeat;
 		private List<Long> chunks;
@@ -94,11 +103,11 @@ public class NameNode implements NameNodeRemoteInterface{
 			this.replicaFactor = 3;
 		}
 		
-		public FileMetaData(int rf) {
-			this.chunks = new ArrayList<Long>();
-			this.chunkInfoTbl = new Hashtable<Long, ChunkMetaData>();
-			this.replicaFactor = rf;
-		}
+//		public FileMetaData(int rf) {
+//			this.chunks = new ArrayList<Long>();
+//			this.chunkInfoTbl = new Hashtable<Long, ChunkMetaData>();
+//			this.replicaFactor = rf;
+//		}
 		
 		private ChunkMetaData addChunk() {
 			long chunkID = NameNode.this.chunkNaming++;
@@ -140,8 +149,17 @@ public class NameNode implements NameNodeRemoteInterface{
 			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
 			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
 		}
-		 HDFSOutputStream out = new HDFSOutputStream((int)this.blocksize, handler);
-		
+		String hostIP = null;
+		try {
+			hostIP = Inet4Address.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			throw new RemoteException("Unknown Host");
+		}
+		HDFSOutputStream out = new HDFSOutputStream((int)this.chunksize, handler, path, hostIP, this.registryPort);
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG NameNode.create(): Invocate create.");
+		}
 		return out;
 	}
 	
@@ -152,6 +170,19 @@ public class NameNode implements NameNodeRemoteInterface{
 		FileMetaData newFile = new FileMetaData();
 		this.metaDataTbl.put(path, newFile);
 		return newFile;
+	}
+
+	@Override
+	public ChunkManipulationHandler applyForNewChunk(String path) throws RemoteException {
+		FileMetaData fileMetaData = this.metaDataTbl.get(path);
+		ChunkMetaData newChunkMetaData = fileMetaData.addChunk();
+		ChunkManipulationHandler handler = new ChunkManipulationHandler(newChunkMetaData.chunkName);
+		List<Integer> dataNodes = newChunkMetaData.locations;
+		for (int dataNode : dataNodes) {
+			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
+			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
+		}
+		return handler;
 	}
 	
 	

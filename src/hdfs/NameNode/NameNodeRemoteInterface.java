@@ -10,4 +10,5 @@ public interface NameNodeRemoteInterface extends Remote{
 	public int join(String ip, int port) throws RemoteException;
 	public void blockReport() throws RemoteException;
 	public HDFSOutputStream create(String path) throws RemoteException;
+	public ChunkManipulationHandler applyForNewChunk(String path) throws RemoteException;
 }

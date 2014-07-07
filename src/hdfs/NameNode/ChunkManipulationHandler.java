@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChunkManipulationHandler implements Serializable{
+public class ChunkManipulationHandler implements Serializable {
 
 	private static final long serialVersionUID = -253895999225595586L;
 	private List<DataNodeInfo> dataNodeList;
@@ -26,7 +26,11 @@ public class ChunkManipulationHandler implements Serializable{
 		return this.dataNodeList.get(index);
 	}
 	
-	public class DataNodeInfo {
+	public class DataNodeInfo implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4553871129664598137L;
 		public String dataNodeRegistryIP;
 		public int dataNodeRegistryPort;
 		
@@ -38,5 +42,9 @@ public class ChunkManipulationHandler implements Serializable{
 	
 	public int getReplicaFactor() {
 		return this.dataNodeList.size();
+	}
+	
+	public String getChunkName() {
+		return this.chunkName + "";
 	}
 }
