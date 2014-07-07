@@ -1,5 +1,6 @@
 package hdfs.DataNode;
 
+import global.Hdfs;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -32,7 +33,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	 */
 	public void init() {
 		try {
-			Registry localRegistry = LocateRegistry.createRegistry(1100);
+			Registry localRegistry = LocateRegistry.createRegistry(1099);
 			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
 			localRegistry.rebind("DataNode", dataNodeStub);
 		} catch (RemoteException e) {
@@ -46,7 +47,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			/* join hdfs cluster */
 			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), 1100);
+			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), 1099);
 			
 			while (true) {
 				Thread.sleep(10000);
@@ -70,6 +71,9 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	@Override
 	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
 		File chunkFile = new File("test_tmp/DataNode-" + this.dataNodeName + "-chunk-" + chunkName);
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG DataNode.write() " + " chunkName: " + chunkName + " offset: "+ offset);
+		}
 		if (!chunkFile.exists()) {
 			try {
 				chunkFile.createNewFile();
@@ -80,7 +84,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		RandomAccessFile out = null;
 		try {
 			out = new RandomAccessFile(chunkFile, "rws");
-			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
