@@ -5,4 +5,5 @@ import java.rmi.RemoteException;
 
 public interface DataNodeRemoteInterface extends Remote{
 	public void write(byte[] b, String chunkName, int offset) throws RemoteException;
+	public byte[] read(String chunkName, int offSet) throws RemoteException;
 }

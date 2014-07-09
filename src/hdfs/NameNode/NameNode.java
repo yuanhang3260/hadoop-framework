@@ -1,6 +1,7 @@
 package hdfs.NameNode;
 
 import global.Hdfs;
+import hdfs.DataStructure.ChunkInfo;
 import hdfs.IO.HDFSInputStream;
 import hdfs.IO.HDFSOutputStream;
 
@@ -12,7 +13,6 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,20 +22,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NameNode implements NameNodeRemoteInterface{
 	private int dataNodeNaming;
 	private long chunkNaming;
-	private Map<Integer, DataNodeInfo> dataNodeTbl;
+	private Map<String, DataNodeInfo> dataNodeTbl;
 	private Map<String, FileMetaData> fileMetaDataTbl;
 	private long chunksize;
 	private int registryPort;
 	
-	public NameNode() {
-		this.dataNodeTbl = new ConcurrentHashMap<Integer, DataNodeInfo>();
+	public NameNode(int port) {
+		this.dataNodeTbl = new ConcurrentHashMap<String, DataNodeInfo>();
 		this.fileMetaDataTbl = new ConcurrentHashMap<String, FileMetaData>();
 		this.dataNodeNaming = 1;
 		this.chunkNaming = 1;
-		this.chunksize = 7;
-		this.registryPort = 1099;
+		this.chunksize = Hdfs.NameNode.CHUNK_SIZE;
+		this.registryPort = port;
 	}
 	
+	/* Export and bind NameNode remote object */
 	public void init() {
 		Registry registry;
 		try {
@@ -49,9 +50,9 @@ public class NameNode implements NameNodeRemoteInterface{
 	}
 	
 	@Override
-	public synchronized void heartBeat(int dataNodeName) {
+	public synchronized void heartBeat(String dataNodeName) {
 		if (Hdfs.DEBUG) {
-			System.out.println("DEBUG NameNode.heartBeat(): Heartbeat Message from Node-" + dataNodeName);
+			System.out.println("DEBUG NameNode.heartBeat(): Heartbeat Message from " + dataNodeName);
 		}	
 		DataNodeInfo dataNodeInfo = dataNodeTbl.get(dataNodeName);
 		if (dataNodeInfo != null) {
@@ -59,38 +60,29 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 	}
 	
-	public int join(String ip, int port) {
+	public String join(String ip, int port) {
 		//TODO:get Data Node stub and save it in DataNodeInfo
 		DataNodeInfo dataNodeInfo = new DataNodeInfo(ip, port);
-		int dataNodeName = dataNodeNaming;
+		String dataNodeName = String.format("DataNode-%04d", dataNodeNaming++);
 		dataNodeTbl.put(dataNodeName, dataNodeInfo);
-		dataNodeNaming++;
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG NameNode.join(): " + dataNodeName + " joins cluster.");
+		}
 		return dataNodeName;
 	}
 
 	@Override
-	public void blockReport() {
+	public void chunkReport() {
 		
 	}
-
 	@Override
-	public HDFSOutputStream create(String path) throws RemoteException {
-		FileMetaData newFile = createFileEntry(path);
+	public HDFSOutputStream create(String filePath) throws RemoteException {
+		FileMetaData newFile = createFileEntry(filePath);
 		if (newFile == null) {
-			//PATH(file name) already exists
+			/* PATH(file name) already exists */
 			return null;
 		}
-		hdfs.NameNode.NameNode.FileMetaData.ChunkMetaData firstChunkMetaData = newFile.addChunk();
-		
-		ChunkInfo handler = new ChunkInfo(firstChunkMetaData.chunkName);
-		List<Integer> dataNodes = firstChunkMetaData.locations;
-		for (int dataNode : dataNodes) {
-			if (Hdfs.DEBUG) {
-				System.out.println("dataNode id=" + dataNode);
-			}
-			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
-			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
-		}
+		ChunkInfo firstChunk = newFile.addChunk();
 		String hostIP = null;
 		try {
 			hostIP = Inet4Address.getLocalHost().getHostName();
@@ -98,26 +90,56 @@ public class NameNode implements NameNodeRemoteInterface{
 			e.printStackTrace();
 			throw new RemoteException("Unknown Host");
 		}
-		HDFSOutputStream out = new HDFSOutputStream((int)this.chunksize, handler, path, hostIP, this.registryPort);
+		HDFSOutputStream out = new HDFSOutputStream((int)this.chunksize, firstChunk, filePath, hostIP, this.registryPort);
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG NameNode.create(): Invocate create.");
 		}
 		return out;
 	}
 	
-	public HDFSInputStream open(String path) throws RemoteException{
-		FileMetaData fileMetaData = this.fileMetaDataTbl.get(path);
+	/**
+	 * Open a file by return a HDFSInputStream with all the chunks' info
+	 * associate with that file
+	 * 
+	 * @param filePath path of the file to be opened
+	 * @return HDFSInputStream 
+	 * @throws RemoteException
+	 */
+	public HDFSInputStream open(String filePath) throws RemoteException {
+		FileMetaData fileMetaData = this.fileMetaDataTbl.get(filePath);
 		HDFSInputStream in = null;
 		if (fileMetaData != null) {
-			List<ChunkInfo> chunksInfo = new ArrayList<ChunkInfo>();
-			for (long chunkName : fileMetaData.chunks) {
-				
+			List<ChunkInfo> chunkInfoList = fileMetaData.chunkList;
+			String hostIP = null;
+			try {
+				hostIP = Inet4Address.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				throw new RemoteException("Unknown Host");
 			}
-			
+			in = new HDFSInputStream(chunkInfoList, hostIP, this.registryPort);
 		}
 		
+		return in;
 	}
 	
+	@Override
+	public List<ChunkInfo> getFileChunks(String file) throws RemoteException {
+		FileMetaData fileMetaData = this.fileMetaDataTbl.get(file);
+		return fileMetaData.chunkList;
+	}
+	
+	private String nameChunk() {
+		String chunkName = String.format("%010d", this.chunkNaming++);
+		return chunkName;
+	}
+	
+	/**
+	 * This is called by NameNode.create()
+	 * In order to create a file, insert a file entry at NameNode first.
+	 * @param path
+	 * @return
+	 */
 	private FileMetaData createFileEntry (String path) {
 		if (this.fileMetaDataTbl.get(path) != null) {
 			return null;
@@ -130,14 +152,9 @@ public class NameNode implements NameNodeRemoteInterface{
 	@Override
 	public ChunkInfo applyForNewChunk(String path) throws RemoteException {
 		FileMetaData fileMetaData = this.fileMetaDataTbl.get(path);
-		hdfs.NameNode.NameNode.FileMetaData.ChunkMetaData newChunkMetaData = fileMetaData.addChunk();
-		ChunkInfo handler = new ChunkInfo(newChunkMetaData.chunkName);
-		List<Integer> dataNodes = newChunkMetaData.locations;
-		for (int dataNode : dataNodes) {
-			DataNodeInfo dataNodeInfo = this.dataNodeTbl.get(dataNode);
-			handler.addDataNode(dataNodeInfo.dataNodeRegistryIP, dataNodeInfo.dataNodeRegistryPort);
-		}
-		return handler;
+
+		ChunkInfo newChunk = fileMetaData.addChunk();
+		return newChunk;
 	}
 	
 	private class DataNodeInfo {
@@ -157,41 +174,37 @@ public class NameNode implements NameNodeRemoteInterface{
 	}
 	
 	private class FileMetaData {
-		private List<Long> chunks;
-		private Hashtable<Long, ChunkMetaData> chunkMetaDataTbl;
-		private int replicaFactor;  
+		private List<ChunkInfo> chunkList; //Indicate chunk order
+		private int replicaFactor; 
+		
 		public FileMetaData() {
-			this.chunks = new ArrayList<Long>();
-			this.chunkMetaDataTbl = new Hashtable<Long, ChunkMetaData>();
-			this.replicaFactor = 3;
+			this.chunkList = new ArrayList<ChunkInfo>();
+			this.replicaFactor = Hdfs.NameNode.REPLICA_FACTOR;
 		}
 		
-//		public FileMetaData(int rf) {
-//			this.chunks = new ArrayList<Long>();
-//			this.chunkInfoTbl = new Hashtable<Long, ChunkMetaData>();
-//			this.replicaFactor = rf;
-//		}
-		
-		private ChunkMetaData addChunk() {
-			long chunkID = NameNode.this.chunkNaming++;
-			ChunkMetaData chunkMetaData = new ChunkMetaData(chunkID);
-			this.chunkMetaDataTbl.put(chunkID, chunkMetaData);
-			Set<Integer> allDataNode = NameNode.this.dataNodeTbl.keySet();
-			Iterator<Integer> it = allDataNode.iterator();
-			for (int i = 0; it.hasNext() && i < this.replicaFactor; i++) {
-				chunkMetaData.locations.add(it.next());
+		public ChunkInfo getChunkByName(String chunkName) {
+			for (ChunkInfo chunk : this.chunkList) {
+				if (chunk.getChunkName().equals(chunkName)) {
+					return chunk;
+				}
 			}
-			return chunkMetaData;
+			return null;
 		}
 		
-		private class ChunkMetaData {
-			private long chunkName;
-			private List<Integer> locations;
+		private ChunkInfo addChunk() {
+			String chunkName = NameNode.this.nameChunk();
+			ChunkInfo newChunk = new ChunkInfo(chunkName);
+			this.chunkList.add(newChunk);
 			
-			public ChunkMetaData(long chunkID) {
-				this.chunkName = chunkID;
-				locations = new ArrayList<Integer>();
+			/* Allocate DataNode to store this chunk */
+			Set<String> allDataNodes = NameNode.this.dataNodeTbl.keySet();
+			Iterator<String> it = allDataNodes.iterator();
+			for (int i = 0; it.hasNext() && i < this.replicaFactor; i++) {
+				String dataNodeName = it.next();
+				DataNodeInfo dataNode = NameNode.this.dataNodeTbl.get(dataNodeName);
+				newChunk.addDataNode(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
 			}
+			return newChunk;
 		}
 	
 	}
