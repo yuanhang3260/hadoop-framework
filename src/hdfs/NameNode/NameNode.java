@@ -1,12 +1,16 @@
 package hdfs.NameNode;
 
 import global.Hdfs;
+import hdfs.DataNode.DataNodeRemoteInterface;
 import hdfs.DataStructure.ChunkInfo;
 import hdfs.IO.HDFSInputStream;
+import hdfs.DataStructure.DataNodeEntry;
 import hdfs.IO.HDFSOutputStream;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -129,6 +133,33 @@ public class NameNode implements NameNodeRemoteInterface{
 		return fileMetaData.chunkList;
 	}
 	
+	@Override
+	public void delete(String path) throws RemoteException, IOException {
+		FileMetaData file = this.fileMetaDataTbl.get(path);
+		if (file == null) {
+			return;
+		}
+		for (ChunkInfo chunk : file.chunkList) {
+			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
+				try {
+					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
+					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
+					dataNodeStub.deleteChunk(chunk.getChunkName());
+				} catch (RemoteException e) {
+					throw new IOException("Cannot connect to DataNode");
+				} catch (NotBoundException e) {
+					throw new IOException("Cannot connect to DataNode");
+				} catch (IOException e) {
+					throw new IOException("Cannot delete chunk(name:" + chunk.getChunkName() + ")");
+				}
+			}
+		}
+		this.fileMetaDataTbl.remove(path);
+	}
+	
+	
+	/* NON-remote-object-supported methods start from here */
+	
 	private String nameChunk() {
 		String chunkName = String.format("%010d", this.chunkNaming++);
 		return chunkName;
@@ -208,5 +239,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 	
 	}
+
+	
 	
 }

@@ -126,7 +126,13 @@ public class HDFSOutputStream implements Serializable {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			List<ChunkInfo> allChunks = nameNodeStub.getFileChunks(this.filePath);
-			//TODO: CHANGE PERMISSION
+			for (ChunkInfo chunk : allChunks) {
+				for (DataNodeEntry dataNode : chunk.getAllLocations()) {
+					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
+					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
+					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
+				}
+			}
 		} catch (RemoteException e) {
 			throw new IOException("Cannot connect to Name Node");
 		} catch (NotBoundException e) {
