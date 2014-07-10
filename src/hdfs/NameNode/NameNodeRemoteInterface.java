@@ -1,7 +1,7 @@
 package hdfs.NameNode;
 
-import hdfs.DataStructure.ChunkInfo;
-import hdfs.IO.HDFSOutputStream;
+import hdfs.DataStructure.DataNodeEntry;
+import hdfs.DataStructure.HDFSFile;
 
 import java.io.IOException;
 import java.rmi.Remote;
@@ -10,10 +10,12 @@ import java.util.List;
 
 public interface NameNodeRemoteInterface extends Remote{
 	public void heartBeat(String dataNodeName) throws RemoteException;
-	public String join(String ip, int port) throws RemoteException;
-	public void chunkReport() throws RemoteException;
-	public HDFSOutputStream create(String path) throws RemoteException;
-	public ChunkInfo applyForNewChunk(String path) throws RemoteException;
-	public List<ChunkInfo> getFileChunks(String file) throws RemoteException;
+	public String join(String ip, int port, List<String> chunkNameList) throws RemoteException;
+	public HDFSFile create(String path) throws RemoteException;
 	public void delete(String path) throws RemoteException, IOException;
+	public void chunkReport(String dataNodeName, List<String> chunkList)
+			throws RemoteException;
+	public String nameChunk() throws RemoteException;
+	public List<DataNodeEntry> select(int replicaFactor) throws RemoteException;
+	public void commitFile(HDFSFile file) throws RemoteException;
 }

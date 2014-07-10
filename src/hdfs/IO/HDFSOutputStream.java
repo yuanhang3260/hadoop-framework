@@ -2,8 +2,9 @@ package hdfs.IO;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.DataStructure.ChunkInfo;
 import hdfs.DataStructure.DataNodeEntry;
+import hdfs.DataStructure.HDFSChunk;
+import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
@@ -20,36 +21,26 @@ public class HDFSOutputStream implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -488017724627896978L;
-	private String filePath;
-	private String nameNodeReigstryIP;
-	private int nameNodeRegistryPort;
+	private HDFSFile file;
 	private int chunkOffset;
 	private int chunkCounter;
 	private int chunksize;
-	private ChunkInfo currChunk;
+	private NameNodeRemoteInterface nameNodeStub;
+
 	
-	public HDFSOutputStream (int size, ChunkInfo chunk, String file, String ip, int port) {
+	
+	public HDFSOutputStream (HDFSFile file, int size, NameNodeRemoteInterface stub) {
+		this.file = file;
 		this.chunksize = size;
-		this.currChunk = chunk;
 		this.chunkOffset = 0;
 		this.chunkCounter = 1;
-		this.filePath = file;
-		this.nameNodeReigstryIP = ip;
-		this.nameNodeRegistryPort = port;
+		this.nameNodeStub = stub;
 	}
 
 	public void write(byte[] content) throws IOException {
 		
 		if (this.chunkOffset == this.chunksize && content.length > 0) { //Apply for a new chunk
-			try {
-				this.currChunk = newChunk();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				throw new IOException("Unable to locate NameNode");
-			} catch (NotBoundException e) {
-				e.printStackTrace();
-				throw new IOException("Unable to locate NameNode");
-			}
+			file.addChunk();
 			this.chunkOffset = 0;
 		}
 		
@@ -64,10 +55,11 @@ public class HDFSOutputStream implements Serializable {
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
 				System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
 				bufferOffset += availableBytes;
-				for (int i = 0; i < this.currChunk.getReplicaFactor(); i++) {
-					writeToDataNode(writeToDataNodeBuf, this.currChunk.getDataNode(i), this.currChunk.getChunkName());
+				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
 				}
 				this.chunkOffset += availableBytes;
+				
 				/* Continue writing till new line feed */
 				if (writeToDataNodeBuf[writeToDataNodeBuf.length - 1] != '\n') {
 					int i = 0;
@@ -75,26 +67,19 @@ public class HDFSOutputStream implements Serializable {
 						i++;
 						bufferOffset++;
 					}
-					if (content[bufferOffset] == '\n' && bufferOffset < content.length) {
+					if (bufferOffset < content.length && content[bufferOffset] == '\n') {
 						i++;
 						bufferOffset++;
 					}
 					byte[] actualWrittenBuf = Arrays.copyOfRange(content, bufferOffset - i, bufferOffset);
-					for (int j = 0; j < this.currChunk.getReplicaFactor(); j++) {
-						writeToDataNode(actualWrittenBuf, this.currChunk.getDataNode(j), this.currChunk.getChunkName());
+					for (int j = 0; j < getCurrentChunk().getReplicaFactor(); j++) {
+						writeToDataNode(actualWrittenBuf, getCurrentChunk().getDataNode(j), getCurrentChunk().getChunkName());
 					}
 				}
+				
 				/* Apply for a new chunk */
 				if (bufferOffset < content.length) {
-					try {
-						this.currChunk = newChunk();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-						throw new IOException("Unable to locate NameNode");
-					} catch (NotBoundException e) {
-						e.printStackTrace();
-						throw new IOException("Unable to locate NameNode");
-					}
+					file.addChunk();
 					this.chunkOffset = 0;
 					availableBytes = this.chunksize;
 				} else {
@@ -105,8 +90,8 @@ public class HDFSOutputStream implements Serializable {
 				if (Hdfs.DEBUG) {
 					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
 				}
-				for (int i = 0; i < this.currChunk.getReplicaFactor(); i++) {
-					writeToDataNode(writeToDataNodeBuf, this.currChunk.getDataNode(i), this.currChunk.getChunkName());
+				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
 				}
 				this.chunkOffset += writeToDataNodeBuf.length;
 				break;
@@ -118,23 +103,24 @@ public class HDFSOutputStream implements Serializable {
 		}
 	}
 	
+	
+	
 	public void close() throws IOException{
-		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
-			List<ChunkInfo> allChunks = nameNodeStub.getFileChunks(this.filePath);
-			for (ChunkInfo chunk : allChunks) {
-				for (DataNodeEntry dataNode : chunk.getAllLocations()) {
+		List<HDFSChunk> allChunks = file.getChunkList();
+		for (HDFSChunk chunk : allChunks) {
+			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
+				try {
 					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
 					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
 					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
+				} catch (RemoteException e) {
+					throw new IOException("Cannot connect to Name Node");
+				} catch (NotBoundException e) {
+					throw new IOException("Cannot connect to Name Node");
 				}
 			}
-		} catch (RemoteException e) {
-			throw new IOException("Cannot connect to Name Node");
-		} catch (NotBoundException e) {
-			throw new IOException("Cannot connect to Name Node");
 		}
+		this.nameNodeStub.commitFile(file);
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
@@ -149,12 +135,10 @@ public class HDFSOutputStream implements Serializable {
 			e.printStackTrace();
 		}
 	}
+
 	
-	private ChunkInfo newChunk() throws RemoteException, NotBoundException {
-		Registry nameNodeRegistry = LocateRegistry.getRegistry(this.nameNodeReigstryIP, this.nameNodeRegistryPort);
-		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
-		ChunkInfo handler = nameNodeStub.applyForNewChunk(this.filePath);
-		return handler;
+	private HDFSChunk getCurrentChunk() {
+		return file.getChunkList().get(file.getChunkList().size() - 1);
 	}
 	
 	
