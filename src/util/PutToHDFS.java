@@ -15,12 +15,13 @@ import java.util.Arrays;
 
 public class PutToHDFS {
 	public static void main(String[] args) throws IOException, NotBoundException {
-		if (args.length != 3) {
+		if (args.length != 4) {
 			printUsage();
 			System.exit(-1);
 		}
-		String filePath = args[2];
-		File newFile = new File(filePath);
+		String localFilePath = args[2];
+		String hdfsFilePath = args[3];
+		File newFile = new File(localFilePath);
 		if (!newFile.exists()) {
 			System.out.println("Error! File does not exists");
 			System.exit(-1);
@@ -33,7 +34,7 @@ public class PutToHDFS {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
-			HDFSFile file = nameNodeStub.create(filePath);
+			HDFSFile file = nameNodeStub.create(hdfsFilePath);
 			HDFSOutputStream out = file.getOutputStream();
 			
 			while ((readBytes = in.read(buff)) != -1) {
@@ -53,7 +54,7 @@ public class PutToHDFS {
 	}
 	
 	public static void printUsage() {
-		System.out.println("Usage:\thdfs put <filename>");
+		System.out.println("Usage:\thdfs put <src file name> <dst file name>");
 	}
 	
 }
