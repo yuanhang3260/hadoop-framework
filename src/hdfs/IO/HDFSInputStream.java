@@ -2,8 +2,8 @@ package hdfs.IO;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.DataStructure.ChunkInfo;
 import hdfs.DataStructure.DataNodeEntry;
+import hdfs.DataStructure.HDFSChunk;
 
 import java.io.Serializable;
 import java.rmi.NotBoundException;
@@ -16,9 +16,8 @@ public class HDFSInputStream implements Serializable{
 
 	private static final long serialVersionUID = 3091088429237095244L;
 	/* chunks of this file */
-	private List<ChunkInfo> fileChunkInfoList;
-	private String nameNodeReigstryIP;
-	private int nameNodeRegistryPort;
+	private List<HDFSChunk> fileChunkInfoList;
+
 	
 	private byte[] readBuffer;
 	private int bufferOffSet;
@@ -28,13 +27,12 @@ public class HDFSInputStream implements Serializable{
 	private boolean endOfChunk;
 	private boolean endOfFile;
 	
-	private ChunkInfo currChunkInfo;
+	private HDFSChunk currChunkInfo;
 	private DataNodeRemoteInterface dataNodeStub;
 	
-	public HDFSInputStream(List<ChunkInfo> chunkInfoList, String ip, int port) {
+	
+	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {
 		this.fileChunkInfoList = chunkInfoList;
-		this.nameNodeReigstryIP = ip;
-		this.nameNodeRegistryPort = port;
 		this.readBuffer = new byte[Hdfs.Client.READ_BUFFER_SIZE];
 		/* indicate no data in read buffer yet */
 		this.bufferOffSet = Hdfs.Client.READ_BUFFER_SIZE;
@@ -48,7 +46,7 @@ public class HDFSInputStream implements Serializable{
 	
 	public void printInfo() {
 		System.out.println("fileChunkInfoList: ");
-		for (ChunkInfo chunk : fileChunkInfoList) {
+		for (HDFSChunk chunk : fileChunkInfoList) {
 			System.out.println("		Name: " + chunk.getChunkName());
 		}
 		System.out.println("readBuffer: length " + readBuffer.length);

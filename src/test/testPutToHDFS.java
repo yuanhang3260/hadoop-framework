@@ -1,6 +1,7 @@
 package test;
 
 import global.Hdfs;
+import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -22,7 +23,9 @@ public class testPutToHDFS {
 		Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		
-		HDFSOutputStream out = nameNodeStub.create("largefile");
+		
+		HDFSFile file = nameNodeStub.create("largefile");
+		HDFSOutputStream out = file.getOutputStream();
 		while ((readBytes = in.read(buff)) != -1) {
 			if (readBytes == 1024) {
 				out.write(buff);

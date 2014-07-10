@@ -2,7 +2,10 @@ package global;
 
 
 public class Hdfs {
-	public static boolean DEBUG = false;
+
+	public static boolean DEBUG = true;
+	public static int replicaFactor = 2;
+	public static int chunkSize = 7;
 
 	public static class NameNode {
 		public static String nameNodeRegistryIP = "localhost";
@@ -23,5 +26,11 @@ public class Hdfs {
 	}
 	public static class DataNode3 {
 		public static int registryPort = 1102;
+	}
+	public static class DataNode4 {
+		public static int registryPort = 1103;
+	}
+	public static class DataNode5 {
+		public static int registryPort = 1104;
 	}
 }

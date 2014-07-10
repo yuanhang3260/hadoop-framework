@@ -1,6 +1,7 @@
 package util;
 
 import global.Hdfs;
+import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -14,12 +15,12 @@ import java.util.Arrays;
 
 public class PutToHDFS {
 	public static void main(String[] args) throws IOException, NotBoundException {
-//		if (args.length != 3) {
-//			printUsage();
-//			System.exit(-1);
-//		}
-		//String filePath = args[2];
-		File newFile = new File("largefile");
+		if (args.length != 3) {
+			printUsage();
+			System.exit(-1);
+		}
+		String filePath = args[2];
+		File newFile = new File(filePath);
 		if (!newFile.exists()) {
 			System.out.println("Error! File does not exists");
 			System.exit(-1);
@@ -32,7 +33,9 @@ public class PutToHDFS {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
-			HDFSOutputStream out = nameNodeStub.create("largefile");
+			HDFSFile file = nameNodeStub.create(filePath);
+			HDFSOutputStream out = file.getOutputStream();
+			
 			while ((readBytes = in.read(buff)) != -1) {
 				if (readBytes == 1024) {
 					out.write(buff);

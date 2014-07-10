@@ -1,5 +1,6 @@
 package test;
 
+import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -15,11 +16,13 @@ public class testWriteFile {
 		int nameNodeRegistryPort = 1099;
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
-		HDFSOutputStream out = nameNodeStub.create("test-file");
+		HDFSFile file = nameNodeStub.create("test-file-3");
+		HDFSOutputStream out = file.getOutputStream();
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);
 		}
+
 		String str1 = "abc\nd\nefghi\n\nb\n12345\n567";
 		String str2 = "\nhijklm\n";
 		byte[] buff1 = str1.getBytes();
