@@ -21,11 +21,11 @@ public class testReadFile {
 		int nameNodeRegistryPort = Hdfs.NameNode.nameNodeRegistryPort;
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
-		HDFSOutputStream out = nameNodeStub.create("test-file-6");
-		if (out == null) {
-			System.err.println("null out");
-			System.exit(-1);
-		}
+//		HDFSOutputStream out = nameNodeStub.create("largefile");
+//		if (out == null) {
+//			System.err.println("null out");
+//			System.exit(-1);
+//		}
 //		String str1 = "abc\nd\nefghi\n\nb\n12345\n567";
 //		String str2 = "\nhijklm\n";
 //		byte[] buff1 = str1.getBytes();

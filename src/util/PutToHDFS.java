@@ -14,12 +14,12 @@ import java.util.Arrays;
 
 public class PutToHDFS {
 	public static void main(String[] args) throws IOException, NotBoundException {
-		if (args.length != 3) {
-			printUsage();
-			System.exit(-1);
-		}
-		String filePath = args[2];
-		File newFile = new File(filePath);
+//		if (args.length != 3) {
+//			printUsage();
+//			System.exit(-1);
+//		}
+		//String filePath = args[2];
+		File newFile = new File("largefile");
 		if (!newFile.exists()) {
 			System.out.println("Error! File does not exists");
 			System.exit(-1);
