@@ -22,7 +22,8 @@ public class testWriteFile {
 			System.err.println("null out");
 			System.exit(-1);
 		}
-		String str1 = "abcdefg123";
+
+		String str1 = "abc\nd\nefghi\n\nb\n12345\n567";
 		String str2 = "\nhijklm\n";
 		byte[] buff1 = str1.getBytes();
 		byte[] buff2 = str2.getBytes();
@@ -34,7 +35,5 @@ public class testWriteFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
 	}
 }

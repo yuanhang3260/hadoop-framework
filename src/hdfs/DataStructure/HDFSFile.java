@@ -1,6 +1,7 @@
 package hdfs.DataStructure;
 
 import global.Hdfs;
+import hdfs.IO.HDFSInputStream;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -89,6 +90,10 @@ public class HDFSFile implements Serializable {
 	
 	public String getName() {
 		return this.name;
+	}
+	
+	public HDFSInputStream getInputStream() {
+		return new HDFSInputStream(this.getChunkList());
 	}
 }
 

@@ -2,6 +2,9 @@ package hdfs.NameNode;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
+
+import hdfs.IO.HDFSInputStream;
+
 import hdfs.DataStructure.DataNodeEntry;
 import hdfs.DataStructure.HDFSChunk;
 import hdfs.DataStructure.HDFSFile;
@@ -41,6 +44,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		this.dataNodeStubTbl = new ConcurrentHashMap<String, DataNodeRemoteInterface>();
 		this.chunkNaming = 1;
 		this.port = port;
+
 	}
 	
 	/* Export and bind NameNode remote object */
@@ -97,6 +101,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		dataNodeInfo.chunkList = chunkList;
 	}
 	
+	
 	@Override
 	public HDFSFile create(String filePath) throws RemoteException {
 		if (this.fileTbl.containsKey(filePath)) {
@@ -106,6 +111,33 @@ public class NameNode implements NameNodeRemoteInterface{
 		this.fileTbl.put(filePath, newFile);
 		return newFile;
 	}
+	
+	/**
+	 * Open a file by return a HDFSInputStream with all the chunks' info
+	 * associate with that file
+	 * 
+	 * @param fileName path of the file to be opened
+	 * @return HDFSInputStream 
+	 * @throws RemoteException
+	 */
+	public HDFSFile open(String fileName) throws RemoteException {
+		HDFSFile file = this.fileTbl.get(fileName);
+//		HDFSInputStream in = null;
+//		if (file != null) {
+//			List<ChunkInfo> chunkInfoList = file.chunkList;
+//			String hostIP = null;
+//			try {
+//				hostIP = Inet4Address.getLocalHost().getHostName();
+//			} catch (UnknownHostException e) {
+//				e.printStackTrace();
+//				throw new RemoteException("Unknown Host");
+//			}
+//			
+//		}
+		
+		return file;
+	}
+	
 		
 	@Override
 	public void delete(String path) throws RemoteException, IOException {
@@ -159,7 +191,8 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 		return rst;
 	}
-	
+
+
 	public synchronized void commitFile(HDFSFile file) throws RemoteException {
 		this.fileTbl.put(file.getName(), file);
 	}
@@ -342,6 +375,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 	}
+
 
 
 	

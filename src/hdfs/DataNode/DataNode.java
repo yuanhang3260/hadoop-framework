@@ -54,10 +54,12 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			/* join hdfs cluster */
 			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
+
 			List<String> chunkList = formChunkReport();
 			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
 			
 			int counter = 1;
+
 			while (true) {
 				if (counter % this.chunkBlockPeriod ==  0) {
 					chunkList = formChunkReport();
@@ -84,7 +86,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override
@@ -100,7 +101,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		RandomAccessFile out = null;
 		try {
 			out = new RandomAccessFile(chunkFile, "rws");
-			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -114,6 +114,56 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			e.printStackTrace();
 		}
 		return;
+	}
+	
+	/**
+	 * Read the chunk data stores on this data node and return a buffer, the
+	 * size of the buffer is set in global.Hdfs.client
+	 * 
+	 * @return a byte array with the chunk data, 
+	 * 		   at most Hdfs.client.readBufSize
+	 */
+	public byte[] read(String chunkName, int offSet) {
+		File chunkFile = new File("test_tmp/" + this.dataNodeName + "-chunk-" + chunkName);
+		long chunkSize = chunkFile.length();
+		
+		if (offSet >= chunkSize) {
+			return new byte[0];
+		}
+		RandomAccessFile in = null;
+		byte[] readBuf = null;
+		try {
+			in = new RandomAccessFile(chunkFile, "r");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (offSet + Hdfs.Client.READ_BUFFER_SIZE <= chunkSize) {
+			readBuf = new byte[Hdfs.Client.READ_BUFFER_SIZE];
+		} else {
+			/* offSet + readBufSize > chunkSize */
+			readBuf = new byte[(int) (chunkSize - offSet)];
+		}
+		
+		try {
+			in.seek(offSet);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			in.read(readBuf);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("DEBUG DataNode.read(): chunkName = " + chunkName + " offSet = " + offSet + " return buffer size = " + readBuf.length);
+		return readBuf;
 	}
 	
 	@Override

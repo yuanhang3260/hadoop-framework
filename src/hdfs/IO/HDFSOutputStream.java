@@ -17,9 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HDFSOutputStream implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -488017724627896978L;
 	private HDFSFile file;
 	private int chunkOffset;
@@ -45,9 +43,11 @@ public class HDFSOutputStream implements Serializable {
 		}
 		
 		int availableBytes = this.chunksize - this.chunkOffset;
-		System.out.println("availabelBytes = " + availableBytes); 
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG HDFSOutputStream.write(): availabelBytes = " + availableBytes); 
+		}
 		int bufferOffset = 0;
-		
+
 		
 		while (bufferOffset < content.length) {
 			
