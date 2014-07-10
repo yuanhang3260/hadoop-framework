@@ -2,9 +2,6 @@ package hdfs.NameNode;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-
-import hdfs.IO.HDFSInputStream;
-
 import hdfs.DataStructure.DataNodeEntry;
 import hdfs.DataStructure.HDFSChunk;
 import hdfs.DataStructure.HDFSFile;
@@ -65,7 +62,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		Thread systemCheckThread = new Thread(new SystemCheck());
+		Thread systemCheckThread = new Thread(new SystemCheck(true));
 		systemCheckThread.start();
 	}
 	
@@ -86,9 +83,13 @@ public class NameNode implements NameNodeRemoteInterface{
 			this.dataNodeStubTbl.put(dataNodeName, dataNodeStub);
 			dataNodeTbl.put(dataNodeName, dataNodeInfo);
 			selector.offer(dataNodeInfo);
+			dataNodeInfo.chunkList = chunkNameList;
 			if (Hdfs.DEBUG) {
 				System.out.format("DEBUG NameNode.join(): %s joins cluster.\n", dataNodeName);
 			}
+			SystemCheck oneTimeCheck = new SystemCheck(false);
+			Thread th = new Thread(oneTimeCheck);
+			th.start();
 			return dataNodeName;
 		} catch (NotBoundException e) {
 			return null;
@@ -239,12 +240,15 @@ public class NameNode implements NameNodeRemoteInterface{
 	}
 	
 	
-	
-
 	private class SystemCheck implements Runnable {
-	
+		private boolean routineThread;
+		
+		public SystemCheck(boolean forever) {
+			this.routineThread = forever;
+		}
+		
 		public void run() {
-			while (true) {
+			do {
 				HashMap<String, ChunkStatisticsForDataNode> chunkAbstractFromDataNode
 					= new HashMap<String, ChunkStatisticsForDataNode>();
 				HashMap<String, ChunkStatisticsForNameNode> chunkAbstractFromNameNode
@@ -297,6 +301,9 @@ public class NameNode implements NameNodeRemoteInterface{
 				
 				/* Delete orphan chunks */
 				Set<String> chunksOnDataNode = chunkAbstractFromDataNode.keySet();
+				if (Hdfs.DEBUG) {
+					System.out.println("DEBUG NameNode.SystemCheck.run(): chunks collected from data node: " + chunksOnDataNode.toString());
+				}
 				for (String chunkOnDataNode : chunksOnDataNode) {
 					if (!chunkAbstractFromNameNode.containsKey(chunkOnDataNode)) {
 						System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnDataNode + ") is orphan.");
@@ -317,7 +324,6 @@ public class NameNode implements NameNodeRemoteInterface{
 					}
 				}
 				
-				
 				/* Compare two abstracts */
 				Set<String> chunksOnNameNode = chunkAbstractFromNameNode.keySet();
 				for (String chunkOnNameNode : chunksOnNameNode) {
@@ -335,9 +341,15 @@ public class NameNode implements NameNodeRemoteInterface{
 					} else if (chunkStat.replicaNum < replicaFac) {
 						String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is LESS THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
 						System.out.println(debugInfo);
+						String srcDataNodeName = chunkStat.dataNodes.get(0);
+						DataNodeRemoteInterface srcDataNodeStub = NameNode.this.dataNodeStubTbl.get(srcDataNodeName);
+						List<DataNodeEntry> dstDataNodes = NameNode.this.select(replicaFac - chunkStat.replicaNum);
+						copyChunk(chunkOnNameNode, srcDataNodeStub, dstDataNodes);
 					} else {
 						String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is MORE THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
 						System.out.println(debugInfo);
+						String dataNodeName = chunkStat.dataNodes.get(0);
+						deleteChunk(chunkOnNameNode, NameNode.this.dataNodeStubTbl.get(dataNodeName));
 					}
 				}
 				
@@ -351,7 +363,7 @@ public class NameNode implements NameNodeRemoteInterface{
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
+			} while (routineThread);
 		}
 		
 		private class ChunkStatisticsForNameNode {
@@ -372,6 +384,32 @@ public class NameNode implements NameNodeRemoteInterface{
 				return this.dataNodes;
 			}
 			
+		}
+		
+		private void copyChunk(String chunkName, DataNodeRemoteInterface srcDataNodeStub, List<DataNodeEntry> dstDataNodes) {
+			byte[] buff = null;
+			int offset = 0;
+			try {
+				buff = srcDataNodeStub.read(chunkName, offset);
+				while (buff.length > 0) {
+					for (DataNodeEntry dstDataNode : dstDataNodes) {
+						NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).write(buff, chunkName, offset);
+					}
+					offset += buff.length;
+					buff = srcDataNodeStub.read(chunkName, offset);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private void deleteChunk(String chunkName, DataNodeRemoteInterface dataNodeStub) {
+			try {
+				System.out.format("DEBUG NameNode.SystemCheck.run(): Delete file(%s)\n", chunkName);
+				dataNodeStub.deleteChunk(chunkName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}

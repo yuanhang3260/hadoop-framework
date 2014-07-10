@@ -54,8 +54,13 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			/* join hdfs cluster */
 			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-
+			
+			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
 			List<String> chunkList = formChunkReport();
+			if (Hdfs.DEBUG) {
+				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
+			}
+			
 			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
 			
 			int counter = 1;
@@ -203,8 +208,8 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	
 		for (String localFileName : files) {
 			String[] segs = localFileName.split("-");
-			if (segs.length == 4 && (segs[0] + '-' + segs[1]).equals(this.dataNodeName)) {
-				chunkList.add(segs[3]);
+			if (segs.length == 3 && segs[0].equals(this.dataNodeName)) {
+				chunkList.add(segs[2]);
 			}
 		}
 		return chunkList;

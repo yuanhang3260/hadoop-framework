@@ -20,7 +20,6 @@ public class HDFSInputStream implements Serializable{
 
 	
 	private byte[] readBuffer;
-	private boolean buffered;
 	private int bufferOffSet;
 	
 	private int chunkCounter;
@@ -32,15 +31,14 @@ public class HDFSInputStream implements Serializable{
 	private DataNodeRemoteInterface dataNodeStub;
 	
 	
-	
 	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {
 		this.fileChunkInfoList = chunkInfoList;
 		this.readBuffer = new byte[Hdfs.Client.READ_BUFFER_SIZE];
-		this.buffered = false;
-		this.bufferOffSet = 0;
+		/* indicate no data in read buffer yet */
+		this.bufferOffSet = Hdfs.Client.READ_BUFFER_SIZE;
 		this.chunkOffSet = 0;
 		this.chunkCounter = 0;	
-		this.endOfChunk = false;
+		this.endOfChunk = true;
 		this.endOfFile = false;
 		this.currChunkInfo = null;
 		this.dataNodeStub = null;
@@ -53,7 +51,6 @@ public class HDFSInputStream implements Serializable{
 		}
 		System.out.println("readBuffer: length " + readBuffer.length);
 		System.out.println(new String(readBuffer));
-		System.out.println("buffered? " + buffered);
 		System.out.println("bufferOffSet: " + bufferOffSet);
 		System.out.println("chunkOffSet: " + chunkOffSet );
 		System.out.println("chunkCounter: " + chunkCounter);
@@ -77,22 +74,27 @@ public class HDFSInputStream implements Serializable{
 				System.out.println("<---");
 			}
 			/* Fetch chunk data and fill in readBuf */
-			if (!buffered) {
+			if (bufferOffSet == readBuffer.length) {
 				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG HDFSInputStream read() CASE 1: buffered");
+					System.out.println("DEBUG HDFSInputStream read() CASE 1: no read buffer/buffer need renew");
 				}
-				if (chunkCounter == fileChunkInfoList.size()) {
-					endOfFile = true;
-					continue;
+				
+				if (endOfChunk) {
+					if (chunkCounter == fileChunkInfoList.size()) {
+						endOfFile = true;
+						break;
+					}
+					currChunkInfo = fileChunkInfoList.get(chunkCounter++);
+					dataNodeEntry = getNearestDataNode(currChunkInfo.getAllLocations());
+					dataNodeRegistry = LocateRegistry.getRegistry(dataNodeEntry.dataNodeRegistryIP, dataNodeEntry.dataNodeRegistryPort);
+					try {
+						dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
+					} catch (NotBoundException e) {
+						e.printStackTrace();
+					}
+					chunkOffSet = 0;
 				}
-				currChunkInfo = fileChunkInfoList.get(chunkCounter++);
-				dataNodeEntry = getNearestDataNode(currChunkInfo.getAllLocations());
-				dataNodeRegistry = LocateRegistry.getRegistry(dataNodeEntry.dataNodeRegistryIP, dataNodeEntry.dataNodeRegistryPort);
-				try {
-					dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-				} catch (NotBoundException e) {
-					e.printStackTrace();
-				}
+				
 				/* get buffer from data node */
 				readBuffer = dataNodeStub.read(currChunkInfo.getChunkName(), chunkOffSet);
 				if (readBuffer.length != Hdfs.Client.READ_BUFFER_SIZE) {
@@ -105,7 +107,6 @@ public class HDFSInputStream implements Serializable{
 				}
 				this.bufferOffSet = 0;
 				this.chunkOffSet += readBuffer.length;
-				this.buffered = true;
 			} else if (readBuffer.length - bufferOffSet > 0 ) {
 				if (Hdfs.DEBUG) {
 					System.out.println("DEBUG HDFSInputStream read() CASE 2: read from readBuffer");
@@ -115,30 +116,6 @@ public class HDFSInputStream implements Serializable{
 				System.arraycopy(readBuffer, bufferOffSet, b, b.length - bytesLeft, len);
 				bytesLeft -= len;
 				bufferOffSet += len;
-			} else {
-				/* renew buffer */
-				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG HDFSInputStream read() CASE 3: renew buffer");
-				}
-				if (endOfChunk) {			
-					/* read from a new chunk */
-					buffered = false;
-					chunkOffSet = 0;
-				} else {
-					/* still read a new buffer from this chunk */
-					readBuffer = dataNodeStub.read(currChunkInfo.getChunkName(), chunkOffSet);
-					if (readBuffer.length != Hdfs.Client.READ_BUFFER_SIZE) {
-						if (chunkCounter == fileChunkInfoList.size()) {
-							endOfFile = true;
-						}
-						endOfChunk = true;
-					} else {
-						endOfChunk = false;
-					}
-					this.bufferOffSet = 0;
-					this.chunkOffSet += readBuffer.length;
-					this.buffered = true;
-				}
 			}
 		}
 		
