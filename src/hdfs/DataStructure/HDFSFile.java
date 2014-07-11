@@ -31,7 +31,7 @@ public class HDFSFile implements Serializable {
 		this.chunkList = new ArrayList<HDFSChunk>();
 		this.replicaFactor = rf;
 		this.nameNodeStub = stub;
-		addChunk();
+//		addChunk();
 	}
 	
 	/**

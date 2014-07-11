@@ -94,11 +94,12 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	}
 
 	@Override
-	public void write(byte[] b, String chunkName, int offset) throws RemoteException {
-		File chunkFile = new File(chunkNameWrapper(chunkName));
+	public void writeToLocal(byte[] b, String chunkName, int offset) throws RemoteException {
+		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(chunkName)));
 		if (!chunkFile.exists()) {
 			try {
 				chunkFile.createNewFile();
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -129,7 +130,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	 * 		   at most Hdfs.client.readBufSize
 	 */
 	public byte[] read(String chunkName, int offSet) {
-		File chunkFile = new File("test_tmp/" + this.dataNodeName + "-chunk-" + chunkName);
+		File chunkFile = new File(chunkNameWrapper(chunkName));
 		long chunkSize = chunkFile.length();
 		
 		if (offSet >= chunkSize) {
@@ -172,16 +173,17 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	}
 	
 	@Override
-	public void modifyChunkPermission(String globalChunkName) throws RemoteException {
-		File chunkFile = new File(chunkNameWrapper(globalChunkName));
+	public void commitChunk(String globalChunkName) throws RemoteException {
+		if (Hdfs.DEBUG) {
+			System.out.format("DEBUG DataNode.commitChunk(): To find chunk(%s) on Node(%s).\n",tmpFileWrapper(chunkNameWrapper(globalChunkName)), this.dataNodeName);
+		}
+		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
 		if (!chunkFile.exists()) {
-			try {
-				chunkFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			System.err.println("chunk doesn't exists");
+			System.exit(-1);
 		}
 		chunkFile.setWritable(false, false);
+		chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
 		return;
 	}
 	
@@ -189,6 +191,9 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	public void deleteChunk(String globalChunkName) throws RemoteException, IOException {
 		try {
 			File chunkFile = new File(chunkNameWrapper(globalChunkName));
+			if (!chunkFile.exists()) {
+				chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
+			}
 			System.out.println("Delete file " + chunkFile);
 			chunkFile.delete();
 		} catch (SecurityException e) {
@@ -198,18 +203,30 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	}
 	
 	private String chunkNameWrapper(String globalChunkName) {
-		return this.dirPrefix + this.dataNodeName + "-chunk-" + globalChunkName;
+		return this.dirPrefix + globalChunkName + "-node-" + this.dataNodeName;
 	}
 	
+	private String tmpFileWrapper(String name) {
+		return name + ".tmp";
+	}
+	
+	private String chunkNameUnwrapper(String localChunkName) {
+		String[] segs = localChunkName.split("-");
+		if (segs.length == 3 && (segs[2].equals(this.dataNodeName)|| segs[2].equals(this.dataNodeName + ".tmp"))) {
+			return segs[0];
+		} 
+		return null;
+		
+	}
 	public List<String> formChunkReport() {
 		List<String> chunkList = new ArrayList<String>();
 		File dfDir = new File(this.dirPrefix);
 		String[] files = dfDir.list();
 	
 		for (String localFileName : files) {
-			String[] segs = localFileName.split("-");
-			if (segs.length == 3 && segs[0].equals(this.dataNodeName)) {
-				chunkList.add(segs[2]);
+			String chunkName = chunkNameUnwrapper(localFileName);
+			if (chunkName != null) {
+				chunkList.add(chunkName);
 			}
 		}
 		return chunkList;

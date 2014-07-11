@@ -5,8 +5,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface DataNodeRemoteInterface extends Remote{
-	public void write(byte[] b, String chunkName, int offset) throws RemoteException;
+	public void writeToLocal(byte[] b, String chunkName, int offset) throws RemoteException;
 	public byte[] read(String chunkName, int offSet) throws RemoteException;
-	public void modifyChunkPermission(String globalChunkName) throws RemoteException;
+	public void commitChunk(String globalChunkName) throws RemoteException;
 	public void deleteChunk(String globalChunkName) throws RemoteException, IOException;
 }
