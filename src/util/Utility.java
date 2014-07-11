@@ -22,11 +22,13 @@ public class Utility {
 	public static void main(String[] args) {
 		if (args.length < 2) {
 			printUsage();
+			return;
 		}
 		
 		if (args[1].equals("put")) {
 			if (args.length < 4) {
 				printPutUsage();
+				return;
 			}
 			String localFilePath = args[2];
 			String hdfsFilePath  = args[3];
@@ -34,6 +36,7 @@ public class Utility {
 		} else if (args[1].equals("get")) {
 			if (args.length < 4) {
 				printGetUsage();
+				return;
 			}
 			String localFilePath = args[3];
 			String hdfsFilePath  = args[2];

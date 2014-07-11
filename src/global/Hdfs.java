@@ -3,7 +3,7 @@ package global;
 
 public class Hdfs {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	public static int replicaFactor = 2;
 	public static int chunkSize = 1024 * 512;
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
