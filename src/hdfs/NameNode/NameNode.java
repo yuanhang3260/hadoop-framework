@@ -160,10 +160,14 @@ public class NameNode implements NameNodeRemoteInterface{
 	public synchronized List<DataNodeEntry> select(int replicaFactor) {
 		List<DataNodeEntry> rst = new ArrayList<DataNodeEntry>();
 		int counter = 0;
-		while (counter < replicaFactor && counter < selector.size()) {
+		int hardCounter = 0; //count the traversed dataNode. It should be less than selector.size();
+		while (counter < replicaFactor && counter < selector.size() && hardCounter < selector.size()) {
 			DataNodeAbstract chosenDataNode = this.selector.poll();
-			rst.add(new DataNodeEntry(chosenDataNode.dataNodeRegistryIP, chosenDataNode.dataNodeRegistryPort, chosenDataNode.dataNodeName));
-			counter++;
+			if (chosenDataNode.isAvailable()) {
+				rst.add(new DataNodeEntry(chosenDataNode.dataNodeRegistryIP, chosenDataNode.dataNodeRegistryPort, chosenDataNode.dataNodeName));
+				counter++;
+			}
+			hardCounter++;
 			this.selector.offer(chosenDataNode);
 		}
 		
@@ -273,7 +277,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					Date now = new Date();
 					for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
 						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
-						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) > 10 * 60 * 1000) {
+						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.dataNodePartitionTolerance) {
 							dataNodeInfo.disableDataNode();
 						}
 					}
@@ -410,6 +414,9 @@ public class NameNode implements NameNodeRemoteInterface{
 					}
 					offset += buff.length;
 					buff = srcDataNodeStub.read(chunkName, offset);
+				}
+				for (DataNodeEntry dstDataNode : dstDataNodes) {
+					NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).commitChunk(chunkName);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
