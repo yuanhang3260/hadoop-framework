@@ -97,7 +97,7 @@ public class Utility {
 			System.exit(-1);
 		}
 		
-		byte[] buff = new byte[1024];
+		byte[] buff = new byte[Hdfs.WRITE_BUFF_SIZE];
 		try {
 			FileInputStream in = new FileInputStream(newFile);
 			int readBytes;
