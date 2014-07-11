@@ -16,7 +16,7 @@ public class Hdfs {
 	}
 	
 	public static class Client {
-		public static int READ_BUFFER_SIZE = 999;
+		public static int READ_BUFFER_SIZE = 1024 * 512;
 	}
 	
 	public static class DataNode1 {
