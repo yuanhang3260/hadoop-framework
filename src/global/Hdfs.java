@@ -3,7 +3,7 @@ package global;
 
 public class Hdfs {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	public static int replicaFactor = 2;
 	public static int chunkSize = 1024 * 1024 * 4;
 	public static int WRITE_BUFF_SIZE = 1024 * 1024;
@@ -18,7 +18,7 @@ public class Hdfs {
 	}
 	
 	public static class Client {
-		public static int READ_BUFFER_SIZE = 999;
+		public static int READ_BUFFER_SIZE = 1024 * 1024;
 	}
 	
 	public static class DataNode1 {
