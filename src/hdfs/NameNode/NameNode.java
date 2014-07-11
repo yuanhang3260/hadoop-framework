@@ -34,6 +34,7 @@ public class NameNode implements NameNodeRemoteInterface{
 	private NameNodeRemoteInterface nameNodeStub;
 	private String ip;
 	private int port;
+	private Object sysCheckSync = new Object();
 	
 	public NameNode(int port) {
 		this.dataNodeTbl = new ConcurrentHashMap<String, DataNodeAbstract>();
@@ -41,7 +42,6 @@ public class NameNode implements NameNodeRemoteInterface{
 		this.dataNodeStubTbl = new ConcurrentHashMap<String, DataNodeRemoteInterface>();
 		this.chunkNaming = 1;
 		this.port = port;
-
 	}
 	
 	/* Export and bind NameNode remote object */
@@ -104,7 +104,7 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	
 	@Override
-	public HDFSFile create(String filePath) throws RemoteException {
+	public synchronized HDFSFile create(String filePath) throws RemoteException {
 		if (this.fileTbl.containsKey(filePath)) {
 			return null;
 		} 
@@ -123,19 +123,6 @@ public class NameNode implements NameNodeRemoteInterface{
 	 */
 	public HDFSFile open(String fileName) throws RemoteException {
 		HDFSFile file = this.fileTbl.get(fileName);
-//		HDFSInputStream in = null;
-//		if (file != null) {
-//			List<ChunkInfo> chunkInfoList = file.chunkList;
-//			String hostIP = null;
-//			try {
-//				hostIP = Inet4Address.getLocalHost().getHostName();
-//			} catch (UnknownHostException e) {
-//				e.printStackTrace();
-//				throw new RemoteException("Unknown Host");
-//			}
-//			
-//		}
-		
 		return file;
 	}
 	
@@ -166,14 +153,14 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	
 	public synchronized String nameChunk() {
-		String chunkName = String.format("%010d", this.chunkNaming++);
+		String chunkName = String.format("%d", new Date().getTime());
 		return chunkName;
 	}
 	
 	public synchronized List<DataNodeEntry> select(int replicaFactor) {
 		List<DataNodeEntry> rst = new ArrayList<DataNodeEntry>();
 		int counter = 0;
-		while (counter < replicaFactor && !this.selector.isEmpty()) {
+		while (counter < replicaFactor && counter < selector.size()) {
 			DataNodeAbstract chosenDataNode = this.selector.poll();
 			rst.add(new DataNodeEntry(chosenDataNode.dataNodeRegistryIP, chosenDataNode.dataNodeRegistryPort, chosenDataNode.dataNodeName));
 			counter++;
@@ -195,7 +182,30 @@ public class NameNode implements NameNodeRemoteInterface{
 
 
 	public synchronized void commitFile(HDFSFile file) throws RemoteException {
-		this.fileTbl.put(file.getName(), file);
+//		List<HDFSChunk> chunkList = file.getChunkList();
+//		for (HDFSChunk chunk : chunkList) {
+//			List<>chunk.getAllLocations();
+//		}
+		synchronized (this.sysCheckSync) {
+			
+			this.fileTbl.put(file.getName(), file);
+			List<HDFSChunk> chunkList = file.getChunkList();
+			System.out.format("DEBUG NameNode.commitFile(): chunkList length=%d\n", chunkList.size());
+			
+			for (HDFSChunk chunk : chunkList) {
+
+				if (Hdfs.DEBUG) {
+					System.out.format("DEBUG NameNode.commitFile(): location size=%d\n", chunk.getAllLocations().size());
+				}
+				for (DataNodeEntry dn : chunk.getAllLocations()) {
+					if (Hdfs.DEBUG) {
+						System.out.format("DEBUG NameNode.commitFile(): locations:%s\n", dn.getNodeName());
+					}
+					this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
+					this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName());
+				}
+			}
+		}
 	}
 	
 	/* NON-remote-object-supported methods start from here */
@@ -249,110 +259,111 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 		public void run() {
 			do {
-				HashMap<String, ChunkStatisticsForDataNode> chunkAbstractFromDataNode
-					= new HashMap<String, ChunkStatisticsForDataNode>();
-				HashMap<String, ChunkStatisticsForNameNode> chunkAbstractFromNameNode
-					= new HashMap<String, ChunkStatisticsForNameNode>();
-
-				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG NameNode.SystemCheck.run(): Start SystemCheck.");
-				}
-				
-				/* Check availability of DataNode */
-				Date now = new Date();
-				for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
-					DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
-					if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) > 10 * 60 * 1000) {
-						dataNodeInfo.disableDataNode();
-					}
-				}
-				
-				/* Obtain chunk abstract from name node */
-				Set<String> filePaths = NameNode.this.fileTbl.keySet();
-				for (String filePath : filePaths) {
-					HDFSFile file = NameNode.this.fileTbl.get(filePath);
-					List<HDFSChunk> chunkList = file.getChunkList();
-					for (HDFSChunk chunk : chunkList) {
-						chunkAbstractFromNameNode.put(chunk.getChunkName(),
-								new ChunkStatisticsForNameNode(chunk.getReplicaFactor(), chunk.getChunkName()));
-					}
-				}
-				
-				/* Obtain chunk abstract from data node */
-				Collection<DataNodeAbstract> dataNodes = NameNode.this.dataNodeTbl.values();
-				for (DataNodeAbstract dataNode : dataNodes) {
-					if (!dataNode.isAvailable()) {
-						continue;
+				synchronized (NameNode.this.sysCheckSync) {
+					HashMap<String, ChunkStatisticsForDataNode> chunkAbstractFromDataNode
+						= new HashMap<String, ChunkStatisticsForDataNode>();
+					HashMap<String, ChunkStatisticsForNameNode> chunkAbstractFromNameNode
+						= new HashMap<String, ChunkStatisticsForNameNode>();
+	
+					if (Hdfs.DEBUG) {
+						System.out.println("DEBUG NameNode.SystemCheck.run(): Start SystemCheck.");
 					}
 					
-					for (String chunkName : dataNode.chunkList) {
-						if (chunkAbstractFromDataNode.containsKey(chunkName)) {
-							ChunkStatisticsForDataNode chunkStat = chunkAbstractFromDataNode.get(chunkName);
-							chunkStat.replicaNum++;
-							chunkStat.getLocations().add(dataNode.dataNodeName);
-						} else {
-							ChunkStatisticsForDataNode chunkStat = new ChunkStatisticsForDataNode();
-							chunkStat.replicaNum = 1;
-							chunkStat.getLocations().add(dataNode.dataNodeName);
-							chunkAbstractFromDataNode.put(chunkName, chunkStat);
+					/* Check availability of DataNode */
+					Date now = new Date();
+					for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
+						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
+						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) > 10 * 60 * 1000) {
+							dataNodeInfo.disableDataNode();
 						}
 					}
-				}
-				
-				/* Delete orphan chunks */
-				Set<String> chunksOnDataNode = chunkAbstractFromDataNode.keySet();
-				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG NameNode.SystemCheck.run(): chunks collected from data node: " + chunksOnDataNode.toString());
-				}
-				for (String chunkOnDataNode : chunksOnDataNode) {
-					if (!chunkAbstractFromNameNode.containsKey(chunkOnDataNode)) {
-						System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnDataNode + ") is orphan.");
-						ChunkStatisticsForDataNode chunkStat = chunkAbstractFromDataNode.get(chunkOnDataNode);
-						for (String dataNodeName : chunkStat.dataNodes) {
-							DataNodeRemoteInterface dataNodeStub = NameNode.this.dataNodeStubTbl.get(dataNodeName);
-							try {
-								dataNodeStub.deleteChunk(chunkOnDataNode);
-							} catch (RemoteException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+					
+					/* Obtain chunk abstract from name node */
+					Set<String> filePaths = NameNode.this.fileTbl.keySet();
+					for (String filePath : filePaths) {
+						HDFSFile file = NameNode.this.fileTbl.get(filePath);
+						List<HDFSChunk> chunkList = file.getChunkList();
+						for (HDFSChunk chunk : chunkList) {
+							chunkAbstractFromNameNode.put(chunk.getChunkName(),
+									new ChunkStatisticsForNameNode(chunk.getReplicaFactor(), chunk.getChunkName()));
+						}
+					}
+					
+					/* Obtain chunk abstract from data node */
+					Collection<DataNodeAbstract> dataNodes = NameNode.this.dataNodeTbl.values();
+					for (DataNodeAbstract dataNode : dataNodes) {
+						if (!dataNode.isAvailable()) {
+							continue;
 						}
 						
+						for (String chunkName : dataNode.chunkList) {
+							if (chunkAbstractFromDataNode.containsKey(chunkName)) {
+								ChunkStatisticsForDataNode chunkStat = chunkAbstractFromDataNode.get(chunkName);
+								chunkStat.replicaNum++;
+								chunkStat.getLocations().add(dataNode.dataNodeName);
+							} else {
+								ChunkStatisticsForDataNode chunkStat = new ChunkStatisticsForDataNode();
+								chunkStat.replicaNum = 1;
+								chunkStat.getLocations().add(dataNode.dataNodeName);
+								chunkAbstractFromDataNode.put(chunkName, chunkStat);
+							}
+						}
 					}
-				}
-				
-				/* Compare two abstracts */
-				Set<String> chunksOnNameNode = chunkAbstractFromNameNode.keySet();
-				for (String chunkOnNameNode : chunksOnNameNode) {
 					
-					ChunkStatisticsForDataNode chunkStat = null;
-					if(chunkAbstractFromDataNode.containsKey(chunkOnNameNode)) {
-						chunkStat = chunkAbstractFromDataNode.get(chunkOnNameNode);
-					} else {
-						//TODO: DISABLE the file
-						continue;
+					/* Delete orphan chunks */
+					Set<String> chunksOnDataNode = chunkAbstractFromDataNode.keySet();
+					if (Hdfs.DEBUG) {
+						System.out.println("DEBUG NameNode.SystemCheck.run(): chunks collected from data node: " + chunksOnDataNode.toString());
 					}
-					int replicaFac = chunkAbstractFromNameNode.get(chunkOnNameNode).replicaFactor;
-					if (chunkStat.replicaNum == replicaFac) {
-						System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnNameNode + ") is OKAY");
-					} else if (chunkStat.replicaNum < replicaFac) {
-						String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is LESS THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
-						System.out.println(debugInfo);
-						String srcDataNodeName = chunkStat.dataNodes.get(0);
-						DataNodeRemoteInterface srcDataNodeStub = NameNode.this.dataNodeStubTbl.get(srcDataNodeName);
-						List<DataNodeEntry> dstDataNodes = NameNode.this.select(replicaFac - chunkStat.replicaNum);
-						copyChunk(chunkOnNameNode, srcDataNodeStub, dstDataNodes);
-					} else {
-						String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is MORE THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
-						System.out.println(debugInfo);
-						String dataNodeName = chunkStat.dataNodes.get(0);
-						deleteChunk(chunkOnNameNode, NameNode.this.dataNodeStubTbl.get(dataNodeName));
+					for (String chunkOnDataNode : chunksOnDataNode) {
+						if (!chunkAbstractFromNameNode.containsKey(chunkOnDataNode)) {
+							System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnDataNode + ") is orphan.");
+							ChunkStatisticsForDataNode chunkStat = chunkAbstractFromDataNode.get(chunkOnDataNode);
+							for (String dataNodeName : chunkStat.dataNodes) {
+								DataNodeRemoteInterface dataNodeStub = NameNode.this.dataNodeStubTbl.get(dataNodeName);
+								try {
+									dataNodeStub.deleteChunk(chunkOnDataNode);
+								} catch (RemoteException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							
+						}
+					}
+					
+					/* Compare two abstracts */
+					Set<String> chunksOnNameNode = chunkAbstractFromNameNode.keySet();
+					for (String chunkOnNameNode : chunksOnNameNode) {
+						
+						ChunkStatisticsForDataNode chunkStat = null;
+						if(chunkAbstractFromDataNode.containsKey(chunkOnNameNode)) {
+							chunkStat = chunkAbstractFromDataNode.get(chunkOnNameNode);
+						} else {
+							//TODO: DISABLE the file
+							continue;
+						}
+						int replicaFac = chunkAbstractFromNameNode.get(chunkOnNameNode).replicaFactor;
+						if (chunkStat.replicaNum == replicaFac) {
+							System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnNameNode + ") is OKAY");
+						} else if (chunkStat.replicaNum < replicaFac) {
+							String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is LESS THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
+							System.out.println(debugInfo);
+							String srcDataNodeName = chunkStat.dataNodes.get(0);
+							DataNodeRemoteInterface srcDataNodeStub = NameNode.this.dataNodeStubTbl.get(srcDataNodeName);
+							List<DataNodeEntry> dstDataNodes = NameNode.this.select(replicaFac - chunkStat.replicaNum);
+							copyChunk(chunkOnNameNode, srcDataNodeStub, dstDataNodes);
+						} else {
+							String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is MORE THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
+							System.out.println(debugInfo);
+							String dataNodeName = chunkStat.dataNodes.get(0);
+							deleteChunk(chunkOnNameNode, NameNode.this.dataNodeStubTbl.get(dataNodeName));
+						}
 					}
 				}
-				
 				/* TODO:Disable file that has one or more chunks equals to 0 */
 
 				if (Hdfs.DEBUG) {
@@ -364,6 +375,8 @@ public class NameNode implements NameNodeRemoteInterface{
 					e.printStackTrace();
 				}
 			} while (routineThread);
+		
+			
 		}
 		
 		private class ChunkStatisticsForNameNode {
@@ -393,7 +406,7 @@ public class NameNode implements NameNodeRemoteInterface{
 				buff = srcDataNodeStub.read(chunkName, offset);
 				while (buff.length > 0) {
 					for (DataNodeEntry dstDataNode : dstDataNodes) {
-						NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).write(buff, chunkName, offset);
+						NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).writeToLocal(buff, chunkName, offset);
 					}
 					offset += buff.length;
 					buff = srcDataNodeStub.read(chunkName, offset);
@@ -413,9 +426,5 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 	}
-
-
-
-	
 	
 }

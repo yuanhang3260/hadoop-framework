@@ -24,6 +24,7 @@ public class HDFSOutputStream implements Serializable {
 	private int chunkCounter;
 	private int chunksize;
 	private NameNodeRemoteInterface nameNodeStub;
+	private boolean firstWrite = true;
 
 	
 	
@@ -37,9 +38,13 @@ public class HDFSOutputStream implements Serializable {
 
 	public void write(byte[] content) throws IOException {
 		
-		if (this.chunkOffset == this.chunksize && content.length > 0) { //Apply for a new chunk
+		if (this.chunkOffset == this.chunksize && content.length > 0 || firstWrite) { //Apply for a new chunk
 			file.addChunk();
 			this.chunkOffset = 0;
+		}
+		
+		if (firstWrite) {
+			firstWrite = false;
 		}
 		
 		int availableBytes = this.chunksize - this.chunkOffset;
@@ -106,21 +111,22 @@ public class HDFSOutputStream implements Serializable {
 	
 	
 	public void close() throws IOException{
-		List<HDFSChunk> allChunks = file.getChunkList();
-		for (HDFSChunk chunk : allChunks) {
-			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
-				try {
-					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
-					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
-				} catch (RemoteException e) {
-					throw new IOException("Cannot connect to Name Node");
-				} catch (NotBoundException e) {
-					throw new IOException("Cannot connect to Name Node");
-				}
-			}
-		}
+//		List<HDFSChunk> allChunks = file.getChunkList();
+//		for (HDFSChunk chunk : allChunks) {
+//			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
+//				try {
+//					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
+//					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
+//					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
+//				} catch (RemoteException e) {
+//					throw new IOException("Cannot connect to Name Node");
+//				} catch (NotBoundException e) {
+//					throw new IOException("Cannot connect to Name Node");
+//				}
+//			}
+//		}
 		this.nameNodeStub.commitFile(file);
+
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
@@ -130,7 +136,7 @@ public class HDFSOutputStream implements Serializable {
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
 		try {
 			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-			dataNodeStub.write(content, chunkName, this.chunkOffset);
+			dataNodeStub.writeToLocal(content, chunkName, this.chunkOffset);
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
