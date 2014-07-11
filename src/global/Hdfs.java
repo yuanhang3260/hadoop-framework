@@ -8,7 +8,7 @@ public class Hdfs {
 	public static int chunkSize = 7;
 
 	public static class NameNode {
-		public static String nameNodeRegistryIP = "localhost";
+		public static String nameNodeRegistryIP = "128.237.222.59";
 		public static int nameNodeRegistryPort = 1099;
 		public static int REPLICA_FACTOR = 1;
 		public static long CHUNK_SIZE = 1024 * 512;
