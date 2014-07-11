@@ -5,7 +5,7 @@ public class Hdfs {
 
 	public static boolean DEBUG = true;
 	public static int replicaFactor = 2;
-	public static int chunkSize = 7;
+	public static int chunkSize = 1025;
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
 
 	public static class NameNode {
