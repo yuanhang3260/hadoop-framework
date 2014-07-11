@@ -9,11 +9,11 @@ public class runDataNode {
 		Thread t1 = new Thread(dataNode1);
 		t1.start();
 		
-//		Thread.sleep(1000 * 5);
-//		DataNode dataNode2 = new DataNode(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode2.registryPort);
-//		dataNode2.init();
-//		Thread t2 = new Thread(dataNode2);
-//		t2.start();
+		Thread.sleep(1000 * 5);
+		DataNode dataNode2 = new DataNode(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode2.registryPort);
+		dataNode2.init();
+		Thread t2 = new Thread(dataNode2);
+		t2.start();
 //		
 //		Thread.sleep(1000 * 5);
 //		DataNode dataNode3 = new DataNode(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode3.registryPort);

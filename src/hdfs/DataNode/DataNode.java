@@ -56,7 +56,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
 			
 			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
-			List<String> chunkList = formChunkReport();
+			List<String> chunkList = formChunkReport(true);
 			if (Hdfs.DEBUG) {
 				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 			}
@@ -67,7 +67,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 
 			while (true) {
 				if (counter % this.chunkBlockPeriod ==  0) {
-					chunkList = formChunkReport();
+					chunkList = formChunkReport(false);
 					if (Hdfs.DEBUG) {
 						System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 					}
@@ -210,21 +210,27 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		return name + ".tmp";
 	}
 	
-	private String chunkNameUnwrapper(String localChunkName) {
+	private String chunkNameUnwrapper(String localChunkName, boolean reportTmp) {
 		String[] segs = localChunkName.split("-");
-		if (segs.length == 3 && (segs[2].equals(this.dataNodeName)|| segs[2].equals(this.dataNodeName + ".tmp"))) {
-			return segs[0];
-		} 
+		if (reportTmp) {
+			if (segs.length == 3 && (segs[2].equals(this.dataNodeName) || segs[2].equals(this.dataNodeName + ".tmp"))) {
+				return segs[0];
+			}
+		} else {
+			if (segs.length == 3 && (segs[2].equals(this.dataNodeName))) {
+				return segs[0];
+			}
+		}
 		return null;
-		
 	}
-	public List<String> formChunkReport() {
+	
+	public List<String> formChunkReport(boolean withTmp) {
 		List<String> chunkList = new ArrayList<String>();
 		File dfDir = new File(this.dirPrefix);
 		String[] files = dfDir.list();
 	
 		for (String localFileName : files) {
-			String chunkName = chunkNameUnwrapper(localFileName);
+			String chunkName = chunkNameUnwrapper(localFileName, withTmp);
 			if (chunkName != null) {
 				chunkList.add(chunkName);
 			}
