@@ -1,13 +1,13 @@
-package mapreduce.core;
+package mapreduce.task;
 
 public class Task {
 	String jid;
 	String tid;
 	//Split split;
-	Class<?> taskClass;
+	public Class<?> taskClass;
 	//InputFormat;
 	TaskStatus status;
-	int partitionNum;
+	public int partitionNum;
 	
 	private enum TaskStatus {
 		RUNNING, TERMINATED, FAILED;

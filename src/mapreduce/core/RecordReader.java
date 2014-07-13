@@ -1,5 +1,7 @@
 package mapreduce.core;
 
+import mapreduce.io.Writable;
+
 public class RecordReader {
 	
 	public Writable nextKey() {
