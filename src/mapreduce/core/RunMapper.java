@@ -25,13 +25,12 @@ public class RunMapper {
 			while (recordReader.hasNext()) {
 				rm.mapper.map(recordReader.nextKey(), recordReader.nextValue(), output);
 			}
-			
+			output.writeToLocal();
+			System.exit(0);
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
