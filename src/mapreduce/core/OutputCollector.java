@@ -98,6 +98,5 @@ public class OutputCollector<K, V> {
 			return nextvalue;
 		}
 		
-		
 	}
 }

@@ -16,6 +16,9 @@ public class JobConf implements Serializable {
 	private Class<?> outputKeyClass;
 	private Class<?> outputValueClass;
 	
+	private int numMapTasks;
+	private int numReduceTasks;
+	
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
 	}
@@ -87,5 +90,21 @@ public class JobConf implements Serializable {
 	
 	public Class<?> getOutputValueClass() {
 		return this.outputValueClass;
+	}
+	
+	public void setNumMapTasks(int num) {
+		this.numMapTasks = num;
+	}
+	
+	public int getNumMapTasks() {
+		return this.numMapTasks;
+	}
+	
+	public void setNumReduceTasks(int num) {
+		this.numReduceTasks = num;
+	}
+	
+	public int getNumReduceTasks() {
+		return this.numReduceTasks;
 	}
 }
