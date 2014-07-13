@@ -6,15 +6,19 @@ public class IntWritable extends Writable {
 	 * 
 	 */
 	private static final long serialVersionUID = -1014971413849096367L;
-	private int value;
+	private Integer value;
 	
 	public IntWritable(int val) {
-		this.value = val; //Initiate value
-		this.hashValue = val; //Initiate hash value
+		this.value = new Integer(val); //Initiate value
 	}
 	
 	public int getValue() {
-		return this.value;
+		return this.value.intValue();
+	}
+
+	@Override
+	public int getHashValue() {
+		return this.value.hashCode();
 	}
 	
 	

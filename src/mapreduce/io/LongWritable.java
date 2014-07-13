@@ -6,14 +6,20 @@ public class LongWritable extends Writable{
 	 * 
 	 */
 	private static final long serialVersionUID = -4469350421720870388L;	
-	private long value;
+	private Long value;
 	
 	public LongWritable(long val) {
-		this.value = val; //Initiate value
-		this.hashValue = val; //Initiate hash value
+		this.value = new Long(val); //Initiate value
 	}
 	
 	public long getValue() {
-		return this.value;
+		return this.value.longValue();
 	}
+
+	@Override
+	public int getHashValue() {
+		return this.value.hashCode();
+	}
+	
+	
 }

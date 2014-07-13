@@ -1,10 +1,12 @@
 package test;
 
+import mapreduce.core.Partitioner;
+import mapreduce.io.IntWritable;
+
 public class hashTest {
 	public static void main(String[] args) {
-		String str = "Geng";
-		System.out.format("Init: %d\n", str.hashCode());
-		String st2 = "Geng";
-		System.out.format("Modified: %d\n", st2.hashCode());
+		IntWritable iw = new IntWritable(2);
+		Partitioner<IntWritable, IntWritable> p = new Partitioner<IntWritable, IntWritable>();
+		System.out.println("Partition No.:" + p.getPartition(iw, iw, 3));
 	}
 }

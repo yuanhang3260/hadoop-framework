@@ -10,16 +10,15 @@ public class Text extends Writable {
 	
 	public Text(String text) {
 		this.value = text;	//Initiate value
-		/* Compute its hash value */
-		long hashValue = 0;
-		for (int i = 0; i < this.value.length(); i++) {
-			hashValue+= this.value.charAt(i);
-		}
-		this.hashValue = hashValue;
 	}
 	
 	public String getText() {
 		return this.value;
+	}
+
+	@Override
+	public int getHashValue() {
+		return this.value.hashCode();
 	}
 	
 }
