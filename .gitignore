@@ -4,6 +4,8 @@
 
 #Ignore tmp test file
 /test_tmp
+/test_file
 
 #Ignore DS_Store
 .DS_Store
+
