@@ -36,4 +36,10 @@ public class Hdfs {
 	public static class DataNode5 {
 		public static int registryPort = 1104;
 	}
+	
+	public static class JobTracker {
+		public static String jobTrackerServiceName = "JobTracker";
+		public static String jobTrackerRegistryIp = "localhost";
+		public static int jobTrackerRegistryPort = 1100;
+	}
 }
