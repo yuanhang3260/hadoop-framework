@@ -11,6 +11,7 @@ public class Hdfs {
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
 
 	public static class NameNode {
+		public static String nameNodeServiceName = "NameNode";
 		public static String nameNodeRegistryIP = "128.237.222.59";
 		public static int nameNodeRegistryPort = 1099;
 		public static int REPLICA_FACTOR = 1;
