@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import mapreduce.Job;
 import mapreduce.core.Split;
-import mapreduce.core.Task;
-import mapreduce.core.TaskTrackerRemoteInterface;
+import mapreduce.task.Task;
+import mapreduce.task.TaskTrackerRemoteInterface;
 
 public class JobTracker implements JobTrackerRemoteInterface {
 	
@@ -64,7 +64,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		try {
 			taskTrackerRegistry = LocateRegistry.getRegistry(taskTrackerIp, taskTrackerPort);
 			TaskTrackerRemoteInterface taskTrackerStub = (TaskTrackerRemoteInterface) taskTrackerRegistry.lookup(Hdfs.TaskTracker.taskTrackerServiceName);
-			boolean ret = taskTrackerStub.runTast(task);
+			boolean ret = taskTrackerStub.runTask(task);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
