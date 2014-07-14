@@ -177,11 +177,11 @@ public class HDFSInputStream implements Serializable{
 	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) {
 		DataNodeEntry nearestEntry = null;
 		try {
-			int localIp = ipToInt(Inet4Address.getLocalHost().getHostAddress());
-			int minDist = Integer.MAX_VALUE;
+			long localIp = ipToInt(Inet4Address.getLocalHost().getHostAddress());
+			long minDist = Long.MAX_VALUE;
 			for (DataNodeEntry entry : entries) {
-				int thisIp = ipToInt(entry.dataNodeRegistryIP);
-				int dist = Math.abs(localIp-thisIp);
+				long thisIp = ipToInt(entry.dataNodeRegistryIP);
+				long dist = Math.abs(localIp-thisIp);
 				if (dist < minDist) {
 					minDist = dist;
 					nearestEntry = entry;
@@ -193,9 +193,9 @@ public class HDFSInputStream implements Serializable{
 		return nearestEntry;
 	}
 	
-	private static int ipToInt(String ip) {
+	private static long ipToInt(String ip) {
 		String newIp = ip.replace(".", "");
-		int ipInt = Integer.parseInt(newIp);
+		long ipInt = Long.parseLong(newIp);
 		return ipInt;
 	}
 
