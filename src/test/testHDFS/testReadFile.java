@@ -1,4 +1,4 @@
-package test;
+package test.testHDFS;
 
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;

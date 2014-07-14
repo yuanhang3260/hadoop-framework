@@ -1,9 +1,11 @@
 package mapreduce.task;
 
+import mapreduce.core.Split;
+
 public class Task {
 	String jid;
 	String tid;
-	//Split split;
+	public Split split;
 	public Class<?> taskClass;
 	//InputFormat;
 	TaskStatus status;

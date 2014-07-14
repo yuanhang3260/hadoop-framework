@@ -1,4 +1,4 @@
-package test;
+package test.testMapRed;
 
 import mapreduce.core.Partitioner;
 import mapreduce.io.IntWritable;
