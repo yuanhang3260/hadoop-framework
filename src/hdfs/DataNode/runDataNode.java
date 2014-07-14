@@ -8,7 +8,7 @@ public class runDataNode {
 		dataNode1.init();
 		Thread t1 = new Thread(dataNode1);
 		t1.start();
-		
+
 //		Thread.sleep(1000 * 2);
 //		DataNode dataNode2 = new DataNode(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode3.registryPort);
 //		dataNode2.init();
