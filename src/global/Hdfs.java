@@ -11,6 +11,7 @@ public class Hdfs {
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
 
 	public static class NameNode {
+		public static String nameNodeServiceName = "NameNode";
 		public static String nameNodeRegistryIP = "128.237.222.59";
 		public static int nameNodeRegistryPort = 1099;
 		public static int REPLICA_FACTOR = 1;
@@ -35,5 +36,15 @@ public class Hdfs {
 	}
 	public static class DataNode5 {
 		public static int registryPort = 1104;
+	}
+	
+	public static class JobTracker {
+		public static String jobTrackerServiceName = "JobTracker";
+		public static String jobTrackerRegistryIp = "localhost";
+		public static int jobTrackerRegistryPort = 1105;
+	}
+	
+	public static class TaskTracker {
+		public static String taskTrackerServiceName = "TaskTracker";
 	}
 }

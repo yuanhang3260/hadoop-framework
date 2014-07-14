@@ -4,7 +4,9 @@ import global.Hdfs;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetAddress;
@@ -122,6 +124,26 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		return;
 	}
 	
+	public String readChunk(String chunkName) throws RemoteException {
+		FileReader in = null;
+		StringBuilder sb = new StringBuilder();
+		try {
+			in = new FileReader(chunkNameWrapper(chunkName));
+			char[] buf = new char[4096];
+			int k = 0;
+
+			while ((k = in.read(buf)) != -1) {
+				sb.append(buf, 0, k);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return sb.toString();
+	}
+	
 	/**
 	 * Read the chunk data stores on this data node and return a buffer, the
 	 * size of the buffer is set in global.Hdfs.client
@@ -129,7 +151,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	 * @return a byte array with the chunk data, 
 	 * 		   at most Hdfs.client.readBufSize
 	 */
-	public byte[] read(String chunkName, int offSet) {
+	public byte[] read(String chunkName, int offSet) throws RemoteException{
 		File chunkFile = new File(chunkNameWrapper(chunkName));
 		long chunkSize = chunkFile.length();
 		
