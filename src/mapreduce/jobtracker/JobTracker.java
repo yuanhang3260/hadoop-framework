@@ -1,6 +1,6 @@
 package mapreduce.jobtracker;
 
-import global.Hdfs;
+import global.MapReduce;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import mapreduce.Job;
 import mapreduce.core.Split;
+import mapreduce.task.MapperTask;
 import mapreduce.task.Task;
 import mapreduce.task.TaskTrackerRemoteInterface;
 
@@ -35,9 +36,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	public void init() {
 		try {
-			Registry jtRegistry = LocateRegistry.createRegistry(Hdfs.JobTracker.jobTrackerRegistryPort);
+			Registry jtRegistry = LocateRegistry.createRegistry(MapReduce.JobTracker.jobTrackerRegistryPort);
 			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
-			jtRegistry.rebind(Hdfs.JobTracker.jobTrackerServiceName, jtStub);
+			jtRegistry.rebind(MapReduce.JobTracker.jobTrackerServiceName, jtStub);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -63,7 +64,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		Registry taskTrackerRegistry;
 		try {
 			taskTrackerRegistry = LocateRegistry.getRegistry(taskTrackerIp, taskTrackerPort);
-			TaskTrackerRemoteInterface taskTrackerStub = (TaskTrackerRemoteInterface) taskTrackerRegistry.lookup(Hdfs.TaskTracker.taskTrackerServiceName);
+			TaskTrackerRemoteInterface taskTrackerStub = (TaskTrackerRemoteInterface) taskTrackerRegistry.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
 			boolean ret = taskTrackerStub.runTask(task);
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -85,7 +86,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private void addMapTasks(Job job) {
 		for (Split split : job.getSplit()) {
-			Task task = new Task(job.getJobId(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
+			Task task = new MapperTask(job.getJobId(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
 			this.mapTaskQueue.add(task);
 		}
 	}

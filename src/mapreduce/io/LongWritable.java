@@ -20,6 +20,11 @@ public class LongWritable extends Writable{
 	public int getHashValue() {
 		return this.value.hashCode();
 	}
+
+	@Override
+	public String toString() {
+		return "" + this.value;
+	}
 	
 	
 }

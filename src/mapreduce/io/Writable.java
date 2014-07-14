@@ -13,14 +13,6 @@ public abstract class Writable implements Serializable {
 	public final int MIN_KEY = Integer.MIN_VALUE;
 	
 	public abstract int getHashValue();
-	
-	public int compareTo(Writable o) {
-		if (this.getHashValue() > o.getHashValue()) {
-			return 1;
-		} else if (this.getHashValue() < o.getHashValue()) {
-			return -1;
-		} else {
-			return 0;
-		}
-	}
+	public abstract String toString();
+
 }

@@ -21,4 +21,8 @@ public class Text extends Writable {
 		return this.value.hashCode();
 	}
 	
+	public String toString() {
+		return this.value;
+	}
+	
 }

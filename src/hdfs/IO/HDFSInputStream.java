@@ -77,7 +77,7 @@ public class HDFSInputStream implements Serializable{
 		String data = null;
 		try {
 			nodeRegistry = LocateRegistry.getRegistry(nodeEntry.dataNodeRegistryIP, nodeEntry.dataNodeRegistryPort);
-			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.DataNode.dataNodeServiceName);
 			data = nodeStub.readChunk(chunkInfo.getChunkName());
 		} catch (RemoteException e) {
 			e.printStackTrace();
