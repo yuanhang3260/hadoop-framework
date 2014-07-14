@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import mapreduce.io.KeyValue;
 import mapreduce.io.Writable;
 
 public class OutputCollector<K extends Writable, V extends Writable> {
@@ -33,9 +34,9 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 
 		while (it.hasNext()) {
 			KeyValue<K, V> keyvalue = it.next();
-			if (currentPartition == partitioner.getPartition(keyvalue.key, keyvalue.value, this.partitionNum)) {
-				out.writeObject(keyvalue.key);
-				out.writeObject(keyvalue.value);
+			if (currentPartition == partitioner.getPartition(keyvalue.getKey(), keyvalue.getValue(), this.partitionNum)) {
+				out.writeObject(keyvalue.getKey());
+				out.writeObject(keyvalue.getValue());
 			} else {
 				if (intermediatePartitionFile != null && outFile != null) {
 					out.close();
@@ -79,21 +80,6 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			return it.next();
 		}
 	}
-	
-	public class KeyValue<KEY2 extends Writable, VALUE2 extends Writable> implements Comparable<KeyValue<KEY2, VALUE2>>{
-		
-		private KEY2 key;
-		private VALUE2 value;
-		
-		public KeyValue(KEY2 k, VALUE2 v) {
-			this.key = k;
-			this.value = v;
-		}
 
-		@Override
-		public int compareTo(KeyValue<KEY2, VALUE2> o) {
-			return this.key.compareTo(o.key);
-		}
-	}
 	
 }

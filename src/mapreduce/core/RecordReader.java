@@ -1,30 +1,31 @@
 package mapreduce.core;
 
-import mapreduce.io.Writable;
+import hdfs.IO.HDFSInputStream;
+import mapreduce.io.KeyValue;
+import mapreduce.io.Text;
 
-public class RecordReader<K, V> {
+public class RecordReader {
 	
-	public Split split;
+	private Split split;
+	private String[] values;
+	private int index;
 	
 	public RecordReader(Split s) {
 		this.split = s;
+		HDFSInputStream in = this.split.file.getInputStream();
+		String content = in.readChunk(this.split.chunkIdx);
+		this.values = content.split("\n");
+		this.index = 0;
 	}
 	
-	public Writable nextKey() {
-		return null;
-	}
-	
-	public Writable nextValue() {
-		return null;
+	public KeyValue<Text, Text> nextKeyValue() {
+		KeyValue<Text, Text> rst = new KeyValue<Text, Text>(new Text(this.split.file.getName()),new Text(this.values[index]));
+		index++;
+		return rst;
 	}
 	
 	public boolean hasNext() {
-		return false;
+		return (this.index < this.values.length);
 	}
-	
-	private class KeyValue<KEY, VALUE> {
-		public KEY key;
-		public VALUE value;
-		
-	}
+
 }
