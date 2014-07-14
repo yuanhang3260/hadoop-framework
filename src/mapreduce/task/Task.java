@@ -1,4 +1,6 @@
-package mapreduce.core;
+package mapreduce.task;
+
+import mapreduce.core.Split;
 
 public class Task {
 	String jobId;
@@ -7,7 +9,7 @@ public class Task {
 	Class<?> taskClass;
 	//InputFormat;
 	TaskStatus status;
-	int partitionNum;
+	public int partitionNum;
 	
 	private enum TaskStatus {
 		RUNNING, TERMINATED, FAILED;

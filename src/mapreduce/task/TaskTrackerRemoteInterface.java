@@ -1,8 +1,8 @@
-package mapreduce.core;
+package mapreduce.task;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface TaskTrackerRemoteInterface extends Remote {
-	public boolean runTast(Task task) throws RemoteException;
+	public boolean runTask(Task task) throws RemoteException;
 }

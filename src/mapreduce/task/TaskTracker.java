@@ -1,4 +1,4 @@
-package mapreduce.core;
+package mapreduce.task;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,7 +10,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	String name;
 	
 	@Override
-	public boolean runTast(Task task) throws RemoteException {
+	public boolean runTask(Task task) throws RemoteException {
 		File taskFile = new File(String.format("tmp/%s-%s-taskFile", name, task.tid));
 		try {
 			taskFile.createNewFile();
