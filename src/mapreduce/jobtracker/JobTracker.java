@@ -144,6 +144,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			for (String ip : allNodes) {
 				
 			}
+			return null;
 		}
 	}
 	
