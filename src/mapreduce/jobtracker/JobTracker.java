@@ -1,6 +1,7 @@
 package mapreduce.jobtracker;
 
 import global.Hdfs;
+import hdfs.DataStructure.DataNodeEntry;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -8,10 +9,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
-import java.util.Queue;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import mapreduce.Job;
 import mapreduce.core.Split;
@@ -20,19 +21,18 @@ import mapreduce.task.TaskTrackerRemoteInterface;
 
 public class JobTracker implements JobTrackerRemoteInterface {
 	
+	private static int MAX_NUM_MAP_TASK = 999;
+	
+	private int taskNaming = 1;
+	
 	/* host IP, task tracker port */
-	private ConcurrentHashMap<String, Integer> taskTrackerTbl = new ConcurrentHashMap<String, Integer>();
+	private ConcurrentHashMap<String, TaskTrackerInfo> taskTrackerTbl = new ConcurrentHashMap<String, TaskTrackerInfo>();
 	
 	/* keep jobs in this tbl after submission from jobclient*/
 	private ConcurrentHashMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();
 	
 	/* keep all tasks wait to be submit to taskTracker*/
-	private ArrayBlockingQueue<Task> mapQueue = new ArrayBlockingQueue<Task>();
-	
-//	public JobTracker() {
-//		this.taskTrackerTbl = new ConcurrentHashMap<String, Integer>();
-//		this.mapTaskQueue = new ConcurrentLinkedQueue<Task>();
-//	}
+	private ArrayBlockingQueue<Task> taskQueue = new ArrayBlockingQueue<Task>(MAX_NUM_MAP_TASK);
 	
 	public void init() {
 		try {
@@ -45,11 +45,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	@Override
-	public synchronized String join(String ip, int port) {
+	public synchronized String join(String ip, int port, int mapSlots, int reduceSlots) {
 		String taskTrackerName = ip + ":" + port;
 		if (!taskTrackerTbl.containsKey(ip)) {
-			taskTrackerTbl.put(ip, port);
+			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port, mapSlots, reduceSlots);
+			taskTrackerTbl.put(ip, stat);
 		}
+		//TODO: upon a tasktracker recover from failure, what about those tasks assigned on it?
 		return taskTrackerName;
 	}
 	
@@ -73,6 +75,16 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 	}
 	
+	private Task createMapTask(String jobId, Split split, Class<?> theClass, int partitionNum) {
+		Task task = new Task(nameTask(), jobId, split, theClass, partitionNum);
+		return task;
+	}
+	
+	private synchronized String nameTask() {
+		int taskName = taskNaming++;
+		return Integer.toString(taskName);
+	}
+	
 	/**
 	 * JobClient calls this method to submit a job to schedule
 	 */
@@ -86,15 +98,53 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private void addMapTasks(Job job) {
 		for (Split split : job.getSplit()) {
-			Task task = new Task(job.getJobId(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
-			this.mapTaskQueue.add(task);
+			Task task = createMapTask(job.getJobId(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
+			this.taskQueue.add(task);
 		}
 	}
 	
 	
 	/* a FIFO JobScheduler */
-	private class JobScheduler {
-		public Queue<Task> taskQueue;
+	private class JobScheduler implements Runnable{
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			while (true) {
+				Task nextTask = taskQueue.peek();
+				
+				if (nextTask instanceof Task) {
+					/* schedule a map task */
+					TaskTrackerInfo taskTracker = pickTaskTrackerForMap(nextTask);
+					if (taskTracker != null) {
+						submitTask(taskQueue.poll(), taskTracker.getIp(), taskTracker.getPort());
+					}
+				} else {
+					/* schedule a reduce task */
+				}
+			}
+		}
+		
+		public synchronized TaskTrackerInfo pickTaskTrackerForMap(Task task) {
+			int chunkIdx = task.getSplit().getChunkIdx();
+			List<DataNodeEntry> nodes = task.getSplit().getFile().getChunkList().get(chunkIdx).getAllLocations();
+			for (DataNodeEntry node : nodes) {
+				String ip = node.dataNodeRegistryIP;
+				if (taskTrackerTbl.containsKey(ip)) {
+					TaskTrackerInfo taskTrackerInfo = taskTrackerTbl.get(ip);
+					if (taskTrackerInfo.getStatus() == TaskTrackerInfo.Status.RUNNING && 
+							taskTrackerInfo.getMapSlot() > 0) {
+						return taskTrackerInfo;
+					}
+				}
+			}
+			
+			/* all data nodes with that split locally is busy now, pick a nearest one */
+			Set<String> allNodes = taskTrackerTbl.keySet();
+			for (String ip : allNodes) {
+				
+			}
+		}
 	}
 	
 }

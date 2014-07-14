@@ -21,5 +21,5 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @return String the name of the Task Tracker upon success, the name is 
 	 * 				  currently formed by ip : port
 	 */
-	public String join(String ip, int port) throws RemoteException;
+	public String join(String ip, int port, int mapSlots, int reduceSlots) throws RemoteException;
 }

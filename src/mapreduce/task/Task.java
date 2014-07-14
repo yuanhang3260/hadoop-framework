@@ -16,7 +16,8 @@ public class Task {
 		RUNNING, TERMINATED, FAILED;
 	}
 	
-	public Task(String jobId, Split split, Class<?> theClass, int partitionNum) {
+	public Task(String tid, String jobId, Split split, Class<?> theClass, int partitionNum) {
+		this.tid = tid;
 		this.jobId = jobId;
 		this.split = split;
 		this.taskClass = theClass;
