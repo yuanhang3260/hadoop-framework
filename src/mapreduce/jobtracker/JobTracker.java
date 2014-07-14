@@ -9,6 +9,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -26,7 +27,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	private ConcurrentHashMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();
 	
 	/* keep all tasks wait to be submit to taskTracker*/
-	private ConcurrentLinkedQueue<Task> mapTaskQueue = new ConcurrentLinkedQueue<Task>();
+	private ArrayBlockingQueue<Task> mapQueue = new ArrayBlockingQueue<Task>();
 	
 //	public JobTracker() {
 //		this.taskTrackerTbl = new ConcurrentHashMap<String, Integer>();

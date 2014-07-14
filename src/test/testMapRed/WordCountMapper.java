@@ -1,5 +1,7 @@
 package test.testMapRed;
 
+import global.Hdfs.JobTracker;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +32,10 @@ public class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritabl
 			output.collect(new Text(word), new IntWritable(wordCount.get(word)));
 		}
 		
+	}
+	
+	public static void main(String[] args) {
+		JobTracker jt = new JobTracker();
 	}
 
 }
