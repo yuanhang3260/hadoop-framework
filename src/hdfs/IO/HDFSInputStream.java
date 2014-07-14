@@ -6,6 +6,8 @@ import hdfs.DataStructure.DataNodeEntry;
 import hdfs.DataStructure.HDFSChunk;
 
 import java.io.Serializable;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -56,6 +58,33 @@ public class HDFSInputStream implements Serializable{
 		System.out.println("chunkCounter: " + chunkCounter);
 		System.out.println("endOfChunk? " + endOfChunk);
 		System.out.println("endOfFile? " + endOfFile);
+	}
+	
+	/**
+	 * Given a chunk index among this file's chunks, read the whole chunk
+	 * @param idx
+	 * @return String the whole chunk data
+	 */
+	public String readChunk(int idx) {
+		int size = fileChunkInfoList.size();
+		if (idx >= size) {
+			/* chunk index out of bound */
+			return null;
+		}
+		HDFSChunk chunkInfo = fileChunkInfoList.get(idx);
+		DataNodeEntry nodeEntry = getNearestDataNode(chunkInfo.getAllLocations());
+		Registry nodeRegistry = null;
+		String data = null;
+		try {
+			nodeRegistry = LocateRegistry.getRegistry(nodeEntry.dataNodeRegistryIP, nodeEntry.dataNodeRegistryPort);
+			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			data = nodeStub.readChunk(chunkInfo.getChunkName());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+		return data;
 	}
 	
 	public int read(byte[] b) throws RemoteException {
@@ -139,9 +168,35 @@ public class HDFSInputStream implements Serializable{
 		}
 	}
 	
+	/**
+	 * Get the nearest DataNode from local host
+	 * 
+	 * @param entries
+	 * @return the nearest entry from local host
+	 */
 	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) {
-		//TODO:find the nearest data node among the list
-		return entries.get(0);
+		DataNodeEntry nearestEntry = null;
+		try {
+			int localIp = ipToInt(Inet4Address.getLocalHost().getHostAddress());
+			int minDist = Integer.MAX_VALUE;
+			for (DataNodeEntry entry : entries) {
+				int thisIp = ipToInt(entry.dataNodeRegistryIP);
+				int dist = Math.abs(localIp-thisIp);
+				if (dist < minDist) {
+					minDist = dist;
+					nearestEntry = entry;
+				}
+			}
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return nearestEntry;
+	}
+	
+	private static int ipToInt(String ip) {
+		String newIp = ip.replace(".", "");
+		int ipInt = Integer.parseInt(newIp);
+		return ipInt;
 	}
 
 }

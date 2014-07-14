@@ -8,7 +8,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,18 +20,18 @@ import mapreduce.core.TaskTrackerRemoteInterface;
 public class JobTracker implements JobTrackerRemoteInterface {
 	
 	/* host IP, task tracker port */
-	private ConcurrentHashMap<String, Integer> taskTrackerTbl;
+	private ConcurrentHashMap<String, Integer> taskTrackerTbl = new ConcurrentHashMap<String, Integer>();
 	
 	/* keep jobs in this tbl after submission from jobclient*/
-	private ConcurrentHashMap<String, Job> jobTbl;
+	private ConcurrentHashMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();
 	
 	/* keep all tasks wait to be submit to taskTracker*/
-	private ConcurrentLinkedQueue<Task> mapTaskQueue;
+	private ConcurrentLinkedQueue<Task> mapTaskQueue = new ConcurrentLinkedQueue<Task>();
 	
-	public JobTracker() {
-		this.taskTrackerTbl = new ConcurrentHashMap<String, Integer>();
-		this.mapTaskQueue = new ConcurrentLinkedQueue<Task>();
-	}
+//	public JobTracker() {
+//		this.taskTrackerTbl = new ConcurrentHashMap<String, Integer>();
+//		this.mapTaskQueue = new ConcurrentLinkedQueue<Task>();
+//	}
 	
 	public void init() {
 		try {
