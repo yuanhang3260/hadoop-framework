@@ -28,7 +28,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			rm.task = (Task)in.readObject();
 			
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task.partitionNum);
-			RecordReader recordReader = new RecordReader();
+			RecordReader recordReader = new RecordReader(rm.task.split);
 			rm.mapper = (Mapper<Writable, Writable, Writable, Writable>) rm.task.taskClass.getConstructors()[0].newInstance();
 			while (recordReader.hasNext()) {
 				rm.mapper.map(recordReader.nextKey(), recordReader.nextValue(), output);

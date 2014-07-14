@@ -1,4 +1,4 @@
-package test;
+package test.testHDFS;
 
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSOutputStream;

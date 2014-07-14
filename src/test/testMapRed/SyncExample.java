@@ -1,4 +1,4 @@
-package test;
+package test.testMapRed;
 
 public class SyncExample {
 

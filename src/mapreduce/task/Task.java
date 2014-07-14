@@ -5,8 +5,9 @@ import mapreduce.core.Split;
 public class Task {
 	String jobId;
 	String tid;
-	Split split;
-	Class<?> taskClass;
+	public Split split;
+	public Class<?> taskClass;
+
 	//InputFormat;
 	TaskStatus status;
 	public int partitionNum;
