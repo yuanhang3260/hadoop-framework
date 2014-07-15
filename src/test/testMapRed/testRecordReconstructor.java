@@ -10,7 +10,7 @@ public class testRecordReconstructor {
 	public static void main(String[] args) {
 		
 		RecordReconstructor<Text, IntWritable> rr = new RecordReconstructor<Text, IntWritable>();
-		KeyValue<Text, IntWritable> data1 = new KeyValue<Text, IntWritable>(new Text("A"), new IntWritable(1));
+		KeyValue<Text, IntWritable> data1 = new KeyValue<Text, IntWritable>(new Text("B"), new IntWritable(1));
 		KeyValue<Text, IntWritable> data2 = new KeyValue<Text, IntWritable>(new Text("A"), new IntWritable(1));
 		KeyValue<Text, IntWritable> data5 = new KeyValue<Text, IntWritable>(new Text("B"), new IntWritable(1));
 		KeyValue<Text, IntWritable> data4 = new KeyValue<Text, IntWritable>(new Text("BC"), new IntWritable(1));

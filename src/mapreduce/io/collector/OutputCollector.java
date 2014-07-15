@@ -79,7 +79,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		HDFSFile file = nameNodeS.create(filename);
 		HDFSOutputStream out = file.getOutputStream();
 		for (KeyValue<K, V> pair : this.keyvalueList) {
-			byte[] content = String.format("%s\t%s", pair.getKey().toString(), pair.getValue().toString()).getBytes();
+			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
 			out.write(content);
 		}
 		out.close();

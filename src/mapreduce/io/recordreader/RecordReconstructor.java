@@ -33,9 +33,7 @@ public class RecordReconstructor<K extends Writable, V extends Writable> {
 		} catch (EOFException e) {
 			in.close();
 		}
-		for (KeyValue<K, V> pair : list) {
-			System.out.println(pair.getKey().toString() + "\t" + pair.getValue().toString());
-		}
+
 	}
 	
 	public void sort() {
@@ -57,6 +55,7 @@ public class RecordReconstructor<K extends Writable, V extends Writable> {
 			Iterator<V> it = collection.getValues();
 			while(it.hasNext()) {
 				System.out.format("%s\t", it.next().toString());
+				i++;
 			}
 			System.out.println();
 		}

@@ -1,5 +1,6 @@
 package mapreduce.core;
 
+import example.WordCountReducer;
 import global.MapReduce;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 		//Configure task
 		if (MapReduce.UNITEST) {
-			ReducerTask task = new ReducerTask(null, null, 0, null, null, null);
+			ReducerTask task = new ReducerTask(null, null, 0, WordCountReducer.class, null, "reducerOutput2");
 			rr.task = task;
 				
 		} else {
@@ -64,18 +65,20 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		//Collect Partition
 		if (MapReduce.UNITEST) {
 			try {
-				for (PartitionEntry taskEntry : rr.task.getEntries()) {
-					byte[] buff = null;
-					String tmpName = OutputCollector.tmpOutputFileName(rr.task.getJobId(), taskEntry.tid, rr.task.getSEQ());
-					buff = taskEntry.taskTrackerStub.transferPartition(tmpName);
-					File file = new File(tmpName);
-					if (!file.exists()) {
-						file.createNewFile();
-					}
-					FileOutputStream out = new FileOutputStream(file);
-					out.write(buff);
-					out.flush();
-					out.close();
+				for (int i = 0; i < 2; i++) {
+//					byte[] buff = null;
+					String tmpName = "null-null-" + i;
+//					FileInputStream in = new FileInputStream(tmpName);
+//					byte[] buff = new byte[1024 * 1024];
+//					in.read(buff);
+//					File file = new File(tmpName);
+//					if (!file.exists()) {
+//						file.createNewFile();
+//					}
+//					FileOutputStream out = new FileOutputStream(file);
+//					out.write(buff);
+//					out.flush();
+//					out.close();
 					recordReconstructor.reconstruct(tmpName);
 				}
 			} catch (RemoteException e) {
