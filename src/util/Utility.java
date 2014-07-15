@@ -15,12 +15,18 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Utility {
 	
 	public static void main(String[] args) {
 		if (args.length < 2) {
+			printUsage();
+			return;
+		}
+		
+		if (!args[0].equals("hadoop")) {
 			printUsage();
 			return;
 		}
@@ -41,6 +47,19 @@ public class Utility {
 			String localFilePath = args[3];
 			String hdfsFilePath  = args[2];
 			getFromHDFS(hdfsFilePath, localFilePath);
+		} else if (args[1].equals("rm")) {
+			if (args.length < 3) {
+				printRmUsage();
+				return;
+			}
+			String hdfsFilePath = args[2];
+			removeFromHDFS(hdfsFilePath);
+		} else if (args[1].equals("ls")) {
+			listFiles();
+			return;
+		} else {
+			printUsage();
+			return;
 		}
 	}
 	
@@ -127,15 +146,58 @@ public class Utility {
 		}
 	}
 	
+	private static void removeFromHDFS(String path) {
+		try {
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			nameNodeStub.delete(path);
+		} catch (RemoteException e){
+			System.out.println("Remove operation may failed");
+			System.exit(-1);
+		} catch (NotBoundException e) {
+			System.out.println("Error! Cannot find name node.");
+			System.exit(-1);
+		} catch (IOException e) {
+			System.out.println("Exception! Some data node may lose connection. The file is removed.");
+			System.exit(-1);
+		}
+	}
+	
+	private static void listFiles() {
+		try {
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			ArrayList<String> rst = nameNodeStub.listFiles();
+			int i = 1;
+			for (String fileName : rst) {
+				System.out.format("%d\t%s\n", i, fileName);
+				i++;
+			}
+			if (rst.size() < 1) {
+				System.out.println("No files on HDFS");
+			}
+		} catch (RemoteException e){
+			System.out.println("Error! Cannot find name node.");
+			System.exit(-1);
+		} catch (NotBoundException e) {
+			System.out.println("Error! Cannot find name node.");
+			System.exit(-1);
+		}
+	}
+	
 	public static void printUsage() {
-		System.out.print("Usage:\thdfs <op> \n<op>:\n\tput\n\tget");
+		System.out.print("Usage:\thadoop <op> \n<op>:\n\tput\n\tget");
 	}
 	
 	private static void printPutUsage() {
-		System.out.println("<src file name> <dst file name>");
+		System.out.println("Usage:\thadoop\tput\t<src file name>\t<dst file name>");
 	}
 	
 	private static void printGetUsage() {
-		System.out.println("<dst file name> <src file name>");
+		System.out.println("Usage:\thadoop\tget\t<dst file name>\t<src file name>");
+	}
+	
+	private static void printRmUsage() {
+		System.out.println("Usage:\thadoop\tdelete\t<obj file name>");
 	}
 }

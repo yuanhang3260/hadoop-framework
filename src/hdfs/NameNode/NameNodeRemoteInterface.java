@@ -6,6 +6,7 @@ import hdfs.DataStructure.HDFSFile;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface NameNodeRemoteInterface extends Remote{
@@ -21,4 +22,5 @@ public interface NameNodeRemoteInterface extends Remote{
 	public String nameChunk() throws RemoteException;
 	public List<DataNodeEntry> select(int replicaFactor) throws RemoteException;
 	public void commitFile(HDFSFile file) throws RemoteException;
+	public ArrayList<String> listFiles() throws RemoteException;
 }
