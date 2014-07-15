@@ -140,10 +140,13 @@ public class NameNode implements NameNodeRemoteInterface{
 					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
 					dataNodeStub.deleteChunk(chunk.getChunkName());
 				} catch (RemoteException e) {
+					this.fileTbl.remove(path);
 					throw new IOException("Cannot connect to DataNode");
 				} catch (NotBoundException e) {
+					this.fileTbl.remove(path);
 					throw new IOException("Cannot connect to DataNode");
 				} catch (IOException e) {
+					this.fileTbl.remove(path);
 					throw new IOException("Cannot delete chunk(name:" + chunk.getChunkName() + ")");
 				}
 			}
@@ -151,7 +154,15 @@ public class NameNode implements NameNodeRemoteInterface{
 		this.fileTbl.remove(path);
 	}
 	
-	
+	@Override
+	public ArrayList<String> listFiles() throws RemoteException {
+		Set<String> fileNameSet = this.fileTbl.keySet();
+		ArrayList<String> rst = new ArrayList<String>();
+		for (String fileName : fileNameSet) {
+			rst.add(fileName);
+		}
+		return rst;
+	}
 	public synchronized String nameChunk() {
 		String chunkName = String.format("%d", new Date().getTime());
 		return chunkName;
@@ -433,5 +444,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 	}
+	
+	
 	
 }
