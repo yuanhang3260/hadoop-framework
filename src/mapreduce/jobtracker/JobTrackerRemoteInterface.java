@@ -2,8 +2,10 @@ package mapreduce.jobtracker;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 import mapreduce.Job;
+import mapreduce.task.Task;
 
 public interface JobTrackerRemoteInterface extends Remote {
 	/**
@@ -22,4 +24,11 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * 				  currently formed by ip : port
 	 */
 	public String join(String ip, int port, int mapSlots, int reduceSlots) throws RemoteException;
+	
+	/**
+	 * Periodically heatBeat and get tasks assignment from job tracker
+	 * @param report
+	 * @return
+	 */
+	public List<Task> heartBeat(TaskTrackerReport report);
 }
