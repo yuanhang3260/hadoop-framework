@@ -1,6 +1,7 @@
 package mapreduce;
 
 import global.Hdfs;
+import global.MapReduce;
 import hdfs.DataStructure.HDFSChunk;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
@@ -19,8 +20,8 @@ public class JobClient {
 	public static String runJob(JobConf conf) {
 		String jobId = null;
 		try {
-			Registry jobTrackerRegistry = LocateRegistry.getRegistry(Hdfs.JobTracker.jobTrackerRegistryIp, Hdfs.JobTracker.jobTrackerRegistryPort);	
-			JobTrackerRemoteInterface jobTrackerStub = (JobTrackerRemoteInterface) jobTrackerRegistry.lookup(Hdfs.JobTracker.jobTrackerServiceName);
+			Registry jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.JobTracker.jobTrackerRegistryIp, MapReduce.JobTracker.jobTrackerRegistryPort);	
+			JobTrackerRemoteInterface jobTrackerStub = (JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.JobTracker.jobTrackerServiceName);
 			
 			Job jobToSubmit = new Job(conf);
 			List<Split> splits = splitFile(conf.getInputPath());

@@ -3,7 +3,7 @@ package global;
 
 public class Hdfs {
 
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	public static int replicaFactor = 2;
 	public static int chunkSize = 1024 * 1024 * 4;
 	public static int WRITE_BUFF_SIZE = 1024 * 1024;
@@ -12,7 +12,7 @@ public class Hdfs {
 
 	public static class NameNode {
 		public static String nameNodeServiceName = "NameNode";
-		public static String nameNodeRegistryIP = "128.237.222.59";
+		public static String nameNodeRegistryIP = "localhost";
 		public static int nameNodeRegistryPort = 1099;
 		public static int REPLICA_FACTOR = 1;
 		public static long CHUNK_SIZE = 1024 * 512;
@@ -20,6 +20,10 @@ public class Hdfs {
 	
 	public static class Client {
 		public static int READ_BUFFER_SIZE = 1024 * 1024;
+	}
+	
+	public static class DataNode {
+		public static String dataNodeServiceName = "DataNode";
 	}
 	
 	public static class DataNode1 {
@@ -37,14 +41,5 @@ public class Hdfs {
 	public static class DataNode5 {
 		public static int registryPort = 1104;
 	}
-	
-	public static class JobTracker {
-		public static String jobTrackerServiceName = "JobTracker";
-		public static String jobTrackerRegistryIp = "localhost";
-		public static int jobTrackerRegistryPort = 1105;
-	}
-	
-	public static class TaskTracker {
-		public static String taskTrackerServiceName = "TaskTracker";
-	}
+
 }

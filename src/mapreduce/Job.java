@@ -1,10 +1,11 @@
 package mapreduce;
 
+import java.io.Serializable;
 import java.util.List;
 
 import mapreduce.core.Split;
 
-public class Job {
+public class Job implements Serializable{
 	private String jobId;
 	private JobConf conf;
 	private List<Split> splits;

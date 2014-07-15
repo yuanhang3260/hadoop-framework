@@ -21,6 +21,11 @@ public class IntWritable extends Writable {
 		return this.value.hashCode();
 	}
 	
+	@Override
+	public String toString() {
+		return "" + this.value.intValue();
+	}
+	
 	
 
 }
