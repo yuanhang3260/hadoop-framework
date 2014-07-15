@@ -1,6 +1,8 @@
 package mapreduce.core;
 
+import example.WordCountMapper;
 import global.Hdfs;
+import global.MapReduce;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -16,10 +18,12 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import mapreduce.io.KeyValue;
-import mapreduce.io.Text;
-import mapreduce.io.Writable;
+import mapreduce.io.Split;
+import mapreduce.io.collector.OutputCollector;
+import mapreduce.io.recordreader.KeyValueLineRecordReader;
+import mapreduce.io.writable.Text;
+import mapreduce.io.writable.Writable;
 import mapreduce.task.MapperTask;
-import test.testMapRed.WordCountMapper;
 
 public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {
 	public MapperTask task;
@@ -34,7 +38,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		RunMapper<Writable, Writable, Writable, Writable> rm = new RunMapper<Writable, Writable, Writable, Writable>();
-		if (args == null || args.length < 1) {
+		if (MapReduce.UNITEST) {
 			try {
 				Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 				NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
@@ -78,7 +82,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		
 		try {
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task.partitionNum);
-			RecordReader recordReader = new RecordReader(rm.task.split);
+			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);
 			rm.mapper = (Mapper<Writable, Writable, Writable, Writable>) rm.task.mapperClass.getConstructors()[0].newInstance();
 			while (recordReader.hasNext()) {
 				KeyValue<Text, Text> nextLine = recordReader.nextKeyValue();

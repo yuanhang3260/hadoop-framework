@@ -1,7 +1,8 @@
 package global;
 
 public class MapReduce {
-	static boolean DEBUG;
+	public static boolean DEBUG = true;
+	public static boolean UNITEST = true;
 	
 	public static class JobTracker {
 		public static String jobTrackerServiceName = "JobTracker";
@@ -11,5 +12,9 @@ public class MapReduce {
 	
 	public static class TaskTracker {
 		public static String taskTrackerServiceName = "TaskTracker";
+	}
+	
+	public static class TaskTracker1 {
+		public static int httpServerPort = 8000;
 	}
 }

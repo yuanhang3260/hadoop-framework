@@ -1,6 +1,6 @@
-package mapreduce.core;
+package mapreduce.io;
 
-import mapreduce.io.Writable;
+import mapreduce.io.writable.Writable;
 
 public class Partitioner<KEY extends Writable, VALUE extends Writable> {
 		

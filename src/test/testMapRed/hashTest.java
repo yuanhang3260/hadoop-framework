@@ -1,7 +1,7 @@
 package test.testMapRed;
 
-import mapreduce.core.Partitioner;
-import mapreduce.io.IntWritable;
+import mapreduce.io.Partitioner;
+import mapreduce.io.writable.IntWritable;
 
 public class hashTest {
 	public static void main(String[] args) {

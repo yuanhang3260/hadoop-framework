@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import mapreduce.Job;
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 import mapreduce.task.MapperTask;
 import mapreduce.task.Task;
 import mapreduce.task.TaskTrackerRemoteInterface;

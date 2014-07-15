@@ -1,16 +1,27 @@
-package mapreduce.core;
+package mapreduce.io.collector;
+
+import global.Hdfs;
+import hdfs.DataStructure.HDFSFile;
+import hdfs.IO.HDFSOutputStream;
+import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import mapreduce.io.KeyValue;
-import mapreduce.io.Writable;
+import mapreduce.io.Partitioner;
+import mapreduce.io.writable.Writable;
 
 public class OutputCollector<K extends Writable, V extends Writable> {
 	
@@ -20,12 +31,14 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	String tid;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
-	PrintWriter[] printWriterArr;
+//	PrintWriter[] printWriterArr;
+	ObjectOutputStream[] objOutArr;
 	
 	public OutputCollector(int num) {
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
 		this.partitionNum = num;
-		this.printWriterArr = new PrintWriter[num];
+//		this.printWriterArr = new PrintWriter[num];
+		this.objOutArr = new ObjectOutputStream[num];
 	}
 	
 	public void writeToLocal() throws IOException {
@@ -35,25 +48,41 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			String tmpFileName = tmpOutputFileName(this.jid, this.tid, i);
 			File tmpFile = new File(tmpFileName);
 			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
-			this.printWriterArr[i] = new PrintWriter(tmpFOS);
+//			this.printWriterArr[i] = new PrintWriter(tmpFOS);
+			this.objOutArr[i] = new ObjectOutputStream(tmpFOS);
 		}
 		
 		while (it.hasNext()) {
 			KeyValue<K, V> keyvalue = it.next();
 			int parNum = partitioner.getPartition(keyvalue.getKey(), keyvalue.getValue(), this.partitionNum);
-			this.printWriterArr[parNum].print(keyvalue.getKey().toString());
-			this.printWriterArr[parNum].print("\t");
-			this.printWriterArr[parNum].println(keyvalue.getValue().toString());
+//			this.printWriterArr[parNum].print(keyvalue.getKey().toString());
+//			this.printWriterArr[parNum].print("\t");
+//			this.printWriterArr[parNum].println(keyvalue.getValue().toString());
+			this.objOutArr[parNum].writeObject(keyvalue);
 		}
 		
 		
 		for (int j = 0 ; j < this.partitionNum; j++) {
-			this.printWriterArr[j].flush();
-			this.printWriterArr[j].close();
+//			this.printWriterArr[j].flush();
+//			this.printWriterArr[j].close();
+			this.objOutArr[j].flush();
+			this.objOutArr[j].close();
 		}
 		
 		return;
 		
+	}
+	
+	public void writeToHDFS(String filename) throws NotBoundException, IOException {
+		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
+		HDFSFile file = nameNodeS.create(filename);
+		HDFSOutputStream out = file.getOutputStream();
+		for (KeyValue<K, V> pair : this.keyvalueList) {
+			byte[] content = String.format("%s\t%s", pair.getKey().toString(), pair.getValue().toString()).getBytes();
+			out.write(content);
+		}
+		out.close();
 	}
 	
 	public void collect(K key, V value) {

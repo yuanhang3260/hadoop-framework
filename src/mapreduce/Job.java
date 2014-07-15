@@ -2,7 +2,7 @@ package mapreduce;
 
 import java.util.List;
 
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 
 public class Job {
 	private String jobId;

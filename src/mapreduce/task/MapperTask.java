@@ -1,6 +1,6 @@
 package mapreduce.task;
 
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 
 public class MapperTask extends Task{
 	

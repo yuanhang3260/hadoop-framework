@@ -1,4 +1,4 @@
-package mapreduce.io;
+package mapreduce.io.writable;
 
 public class Text extends Writable {
 

@@ -1,9 +1,13 @@
 package mapreduce.task;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.RemoteException;
 
 public class TaskTracker implements TaskTrackerRemoteInterface {
@@ -26,9 +30,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	}
 
 	@Override
-	public void transferPartition(String fileName) throws RemoteException {
+	public byte[] transferPartition(String fileName) throws RemoteException {
 		// TODO Auto-generated method stub
+		return null;
 		
 	}
+	
 	
 }

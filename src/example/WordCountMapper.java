@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import mapreduce.core.Mapper;
-import mapreduce.core.OutputCollector;
-import mapreduce.io.IntWritable;
-import mapreduce.io.Text;
+import mapreduce.io.collector.OutputCollector;
+import mapreduce.io.writable.IntWritable;
+import mapreduce.io.writable.Text;
 
 public class WordCountMapper extends Mapper<Text, Text, Text, IntWritable> {
 
