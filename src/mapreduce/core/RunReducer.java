@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import mapreduce.io.KeyValue;
+import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.RecordReconstructor;
 import mapreduce.io.writable.Writable;
@@ -109,14 +109,15 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 		//Merge Sort
 		recordReconstructor.sort();
+		recordReconstructor.merge();
 		
 		OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(1);
 		//Reduce phase
 		try {
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
-				KeyValue<Writable, Writable> nextLine = recordReconstructor.nextKeyValue();
-				rr.reducer.reduce(nextLine.getKey(), nextLine.getValue(), output);
+				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
+				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
 			}
 			output.sort();
 			output.printOutputCollector();
