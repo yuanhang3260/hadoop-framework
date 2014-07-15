@@ -3,7 +3,7 @@ package mapreduce;
 import java.io.Serializable;
 import java.util.List;
 
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 
 public class Job implements Serializable{
 	private String jobId;

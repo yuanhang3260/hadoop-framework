@@ -13,7 +13,7 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 
 public class JobClient {

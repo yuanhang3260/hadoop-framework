@@ -1,4 +1,4 @@
-package mapreduce.io;
+package mapreduce.io.writable;
 
 public class IntWritable extends Writable {
 
@@ -9,6 +9,10 @@ public class IntWritable extends Writable {
 	private Integer value;
 	
 	public IntWritable(int val) {
+		this.value = new Integer(val); //Initiate value
+	}
+	
+	public IntWritable(String val) {
 		this.value = new Integer(val); //Initiate value
 	}
 	

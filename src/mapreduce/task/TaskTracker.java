@@ -66,9 +66,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	}
 
 	@Override
-	public void transferPartition(String fileName) throws RemoteException {
+	public byte[] transferPartition(String fileName) throws RemoteException {
 		// TODO Auto-generated method stub
+		return null;
 		
 	}
+	
 	
 }

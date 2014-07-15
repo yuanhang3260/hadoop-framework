@@ -1,6 +1,7 @@
 package mapreduce.core;
 
-import mapreduce.io.Writable;
+import mapreduce.io.collector.OutputCollector;
+import mapreduce.io.writable.Writable;
 
 public abstract class Mapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {
 	

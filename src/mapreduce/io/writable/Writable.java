@@ -1,4 +1,4 @@
-package mapreduce.io;
+package mapreduce.io.writable;
 
 import java.io.Serializable;
 
@@ -11,5 +11,6 @@ public abstract class Writable implements Serializable {
 	
 	public abstract int getHashValue();
 	public abstract String toString();
+
 
 }

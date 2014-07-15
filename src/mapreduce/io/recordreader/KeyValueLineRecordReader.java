@@ -1,16 +1,16 @@
-package mapreduce.core;
+package mapreduce.io.recordreader;
 
 import hdfs.IO.HDFSInputStream;
 import mapreduce.io.KeyValue;
-import mapreduce.io.Text;
+import mapreduce.io.Split;
+import mapreduce.io.writable.Text;
 
-public class RecordReader {
-	
+public class KeyValueLineRecordReader extends RecordReader<Text, Text>{
 	private Split split;
 	private String[] values;
 	private int index;
 	
-	public RecordReader(Split s) {
+	public KeyValueLineRecordReader(Split s) {
 		this.split = s;
 		HDFSInputStream in = this.split.file.getInputStream();
 		String content = in.readChunk(this.split.chunkIdx);
@@ -27,5 +27,4 @@ public class RecordReader {
 	public boolean hasNext() {
 		return (this.index < this.values.length);
 	}
-
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mapreduce.Job;
-import mapreduce.core.Split;
+import mapreduce.io.Split;
 import mapreduce.task.MapperTask;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;

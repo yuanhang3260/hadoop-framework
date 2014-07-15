@@ -1,4 +1,4 @@
-package mapreduce.io;
+package mapreduce.io.writable;
 
 public class LongWritable extends Writable{
 
@@ -10,6 +10,10 @@ public class LongWritable extends Writable{
 	
 	public LongWritable(long val) {
 		this.value = new Long(val); //Initiate value
+	}
+	
+	public LongWritable(String val) {
+		this.value = new Long(val);
 	}
 	
 	public long getValue() {
