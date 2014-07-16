@@ -12,9 +12,10 @@ public class testJobSubmit {
 		conf.setJobName("jobSubmitTest");
 		conf.setMapperClass(WordCountMapper.class);
 		conf.setReducerClass(null);
-		conf.setNumReduceTasks(2);
+		conf.setNumReduceTasks(1);
 		
 		String jobId = JobClient.runJob(conf);
 		System.out.println("Job ID: " + jobId);
+		System.out.println("DEBUG testJobSubmit(): numReduceTasks = " + conf.getNumReduceTasks());
 	}
 }

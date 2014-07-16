@@ -1,6 +1,8 @@
 package mapreduce.task;
 
-public class PartitionEntry {
+import java.io.Serializable;
+
+public class PartitionEntry implements Serializable {
 	
 	private String tid;
 	

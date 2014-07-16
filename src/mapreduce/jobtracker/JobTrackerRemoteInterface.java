@@ -31,4 +31,20 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @return
 	 */
 	public List<Task> heartBeat(TaskTrackerReport report) throws RemoteException;
+	
+	/**
+	 * 
+	 * @param jobId
+	 * @return int The number of incomplete map tasks
+	 * @throws RemoteException
+	 */
+	public int checkMapProgress(String jobId) throws RemoteException;
+	
+	/**
+	 * 
+	 * @param jobId
+	 * @return int The number of incomplete reduce tasks
+	 * @throws RemoteException
+	 */
+	public int checkReduceProgress(String jobId) throws RemoteException;
 }

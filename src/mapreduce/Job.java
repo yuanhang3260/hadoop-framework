@@ -30,7 +30,7 @@ public class Job implements Serializable{
 		this.splits = splits;
 		/* set the number of mapper & reducer tasks */
 		this.conf.setNumMapTasks(splits.size());
-		this.conf.setNumReduceTasks(splits.size());
+		//this.conf.setNumReduceTasks(splits.size());
 	}
 	
 	public List<Split> getSplit() {

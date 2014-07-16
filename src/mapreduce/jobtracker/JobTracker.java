@@ -12,6 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -19,9 +20,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mapreduce.Job;
-import mapreduce.core.Mapper;
 import mapreduce.io.Split;
 import mapreduce.task.MapperTask;
+import mapreduce.task.PartitionEntry;
+import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
 import mapreduce.task.TaskTrackerRemoteInterface;
 
@@ -63,7 +65,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (!taskTrackerTbl.containsKey(ip)) {
 			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port, mapSlots, reduceSlots);
 			taskTrackerTbl.put(ip, stat);
-			this.jobScheduler.taskTrackerToTasksTbl.put(ip, new PriorityQueue<Task>(MAX_NUM_MAP_TASK, new Comparator<Task>() {
+			this.jobScheduler.taskScheduleTbl.put(ip, new PriorityQueue<Task>(MAX_NUM_MAP_TASK, new Comparator<Task>() {
 				@Override
 				public int compare(Task t1, Task t2) {
 					long time1 = Long.parseLong(t1.getJobId());
@@ -116,6 +118,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return task;
 	}
 	
+	private ReducerTask createReduceTask(String jobId, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
+		ReducerTask task = new ReducerTask(nameTask(), jobId, reducerSEQ, theClass, partitionEntry, path);
+		return task;
+	}
+	
 	private synchronized String nameTask() {
 		long taskName = taskNaming++;
 		return Long.toString(taskName);
@@ -132,6 +139,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* initialize job status record */
 		JobStatus jobStatus = new JobStatus(job.getSplit().size(), job.getJobConf().getNumReduceTasks());
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
+		}
 		this.jobStatusTbl.put(jobId, jobStatus);
 		System.out.println("DEBUG JobTracker.submitJob() jobId: " + jobId);
 		initMapTasks(job);
@@ -157,7 +167,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			this.jobScheduler.addMapTask(task);
 			/* initialize task status record */
 			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
-			this.jobStatusTbl.get(job.getJobId()).taskStatusTbl.put(task.getTaskId(), stat);	
+			this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl.put(task.getTaskId(), stat);	
 		}
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG JobTrakcer.initMapTask(): map tasks initialization finished, current job scheduling queue: ");
@@ -167,6 +177,27 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private void initReduceTasks(Job job) {
 		int numOfReducer = job.getJobConf().getNumReduceTasks();
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG JobTracker.initReduceTasks() numReduceTasks = " + numOfReducer);
+		}
+		ConcurrentHashMap<String, TaskStatus> tbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
+		Set<String> hosts = new HashSet<String>();
+		Set<String> set = tbl.keySet();	
+		/* create partition entry array */
+		PartitionEntry[] entries = new PartitionEntry[set.size()];
+		int i = 0;
+		for (String taskId : set) {
+			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker.taskTrackerServerPort);
+		}
+		
+		/* create reducer tasks */
+		for (int j = 0; j < numOfReducer; j++) {
+			ReducerTask task = createReduceTask(job.getJobId(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
+			this.taskTbl.put(task.getTaskId(), task);
+			this.jobScheduler.addReduceTask(task);
+			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
+			this.jobStatusTbl.get(job.getJobId()).reducerStatusTbl.put(task.getTaskId(), stat);
+		}
 	}
 	
 	
@@ -184,7 +215,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				
 				JobStatus jobStatus = this.jobStatusTbl.get(taskStatus.jobId);
 				synchronized (jobStatus) {
-					TaskStatus preStatus = jobStatus.taskStatusTbl.get(taskStatus.taskId);
+					TaskStatus preStatus = jobStatus.mapperStatusTbl.get(taskStatus.taskId);
 					if (preStatus.status == WorkStatus.SUCCESS) {
 						continue;
 					} else if (preStatus.status == WorkStatus.RUNNING || preStatus.status == WorkStatus.FAILED) {
@@ -192,7 +223,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							if (Hdfs.DEBUG) {
 								System.out.println("DEBUG JobTracker.heartBeat(): task " + taskStatus.taskId + " in job " + taskStatus.jobId + " SUCCESS, update status");
 							}
-							this.jobStatusTbl.get(taskStatus.jobId).taskStatusTbl.put(taskStatus.taskId, taskStatus);
+							this.jobStatusTbl.get(taskStatus.jobId).mapperStatusTbl.put(taskStatus.taskId, taskStatus);
 							if (this.taskTbl.get(taskStatus.taskId) instanceof MapperTask) {
 								if (Hdfs.DEBUG) {
 									System.out.println("DEBUG JobTracker.heartBeat(): a mapper task, decrease mapper count ");
@@ -204,7 +235,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 									if (Hdfs.DEBUG) {
 										System.out.println("DEBUG JobTracker.heartBeat(): Job " + taskStatus.jobId + " all mappers finished, schedule a reducer task");
 									}
-									
+									initReduceTasks(this.jobTbl.get(taskStatus.jobId));
 								}
 							} else {
 								/* reducer sucess */
@@ -223,7 +254,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 		
 		/* assign a number of tasks back to task tracker */
-		Queue<Task> allTasks = this.jobScheduler.taskTrackerToTasksTbl.get(report.taskTrackerIp);
+		Queue<Task> allTasks = this.jobScheduler.taskScheduleTbl.get(report.taskTrackerIp);
 		List<Task> assignment = new ArrayList<Task>();
 		if (report.emptySlot > 0 && allTasks.size() != 0) {
 			int queueSize = allTasks.size();
@@ -234,16 +265,25 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return assignment;
 	}
 	
+	@Override
+	public int checkMapProgress(String jobId) throws RemoteException {
+		return this.jobStatusTbl.get(jobId).mapTaskLeft;
+	}
+
+	@Override
+	public int checkReduceProgress(String jobId) throws RemoteException {
+		return this.jobStatusTbl.get(jobId).reduceTaskLeft;
+	}
 	
 	/* JobScheduler */
 	private class JobScheduler {
 		
 		
-		public ConcurrentHashMap<String, Queue<Task>> taskTrackerToTasksTbl = new ConcurrentHashMap<String, Queue<Task>>();
+		public ConcurrentHashMap<String, Queue<Task>> taskScheduleTbl = new ConcurrentHashMap<String, Queue<Task>>();
 		
 		/**
-		 * Schedule a task with locality first
-		 * @param task
+		 * Schedule a map task with locality first
+		 * @param task The task to schedule
 		 */
 		public synchronized void addMapTask(MapperTask task) {
 			int chunkIdx = task.getSplit().getChunkIdx();
@@ -252,8 +292,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			String bestIp = null;
 			int minLoad = Integer.MAX_VALUE;
 			for (DataNodeEntry entry : entries) {
-				if (taskTrackerToTasksTbl.containsKey(entry.dataNodeRegistryIP)) {
-					int workLoad = taskTrackerToTasksTbl.get(entry.dataNodeRegistryIP).size();
+				if (taskScheduleTbl.containsKey(entry.dataNodeRegistryIP)) {
+					int workLoad = taskScheduleTbl.get(entry.dataNodeRegistryIP).size();
 					if (workLoad < minLoad && workLoad < MapReduce.TaskTracker.MAX_NUM_MAP_TASK 
 							&& taskTrackerTbl.get(entry.dataNodeRegistryIP).getStatus() == TaskTrackerInfo.Status.RUNNING) {
 						bestIp = entry.dataNodeRegistryIP;
@@ -266,9 +306,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				/* all the optimal task trackers are full, pick a nearest one */
 				long baseIp = ipToLong(entries.get(0).dataNodeRegistryIP);
 				long minDist = Long.MAX_VALUE;
-				Set<String> allNodes = taskTrackerToTasksTbl.keySet();
+				Set<String> allNodes = taskScheduleTbl.keySet();
 				for (String ip : allNodes) {
-					int workLoad = taskTrackerToTasksTbl.get(ip).size();
+					int workLoad = taskScheduleTbl.get(ip).size();
 					if (workLoad < minLoad && workLoad < MapReduce.TaskTracker.MAX_NUM_MAP_TASK 
 							&& taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
 						long thisIp = ipToLong(ip);
@@ -285,7 +325,36 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			if (bestIp == null) {
 				return;
 			}
-			taskTrackerToTasksTbl.get(bestIp).add(task);
+			taskScheduleTbl.get(bestIp).add(task);
+		}
+		
+
+		
+		/**
+		 * Schedule a reduce task, idle task tracker first
+		 * @param task The task to schedule
+		 */
+		public synchronized void addReduceTask(ReducerTask task) {
+			if (Hdfs.DEBUG) {
+				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add reduce task, id = " + task.getTaskId());
+			}
+			/* pick the one with lightest workload */
+			String bestIp = null;
+			int minLoad = Integer.MAX_VALUE;
+			Set<String> allNodes = taskScheduleTbl.keySet();
+			for (String ip : allNodes) {
+				int workLoad = taskScheduleTbl.get(ip).size();
+				if (workLoad == 0) {
+					bestIp = ip;
+					break;
+				} else {
+					if (workLoad < minLoad) {
+						bestIp = ip;
+						minLoad = workLoad;
+					}
+				}
+			}
+			taskScheduleTbl.get(bestIp).add(task); 
 		}
 		
 		public synchronized TaskTrackerInfo pickTaskTrackerForMap(MapperTask task) {
@@ -333,11 +402,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 		
 		private void printScheduleTbl() {
-			Set<String> taskTrackers = this.taskTrackerToTasksTbl.keySet();
+			Set<String> taskTrackers = this.taskScheduleTbl.keySet();
 			for (String each : taskTrackers) {
 				System.out.println(">>>>>>>>>>>>>>>>>>>>>");
 				System.out.println("TaskTracker: " + each + " assigned tasks: ");
-				Queue<Task> tasks = this.taskTrackerToTasksTbl.get(each);
+				Queue<Task> tasks = this.taskScheduleTbl.get(each);
 				for (Task task : tasks) {
 					System.out.println("TaskId: " + task.getTaskId() + " jobId: " + task.getJobId() + " class name: " + task.getClass().getName());
 				}
