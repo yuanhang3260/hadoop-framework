@@ -92,8 +92,6 @@ public class JobClient {
 	}
 	
 	private static List<Split> splitChunks(HDFSFile file) {
-		//TODO: cut chunks into approriate splits, use the whole chunk as a split
-		//for now
 		List<HDFSChunk> chunks = file.getChunkList();
 		List<Split> splits = new ArrayList<Split>();
 		for (int i = 0; i < chunks.size(); i++) {

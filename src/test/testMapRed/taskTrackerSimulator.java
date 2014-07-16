@@ -33,13 +33,16 @@ public class taskTrackerSimulator {
 				System.out.println("DEBUG taskTrackerSimulator.main(): receive tasks from jobTracker:");
 				allStatus = new ArrayList<TaskStatus>();
 				for (Task task : tasks) {
+					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
 					System.out.print("JobId: " + task.getJobId() + " TaksId: " + task.getTaskId());
 					if (task instanceof MapperTask) {
 						System.out.println(" Map task");
 					} else {
 						System.out.println(" Reduce task");
+						if (i != 4) {
+							status.status = WorkStatus.FAILED;
+						}
 					}
-					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
 					allStatus.add(status);
 				}
 				
@@ -47,56 +50,6 @@ public class taskTrackerSimulator {
 				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
 				tasks = jtStub.heartBeat(report);
 			}
-			
-//			System.out.println("DEBUG taskTrackerSimulator.main(): 1. receive tasks from jobTracker:");
-//			for (Task task : tasks) {
-//				System.out.print("JobId: " + task.getJobId() + " TaksId: " + task.getTaskId());
-//				if (task instanceof MapperTask) {
-//					System.out.println(" Map task");
-//				} else {
-//					System.out.println(" Reduce task");
-//				}
-//				TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
-//				allStatus.add(status);
-//			}
-			
-//			Thread.sleep(1000 * 10);
-//			report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
-//			
-//			tasks = jtStub.heartBeat(report);	
-//			allStatus = new ArrayList<TaskStatus>();
-//			System.out.println("DEBUG taskTrackerSimulator.main(): 2. receive tasks from jobTracker:");
-//			for (Task task : tasks) {
-//				System.out.println("JobId: " + task.getJobId() + " TaksId: " + task.getTaskId());
-//				if (task instanceof MapperTask) {
-//					System.out.println(" Map task");
-//				} else {
-//					System.out.println(" Reduce task");
-//				}
-//				TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
-//				allStatus.add(status);
-//			}
-//			
-//			Thread.sleep(1000 * 10);
-//			report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
-//			
-//			tasks = jtStub.heartBeat(report);
-//			allStatus = new ArrayList<TaskStatus>();
-//			System.out.println("DEBUG taskTrackerSimulator.main(): 3. receive tasks from jobTracker:");
-//			for (Task task : tasks) {
-//				System.out.println("JobId: " + task.getJobId() + " TaksId: " + task.getTaskId());
-//				if (task instanceof MapperTask) {
-//					System.out.println(" Map task");
-//				} else {
-//					System.out.println(" Reduce task");
-//				}
-//				TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
-//				allStatus.add(status);
-//			}
-//			Thread.sleep(1000 * 10);
-//			report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
-//			
-//			tasks = jtStub.heartBeat(report);
 			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
