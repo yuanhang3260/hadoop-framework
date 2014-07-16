@@ -10,6 +10,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
@@ -29,12 +30,13 @@ public class taskTrackerSimulator {
 			List<Task> tasks = jtStub.heartBeat(report);
 			List<TaskStatus> allStatus;
 			
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 20; i++) {
 				System.out.println("DEBUG taskTrackerSimulator.main(): receive tasks from jobTracker:");
 				allStatus = new ArrayList<TaskStatus>();
 				for (Task task : tasks) {
-					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), WorkStatus.SUCCESS, Inet4Address.getLocalHost().getHostAddress(), 9999);
-					System.out.print("JobId: " + task.getJobId() + " TaksId: " + task.getTaskId());
+					WorkStatus thisStatus = randomStatusGenerator();
+					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), thisStatus, Inet4Address.getLocalHost().getHostAddress(), 9999);
+					System.out.print("Get task: JobId: " + task.getJobId() + " TaksId: " + task.getTaskId() + " Process result: " + thisStatus);
 					if (task instanceof MapperTask) {
 						System.out.println(" Map task");
 					} else {
@@ -63,6 +65,16 @@ public class taskTrackerSimulator {
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public static WorkStatus randomStatusGenerator() {
+		Random random = new Random();
+		int k = random.nextInt(100);
+		if (k < 10) {
+			return WorkStatus.SUCCESS;
+		} else {
+			return WorkStatus.FAILED;
 		}
 	}
 	

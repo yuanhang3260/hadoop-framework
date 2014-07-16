@@ -65,6 +65,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			this.jobScheduler.taskScheduleTbl.put(ip, new PriorityQueue<Task>(MAX_NUM_MAP_TASK, new Comparator<Task>() {
 				@Override
 				public int compare(Task t1, Task t2) {
+					if (t1.getPriority() != t2.getPriority()) {
+						return t1.getPriority() - t2.getPriority();
+					}
 					long time1 = Long.parseLong(t1.getJobId());
 					long time2 = Long.parseLong(t2.getJobId());
 					if (time1 > time2) {
@@ -110,13 +113,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 	}
 	
-	private MapperTask createMapTask(String jobId, Split split, Class<?> theClass, int partitionNum) {
-		MapperTask task = new MapperTask(nameTask(), jobId, split, theClass, partitionNum);
+	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
+		MapperTask task = new MapperTask(nameTask(), jobId, level, split, theClass, partitionNum);
 		return task;
 	}
 	
-	private ReducerTask createReduceTask(String jobId, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(nameTask(), jobId, reducerSEQ, theClass, partitionEntry, path);
+	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
+		ReducerTask task = new ReducerTask(nameTask(), jobId, level, reducerSEQ, theClass, partitionEntry, path);
 		return task;
 	}
 	
@@ -153,7 +156,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	private synchronized void initMapTasks(Job job) {
 		for (Split split : job.getSplit()) {
-			MapperTask task = createMapTask(job.getJobId(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
+			MapperTask task = 
+					createMapTask(job.getJobId(), job.getJobConf().getPriority(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
 			
 			if (Hdfs.DEBUG) {
 				System.out.println("DEBUG JobTracker.addMapTasks(): now adding task " + task.getTaskId() + " to Task Queue");
@@ -194,7 +198,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* create reducer tasks */
 		for (int j = 0; j < numOfReducer; j++) {
-			ReducerTask task = createReduceTask(job.getJobId(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
+			ReducerTask task = createReduceTask(job.getJobId(), job.getJobConf().getPriority(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
 			this.taskTbl.put(task.getTaskId(), task);
 			this.jobScheduler.addReduceTask(task);
 			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
@@ -269,13 +273,25 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					jobStatus.reduceTaskLeft--;
 				}			
 			} else if (taskStatus.status == WorkStatus.FAILED) {
-				/* re-schedule this task */
-				Task task = this.taskTbl.get(taskStatus.taskId);
-				if (isMapper) {
-					this.jobScheduler.addMapTask((MapperTask) task);
-				} else {
-					this.jobScheduler.addReduceTask((ReducerTask) task);
+				if (Hdfs.DEBUG) {
+					System.out.println("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " FAILED ");
 				}
+				/* try to re-schedule this task */
+				Task task = this.taskTbl.get(taskStatus.taskId);
+				if (task.getRescheduleNum() < MapReduce.JobTracker.MAX_RESCHEDULE_NUM_OF_FAILURE) {
+					/* increase schedule priority of this task */
+					task.increasePriority();
+					task.increaseRescheuleNum();
+					if (isMapper) {
+						this.jobScheduler.addMapTask((MapperTask) task);
+					} else {
+						this.jobScheduler.addReduceTask((ReducerTask) task);
+					}
+				} else {
+					/* reach max task reschedule limit, task failed / job failed */
+					System.out.println("    Task " + taskStatus.taskId + " cannot be rescheduled anymore");
+				}
+
 			}
 		}
 	}
@@ -292,7 +308,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	/* JobScheduler */
 	private class JobScheduler {
-		
 		
 		public ConcurrentHashMap<String, Queue<Task>> taskScheduleTbl = new ConcurrentHashMap<String, Queue<Task>>();
 		
@@ -317,29 +332,41 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				}
 			}
 			
+//			if (bestIp == null) {
+//				/* all the optimal task trackers are full, pick a nearest one */
+//				long baseIp = ipToLong(entries.get(0).dataNodeRegistryIP);
+//				long minDist = Long.MAX_VALUE;
+//				Set<String> allNodes = taskScheduleTbl.keySet();
+//				for (String ip : allNodes) {
+//					int workLoad = taskScheduleTbl.get(ip).size();
+//					if (workLoad < minLoad && workLoad < MapReduce.TaskTracker.MAX_NUM_MAP_TASK 
+//							&& taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
+//						long thisIp = ipToLong(ip);
+//						long dist = Math.abs(thisIp - baseIp);
+//						if (dist < minDist) {
+//							bestIp = ip;
+//							minDist = dist;
+//						}
+//					}
+//				}
+//			}
 			if (bestIp == null) {
-				/* all the optimal task trackers are full, pick a nearest one */
-				long baseIp = ipToLong(entries.get(0).dataNodeRegistryIP);
-				long minDist = Long.MAX_VALUE;
+				/* all the optimal task trackers are full, pick a task tracker with lightest workload among all */
+				minLoad = Integer.MAX_VALUE;
 				Set<String> allNodes = taskScheduleTbl.keySet();
 				for (String ip : allNodes) {
 					int workLoad = taskScheduleTbl.get(ip).size();
-					if (workLoad < minLoad && workLoad < MapReduce.TaskTracker.MAX_NUM_MAP_TASK 
-							&& taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
-						long thisIp = ipToLong(ip);
-						long dist = Math.abs(thisIp - baseIp);
-						if (dist < minDist) {
-							bestIp = ip;
-							minDist = dist;
+					if (taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING && workLoad < minLoad) {
+						minLoad = workLoad;
+						bestIp = ip;
+						/* push idle task tracker to work! */
+						if (workLoad == 0) {
+							break;
 						}
 					}
 				}
 			}
 			
-			//TODO:still cannot find a slot-> all task trackers are full
-			if (bestIp == null) {
-				return;
-			}
 			taskScheduleTbl.get(bestIp).add(task);
 		}
 

@@ -8,8 +8,8 @@ public class MapperTask extends Task{
 	public Class<?> mapperClass;
 	public int partitionNum;
 	
-	public MapperTask(String tid, String jobId, Split split, Class<?> theClass, int num) {
-		super(tid, jobId);
+	public MapperTask(String tid, String jobId, int level, Split split, Class<?> theClass, int num) {
+		super(tid, jobId, level);
 		this.split = split;
 		this.mapperClass = theClass;
 		this.partitionNum = num;

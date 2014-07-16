@@ -8,8 +8,8 @@ public class ReducerTask extends Task {
 	private PartitionEntry[] partitionEntry;
 	private String outputPath;
 
-	public ReducerTask(String tid, String jobId, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
-		super(tid, jobId);
+	public ReducerTask(String tid, String jobId, int level, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
+		super(tid, jobId, level);
 		this.seq = reducerSEQ;
 		this.reducerTask = task;
 		this.partitionEntry = partitionEntry;

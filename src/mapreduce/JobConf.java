@@ -19,6 +19,16 @@ public class JobConf implements Serializable {
 	private int numMapTasks;
 	private int numReduceTasks;
 	
+	private int priorityLevel;
+	
+	public void setPriority(int level) {
+		this.priorityLevel = level;
+	}
+	
+	public int getPriority() {
+		return this.priorityLevel;
+	}
+	
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
 	}
