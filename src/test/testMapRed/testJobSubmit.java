@@ -4,10 +4,10 @@ import example.WordCountMapper;
 import mapreduce.JobClient;
 import mapreduce.JobConf;
 
-public class jobSubmitTest {
+public class testJobSubmit {
 	public static void main(String[] args) {
 		JobConf conf = new JobConf();
-		conf.setInputPath("wordCount");
+		conf.setInputPath("hello");
 		conf.setOutputPath("result");
 		conf.setJobName("jobSubmitTest");
 		conf.setMapperClass(WordCountMapper.class);

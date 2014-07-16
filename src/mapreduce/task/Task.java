@@ -2,22 +2,20 @@ package mapreduce.task;
 
 import java.io.Serializable;
 
+import mapreduce.jobtracker.WorkStatus;
+
 
 public class Task implements Serializable {
 	String jobId;
 	String tid;
 
 	//InputFormat;
-	TaskStatus status;
-	
-	private enum TaskStatus {
-		RUNNING, TERMINATED, FAILED;
-	}
+	//WorkStatus status;
 	
 	public Task(String tid, String jobId) {
 		this.tid = tid;
 		this.jobId = jobId;
-		this.status = TaskStatus.RUNNING;
+		//this.status = WorkStatus.RUNNING;
 	}
 	
 	public String getTaskId() {
@@ -29,8 +27,8 @@ public class Task implements Serializable {
 	}
 	
 	
-	public TaskStatus getTaskStatus() {
-		return this.status;
-	}
+//	public WorkStatus getTaskStatus() {
+//		return this.status;
+//	}
 	
 }

@@ -5,8 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import mapreduce.task.Task;
 
 public class JobStatus {
-	public Status status;
-	public ConcurrentHashMap<String, Task> taskStatusTbl;
+	//public String jobId;
+	public WorkStatus status;
+	public ConcurrentHashMap<String, TaskStatus> taskStatusTbl;
 	public int mapTaskTotal;
 	public int mapTaskLeft;
 	public int reduceTaskTotal;
@@ -17,11 +18,7 @@ public class JobStatus {
 		this.mapTaskLeft = mapNum;
 		this.reduceTaskTotal = reduceNum;
 		this.reduceTaskLeft = reduceNum;
-		this.taskStatusTbl = new ConcurrentHashMap<String, Task>();
-		this.status = Status.RUNNING;
-	}
-	
-	public enum Status {
-		RUNNING, FAILED, TERMINATED;
+		this.taskStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
+		this.status = WorkStatus.RUNNING;
 	}
 }

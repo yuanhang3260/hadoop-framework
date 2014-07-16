@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import hdfs.DataStructure.HDFSFile;
 
-public class Split {
+public class Split implements Serializable {
 	public HDFSFile file;
 	
 	/* for now, take a whole chunk as a split */
