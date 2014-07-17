@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
@@ -27,13 +28,13 @@ public class taskTrackerSimulator {
 			jtStub.join("128.237.213.225", 1500, 4, 4);
 			Thread.sleep(1000 * 10);
 			TaskTrackerReport report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, null);
-			List<Task> tasks = jtStub.heartBeat(report);
+			JobTrackerACK ack = jtStub.heartBeat(report);
 			List<TaskStatus> allStatus;
 			
 			for (int i = 0; i < 20; i++) {
 				System.out.println("DEBUG taskTrackerSimulator.main(): receive tasks from jobTracker:");
 				allStatus = new ArrayList<TaskStatus>();
-				for (Task task : tasks) {
+				for (Task task : ack.newAddedTasks) {
 					WorkStatus thisStatus = randomStatusGenerator();
 					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), thisStatus, Inet4Address.getLocalHost().getHostAddress(), 9999);
 					System.out.print("Get task: JobId: " + task.getJobId() + " TaksId: " + task.getTaskId() + " Process result: " + thisStatus);
@@ -50,7 +51,7 @@ public class taskTrackerSimulator {
 				
 				Thread.sleep(1000 * 10);
 				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
-				tasks = jtStub.heartBeat(report);
+				ack = jtStub.heartBeat(report);
 			}
 			
 		} catch (RemoteException e) {

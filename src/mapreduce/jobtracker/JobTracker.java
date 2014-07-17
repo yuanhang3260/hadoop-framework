@@ -79,13 +79,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					} else if (time1 < time2) {
 						return -1;
 					} else {
-						long taskId1 = Long.parseLong(t1.getTaskId());
-						long taskId2 = Long.parseLong(t2.getTaskId());
-						if (taskId1 > taskId2) {
-							return 1;
-						} else {
-							return -1;
-						}
+//						long taskId1 = Long.parseLong(t1.getTaskId());
+//						long taskId2 = Long.parseLong(t2.getTaskId());
+//						if (taskId1 > taskId2) {
+//							return 1;
+//						} else {
+//							return -1;
+//						}
+						return t1.getTaskId().compareTo(t2.getTaskId());
 					}
 				}
 			}));
@@ -130,7 +131,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private synchronized String nameTask() {
 		long taskName = taskNaming++;
-		return Long.toString(taskName);
+		return "task" + Long.toString(taskName);
 	}
 	
 	/**
@@ -213,7 +214,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	
 	@Override
-	public List<Task> heartBeat(TaskTrackerReport report) {
+	public JobTrackerACK heartBeat(TaskTrackerReport report) {
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
 		}
@@ -222,11 +223,16 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		this.taskTrackerTbl.get(report.taskTrackerIp).updateTimeStamp();
 		List<TaskStatus> allStatus = report.taskStatus;
+		/* acknowledge those FAILED and SUCCESS tasks */
+		List<TaskStatus> ackTasks = new ArrayList<TaskStatus>();
 		if (allStatus != null) {
 			for (TaskStatus taskStatus : allStatus) {
 				/* update taskStatus */
 				//TODO: SERVERAL CASES EXIST!
 				updateTaskStatus(taskStatus);
+				if (taskStatus.status == WorkStatus.FAILED || taskStatus.status == WorkStatus.SUCCESS) {
+					ackTasks.add(taskStatus);
+				}
 			}
 		}
 		
@@ -244,7 +250,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		TaskTrackerInfo taskTracker = this.taskTrackerTbl.get(report.taskTrackerIp);
 		taskTracker.addTask(assignment);
 		
-		return assignment;
+		JobTrackerACK ack = new JobTrackerACK(assignment, ackTasks);
+		
+		return ack;
 	}
 	
 	/**
@@ -292,7 +300,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				taskTracker.removeTask(taskStatus.taskId);
 				
 				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " FAILED ");
+					System.out.println("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " FAILED, on TaskTracker " + taskStatus.taskTrackerIp);
 				}
 				/* try to re-schedule this task */
 				Task task = this.taskTbl.get(taskStatus.taskId);
@@ -301,13 +309,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					/* disable the bad task tracker so that the failed task
 					 * will not be scheduled to this TaskTracker */
 					TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
-					badTaskTracker.disable();
+					//badTaskTracker.disable();
 					task.increasePriority();
 					task.increaseRescheuleNum();
 					if (isMapper) {
+						System.out.println(" map task");
 						this.jobScheduler.addMapTask((MapperTask) task);
 					} else {
 						//TODO:re-schedule the whole job
+						System.out.println(" reduce task");
 						this.jobScheduler.addReduceTask((ReducerTask) task);
 					}
 					badTaskTracker.enable();

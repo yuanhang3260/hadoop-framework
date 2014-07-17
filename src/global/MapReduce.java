@@ -16,7 +16,7 @@ public class MapReduce {
 	
 	public static class TaskTracker {
 		public static String taskTrackerServiceName = "TaskTracker";
-		public static int MAX_NUM_MAP_TASK = 1;
+		public static int MAX_NUM_MAP_TASK = 9;
 		public static int MAX_NUM_REDUCE_TASK = 3;
 		public static int HEART_BEAT_FREQ = 1000; //milliseconds
 		public static int BUFF_SIZE = 1024 * 1024;

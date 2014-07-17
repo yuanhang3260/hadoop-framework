@@ -30,7 +30,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @param report
 	 * @return
 	 */
-	public List<Task> heartBeat(TaskTrackerReport report) throws RemoteException;
+	public JobTrackerACK heartBeat(TaskTrackerReport report) throws RemoteException;
 	
 	/**
 	 * 
@@ -47,4 +47,5 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public int checkReduceProgress(String jobId) throws RemoteException;
+	
 }
