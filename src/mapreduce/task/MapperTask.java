@@ -15,6 +15,13 @@ public class MapperTask extends Task{
 		this.partitionNum = num;
 	}
 	
+	public MapperTask(String tid, String jobId, Split split, Class<?> theClass, int num) {
+		super(tid, jobId, 0);
+		this.split = split;
+		this.mapperClass = theClass;
+		this.partitionNum = num;
+	}
+	
 	public Split getSplit() {
 		return this.split;
 	}

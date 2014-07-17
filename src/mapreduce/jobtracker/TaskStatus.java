@@ -18,6 +18,4 @@ public class TaskStatus implements Serializable {
 		this.taskTrackerIp = ip;
 		this.taskTrackerPort = port;
 	}
-	
-	
 }
