@@ -12,8 +12,8 @@ public class MapperTask extends Task{
 	public Class<?> mapperClass;
 	private int partitionNum;
 	
-	public MapperTask(String tid, String jobId, int level, Split split, Class<?> theClass, int num) {
-		super(tid, jobId, level);
+	public MapperTask(String jobId, String tid, int level, Split split, Class<?> theClass, int num) {
+		super(jobId, tid, level);
 		this.split = split;
 		this.mapperClass = theClass;
 		this.partitionNum = num;
@@ -28,7 +28,7 @@ public class MapperTask extends Task{
 	 * @param num Total partition number
 	 */
 	public MapperTask(String jobId, String tid, Split split, Class<?> theClass, int num) {
-		super(tid, jobId, 0);
+		super(jobId, tid, 0);
 		this.split = split;
 		this.mapperClass = theClass;
 		this.partitionNum = num;

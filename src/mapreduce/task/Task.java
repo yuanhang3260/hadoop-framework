@@ -20,7 +20,7 @@ public class Task implements Serializable {
 	int rescheduleNum;
 	WorkStatus status;
 	
-	public Task(String tid, String jobId, int level) {
+	public Task(String jobId, String tid, int level) {
 		this.tid = tid;
 		this.jobId = jobId;
 		this.priorityLevel = level;
@@ -51,6 +51,10 @@ public class Task implements Serializable {
 	
 	public String getJobId() {
 		return this.jobId;
+	}
+	
+	public WorkStatus getTaskStatus() {
+		return this.status;
 	}
 	
 	public void setFilePrefix(String prefix) {

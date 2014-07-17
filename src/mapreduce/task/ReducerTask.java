@@ -13,16 +13,16 @@ public class ReducerTask extends Task {
 	private PartitionEntry[] partitionEntry;
 	private String outputPath;
 
-	public ReducerTask(String tid, String jobId, int level, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
-		super(tid, jobId, level);
+	public ReducerTask(String jobId, String tid, int level, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
+		super(jobId, tid, level);
 		this.seq = reducerSEQ;
 		this.reducerTask = task;
 		this.partitionEntry = partitionEntry;
 		this.outputPath = path;
 	}
 	
-	public ReducerTask(String tid, String jobId, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
-		super(tid, jobId, 0);
+	public ReducerTask(String jobId, String tid, int reducerSEQ, Class<?> task, PartitionEntry[] partitionEntry, String path) {
+		super(jobId, tid, 0);
 		this.seq = reducerSEQ;
 		this.reducerTask = task;
 		this.partitionEntry = partitionEntry;

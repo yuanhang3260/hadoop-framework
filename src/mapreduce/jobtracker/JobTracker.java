@@ -118,12 +118,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
-		MapperTask task = new MapperTask(nameTask(), jobId, level, split, theClass, partitionNum);
+		MapperTask task = new MapperTask(jobId, nameTask(), level, split, theClass, partitionNum);
 		return task;
 	}
 	
 	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(nameTask(), jobId, level, reducerSEQ, theClass, partitionEntry, path);
+		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path);
 		return task;
 	}
 	

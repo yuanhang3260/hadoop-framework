@@ -68,7 +68,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			recordReconstructor.sort();
 			recordReconstructor.merge();
 			
-			Thread.sleep(1000 * 10); //TODO: remove this after debugging
+//			Thread.sleep(1000 * 10); //TODO: remove this after debugging
 			
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
 			

@@ -46,31 +46,46 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		String tid2 = "task002";
 		String tid3 = "task003";
 		String tid4 = "task004";
+		String tid5 = "task005";
+		String tid6 = "task006";
 		
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
 		HDFSFile file1 = nameNodeS.open(MapReduce.TaskTrackerTest1.fileName);
-		HDFSFile file2 = nameNodeS.open(MapReduce.TaskTrackerTest1.fileName);
+
 		
 		Split split1 = new Split(file1, 0);
-		Split split2 = new Split(file2, 0);
+		Split split2 = new Split(file1, 1);
+		Split split3 = new Split(file1, 2);
 		
-		jt.task = new MapperTask(jid, tid1, split1, WordCountMapper.class, 2);
+		jt.task = new MapperTask(jid, tid1, split1, WordCountMapper.class, 3);
 		
 		Thread.sleep(1000 * 5);
-		jt.task = new MapperTask(jid, tid2, split2, WordCountMapper.class, 2);
+		jt.task = new MapperTask(jid, tid2, split2, WordCountMapper.class, 3);
+		
+		Thread.sleep(1000 * 5);
+		jt.task = new MapperTask(jid, tid3, split3, WordCountMapper.class, 3);
 
 		Thread.sleep(1000 * 5);
-		PartitionEntry[] partitionEntry0 = new PartitionEntry[2];
+		PartitionEntry[] partitionEntry0 = new PartitionEntry[3];
 		partitionEntry0[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
 		partitionEntry0[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		jt.task = new ReducerTask(jid, tid3, 0, WordCountReducer.class, partitionEntry0, "output-part1");
+		partitionEntry0[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		jt.task = new ReducerTask(jid, tid4, 0, WordCountReducer.class, partitionEntry0, "output-part1");
 
 		Thread.sleep(1000 * 5);
-		PartitionEntry[] partitionEntry1 = new PartitionEntry[2];
+		PartitionEntry[] partitionEntry1 = new PartitionEntry[3];
 		partitionEntry1[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
 		partitionEntry1[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		jt.task = new ReducerTask(jid, tid4, 1, WordCountReducer.class, partitionEntry1, "output-part2");
+		partitionEntry1[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		jt.task = new ReducerTask(jid, tid5, 1, WordCountReducer.class, partitionEntry1, "output-part2");
+		
+		Thread.sleep(1000 * 5);
+		PartitionEntry[] partitionEntry2 = new PartitionEntry[3];
+		partitionEntry2[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		partitionEntry2[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		partitionEntry2[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		jt.task = new ReducerTask(jid, tid6, 2, WordCountReducer.class, partitionEntry2, "output-part3");
 		
 
 	}
@@ -127,6 +142,18 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 			return rst;
 		}
 		return null;
+	}
+
+	@Override
+	public int checkMapProgress(String jobId) throws RemoteException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int checkReduceProgress(String jobId) throws RemoteException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
