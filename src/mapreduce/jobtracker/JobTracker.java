@@ -197,7 +197,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		PartitionEntry[] entries = new PartitionEntry[set.size()];
 		int i = 0;
 		for (String taskId : set) {
-			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker.taskTrackerServerPort);
+			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker1.taskTrackerServerPort);
 		}
 		
 		/* create reducer tasks */

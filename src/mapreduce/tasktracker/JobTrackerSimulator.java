@@ -68,23 +68,23 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 
 		Thread.sleep(1000 * 5);
 		PartitionEntry[] partitionEntry0 = new PartitionEntry[3];
-		partitionEntry0[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry0[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry0[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		partitionEntry0[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry0[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry0[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
 		jt.task = new ReducerTask(jid, tid4, 0, WordCountReducer.class, partitionEntry0, "output-part1");
 
 		Thread.sleep(1000 * 5);
 		PartitionEntry[] partitionEntry1 = new PartitionEntry[3];
-		partitionEntry1[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry1[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry1[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		partitionEntry1[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry1[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry1[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
 		jt.task = new ReducerTask(jid, tid5, 1, WordCountReducer.class, partitionEntry1, "output-part2");
 		
 		Thread.sleep(1000 * 5);
 		PartitionEntry[] partitionEntry2 = new PartitionEntry[3];
-		partitionEntry2[0] = new PartitionEntry(tid1, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry2[1] = new PartitionEntry(tid2, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
-		partitionEntry2[2] = new PartitionEntry(tid3, "localhost", MapReduce.TasktTracker1.taskTrackerServerPort);
+		partitionEntry2[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry2[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+		partitionEntry2[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
 		jt.task = new ReducerTask(jid, tid6, 2, WordCountReducer.class, partitionEntry2, "output-part3");
 		
 
@@ -102,7 +102,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		this.taskTrackerIp = ip;
 		this.taskTrackerRegistryPort = port;
-		this.taskTrackerServerPort = MapReduce.TasktTracker1.taskTrackerServerPort; //TODO: change to join argument
+		this.taskTrackerServerPort = MapReduce.TaskTracker1.taskTrackerServerPort; //TODO: change to join argument
 		System.out.println("Target task tracker joins.");
 		
 		return "TaskTracker-001";

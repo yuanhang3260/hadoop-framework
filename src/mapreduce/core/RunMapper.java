@@ -81,6 +81,17 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		}
 		
 		
+		if (MapReduce.TaskTracker.FAULT_TEST) {
+			try {
+				Thread.sleep(1000 * 10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.exit(128);
+		}
+		
+		
 		try {
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task);
 			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);

@@ -84,7 +84,7 @@ public class HDFSFile implements Serializable {
 	}
 	
 	public HDFSOutputStream getOutputStream() {
-		this.outputStream = new HDFSOutputStream(this, Hdfs.chunkSize, this.nameNodeStub);
+		this.outputStream = new HDFSOutputStream(this, Hdfs.NameNode.CHUNK_SIZE, this.nameNodeStub);
 		return this.outputStream;
 	}
 	

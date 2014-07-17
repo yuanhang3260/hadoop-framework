@@ -248,7 +248,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 			
 			TaskTrackerReport report = new TaskTrackerReport(TaskTracker.this.taskTrackerIp, 
-					MapReduce.TasktTracker1.CORE_NUM - runningCounter, taskStatusList);
+					MapReduce.TaskTracker1.CORE_NUM - runningCounter, taskStatusList);
 			return report;
 		}
 		
