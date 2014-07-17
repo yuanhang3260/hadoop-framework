@@ -1,8 +1,13 @@
 package mapreduce.task;
 
 
+
 public class ReducerTask extends Task {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9087455093923296482L;
 	private int seq;
 	private Class<?> reducerTask;
 	private PartitionEntry[] partitionEntry;

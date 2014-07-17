@@ -1,5 +1,5 @@
 package mapreduce.jobtracker;
 
 public enum WorkStatus {
-	RUNNING, FAILED, TERMINATED, SUCCESS;
+	READY, RUNNING, FAILED, TERMINATED, SUCCESS;
 }

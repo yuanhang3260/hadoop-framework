@@ -9,9 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
@@ -22,30 +20,49 @@ import java.util.List;
 import mapreduce.io.KeyValue;
 import mapreduce.io.Partitioner;
 import mapreduce.io.writable.Writable;
+import mapreduce.task.MapperTask;
+import mapreduce.task.Task;
 
 public class OutputCollector<K extends Writable, V extends Writable> {
 	
 	List<KeyValue<K, V>> keyvalueList;
-	int partitionNum;
-	String jid;
-	String tid;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
 //	PrintWriter[] printWriterArr;
 	ObjectOutputStream[] objOutArr;
+	Task task;
+	int partitionNum;
 	
-	public OutputCollector(int num) {
+	
+	/**
+	 * OutputCollector constructor: This is for mappers, which
+	 * write the outputs to different partition files on local
+	 * file system.
+	 * @param num
+	 */
+	public OutputCollector(MapperTask task) {
+		this.task = task;
+		this.partitionNum = ((MapperTask)this.task).getPartitionNum();
+		
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
-		this.partitionNum = num;
-//		this.printWriterArr = new PrintWriter[num];
-		this.objOutArr = new ObjectOutputStream[num];
+		this.objOutArr = new ObjectOutputStream[this.partitionNum];
+	}
+	
+	/**
+	 * OutputCollector constructor: This is for reducers, which
+	 * merges same partitions collected from different mappers
+	 * to a file on HDFS.
+	 */
+	public OutputCollector() {
+		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
+		this.objOutArr = new ObjectOutputStream[1];
 	}
 	
 	public void writeToLocal() throws IOException {
 		Partitioner<K, V> partitioner = new Partitioner<K, V>();
 		OutputCollectorIterator<K, V> it = this.iterator(); 
 		for (int i = 0 ; i < this.partitionNum; i++) {
-			String tmpFileName = tmpOutputFileName(this.jid, this.tid, i);
+			String tmpFileName = task.localFileNameWrapper(i);
 			File tmpFile = new File(tmpFileName);
 			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
 //			this.printWriterArr[i] = new PrintWriter(tmpFOS);
@@ -123,10 +140,5 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			return it.next();
 		}
 	}
-	
-	public static String tmpOutputFileName(String jid, String tid, int partitionNum) {
-		return String.format("%s-%s-%d", jid, tid, partitionNum);
-	}
-
 	
 }

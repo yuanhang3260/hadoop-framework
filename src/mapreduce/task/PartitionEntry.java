@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 public class PartitionEntry implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3630399948649412039L;
+
 	private String tid;
 	
 	private String host;

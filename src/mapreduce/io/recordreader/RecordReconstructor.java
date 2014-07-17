@@ -1,6 +1,7 @@
 package mapreduce.io.recordreader;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,21 +19,25 @@ public class RecordReconstructor<K extends Writable, V extends Writable> {
 	
 	List<KeyValue<K, V>> list = new ArrayList<KeyValue<K, V>>();
 	List<KeyValueCollection<K, V>> finalList= new ArrayList<KeyValueCollection<K, V>>();
+	Object syncMutex = new Object();
 	
 	int index = 0;
 	
 	public void reconstruct(String filename) throws FileNotFoundException, IOException, ClassNotFoundException {
-		
-		ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename));
+		System.out.println("RecordRecontsructor.reconstruct(): Finish collecet file=" + filename);
+		ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(filename)));
 		
 		try {
 			while (true) {
 				KeyValue<K, V> tmp = (KeyValue<K,V>)in.readObject();
-				list.add(tmp);
+				synchronized (this.syncMutex) {
+					list.add(tmp);
+				}
 			}
 		} catch (EOFException e) {
 			in.close();
 		}
+		
 
 	}
 	
