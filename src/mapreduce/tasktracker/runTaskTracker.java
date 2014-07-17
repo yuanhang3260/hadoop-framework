@@ -11,7 +11,8 @@ public class runTaskTracker {
 	public static void main(String[] args) {
 		TaskTracker tt = 
 			new TaskTracker(
-				/*MapReduce.JobTracker.jobTrackerRegistryIp*/"128.237.213.225", 
+				/*MapReduce.JobTracker.jobTrackerRegistryIp*/
+				MapReduce.JobTracker.jobTrackerRegistryIp, 
 				MapReduce.JobTracker.jobTrackerRegistryPort, 
 				MapReduce.TaskTracker1.taskTrackerPort,
 				MapReduce.TaskTracker1.taskTrackerServerPort,

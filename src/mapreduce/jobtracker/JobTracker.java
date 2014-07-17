@@ -213,7 +213,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	
 	@Override
-	public List<Task> heartBeat(TaskTrackerReport report) {
+	public JobTrackerACK heartBeat(TaskTrackerReport report) {
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
 		}
@@ -244,7 +244,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		TaskTrackerInfo taskTracker = this.taskTrackerTbl.get(report.taskTrackerIp);
 		taskTracker.addTask(assignment);
 		
-		return assignment;
+		return null;
 	}
 	
 	/**
