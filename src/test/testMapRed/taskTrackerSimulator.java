@@ -71,7 +71,7 @@ public class taskTrackerSimulator {
 	public static WorkStatus randomStatusGenerator() {
 		Random random = new Random();
 		int k = random.nextInt(100);
-		if (k < 10) {
+		if (k < 50) {
 			return WorkStatus.SUCCESS;
 		} else {
 			return WorkStatus.FAILED;

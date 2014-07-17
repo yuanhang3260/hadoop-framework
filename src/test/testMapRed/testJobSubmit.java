@@ -1,6 +1,7 @@
 package test.testMapRed;
 
 import example.WordCountMapper;
+import example.WordCountReducer;
 import mapreduce.JobClient;
 import mapreduce.JobConf;
 
@@ -12,8 +13,10 @@ public class testJobSubmit {
 		conf.setJobName("jobSubmitTest");
 		conf.setMapperClass(WordCountMapper.class);
 		conf.setReducerClass(null);
-		conf.setNumReduceTasks(1);
+		conf.setNumReduceTasks(2);
 		conf.setPriority(0);
+		conf.setReducerClass(WordCountReducer.class);
+		conf.setOutputPath("result");
 		
 		String jobId = JobClient.runJob(conf);
 		System.out.println("Job ID: " + jobId);

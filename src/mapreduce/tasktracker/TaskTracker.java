@@ -318,30 +318,30 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						task.setProcRef(p);
 						task.startTask();
 //						TaskTracker.this.slots--;
-						//TODO: DELETE following block
-//						if (task instanceof ReducerTask) {
-//							System.out.println("The reuducer is running");
-//							InputStream in = p.getInputStream();
-//							BufferedInputStream bin = new BufferedInputStream(in);
-//							InputStream errin = p.getErrorStream();
-//							
-//							byte[] buff = new byte[1024];
-//							int c = 0;
-//							while((c = bin.read(buff)) != -1){
-//								System.out.print(new String(buff, 0, c));
-//							}
-//							while ((c = errin.read(buff)) != -1) {
-//								System.out.println(new String(buff, 0, c));
-//							}
-//							
-//							
-//							try {
-//								p.waitFor();
-//							} catch (InterruptedException e) {
-//								e.printStackTrace();
-//							}
-//							System.out.println("The reducuer ends with CODE:" + p.exitValue());
-//						}						
+//						TODO: DELETE following block
+						if (task instanceof ReducerTask) {
+							System.out.println("The task is running");
+							InputStream in = p.getInputStream();
+							BufferedInputStream bin = new BufferedInputStream(in);
+							InputStream errin = p.getErrorStream();
+							
+							byte[] buff = new byte[1024];
+							int c = 0;
+							while((c = bin.read(buff)) != -1){
+								System.out.print(new String(buff, 0, c));
+							}
+							while ((c = errin.read(buff)) != -1) {
+								System.out.println(new String(buff, 0, c));
+							}
+							
+							
+							try {
+								p.waitFor();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							System.out.println("The reducuer ends with CODE:" + p.exitValue());
+						}						
  					} catch (IOException e) {
 						e.printStackTrace();
 						task.failedTask();

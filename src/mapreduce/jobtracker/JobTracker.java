@@ -123,7 +123,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path);
+		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + reducerSEQ);
 		return task;
 	}
 	
