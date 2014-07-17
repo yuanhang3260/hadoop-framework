@@ -94,7 +94,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
 		HDFSFile file = nameNodeS.create(filename);
-		HDFSOutputStream out = file.getOutputStream();
+		HDFSOutputStream out = file.getOutputStream();//TODO: file == null means duplicate file
 		for (KeyValue<K, V> pair : this.keyvalueList) {
 			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
 			out.write(content);
