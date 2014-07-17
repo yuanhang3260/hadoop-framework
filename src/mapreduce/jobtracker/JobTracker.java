@@ -119,6 +119,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
 		MapperTask task = new MapperTask(jobId, nameTask(), level, split, theClass, partitionNum);
+		//TODO: by default the status is READY?
 		return task;
 	}
 	
@@ -197,7 +198,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		PartitionEntry[] entries = new PartitionEntry[set.size()];
 		int i = 0;
 		for (String taskId : set) {
-			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker.taskTrackerServerPort);
+			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker1.taskTrackerServerPort);
 		}
 		
 		/* create reducer tasks */
@@ -271,10 +272,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			
 			if (taskStatus.status == WorkStatus.SUCCESS) {
 				if (Hdfs.DEBUG) {
-					System.out.print("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " SUCCESS, ");
+					System.out.print("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " SUCCESS, on TaskTracker " + taskStatus.taskTrackerIp);
 				}
 				if (isMapper) {
-					System.out.println("map task");
+					System.out.println(" map task");
 					jobStatus.mapTaskLeft--;
 					if (jobStatus.mapTaskLeft == 0) {
 						System.out.println("DEBUG schedule reducer task");
@@ -282,7 +283,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						initReduceTasks(taskStatus.jobId);
 					}
 				} else {
-					System.out.println("reduce task");
+					System.out.println(" reduce task");
 					jobStatus.reduceTaskLeft--;
 				}			
 			} else if (taskStatus.status == WorkStatus.FAILED) {
@@ -297,13 +298,20 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				Task task = this.taskTbl.get(taskStatus.taskId);
 				if (task.getRescheduleNum() < MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {
 					/* increase schedule priority of this task */
+					/* disable the bad task tracker so that the failed task
+					 * will not be scheduled to this TaskTracker */
+					TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
+					badTaskTracker.disable();
 					task.increasePriority();
 					task.increaseRescheuleNum();
 					if (isMapper) {
 						this.jobScheduler.addMapTask((MapperTask) task);
 					} else {
+						//TODO:re-schedule the whole job
 						this.jobScheduler.addReduceTask((ReducerTask) task);
 					}
+					badTaskTracker.enable();
+					
 				} else {
 					/* reach max task reschedule limit, task failed / job failed */
 					System.out.println("                                     Task " + taskStatus.taskId + " cannot be rescheduled anymore");

@@ -13,8 +13,8 @@ public class runTaskTracker {
 			new TaskTracker(
 				/*MapReduce.JobTracker.jobTrackerRegistryIp*/"128.237.213.225", 
 				MapReduce.JobTracker.jobTrackerRegistryPort, 
-				MapReduce.TasktTracker1.taskTrackerPort,
-				MapReduce.TasktTracker1.taskTrackerServerPort,
+				MapReduce.TaskTracker1.taskTrackerPort,
+				MapReduce.TaskTracker1.taskTrackerServerPort,
 				MapReduce.TaskTracker.TEMP_FILE_DIR);
 		try {
 			tt.init();
