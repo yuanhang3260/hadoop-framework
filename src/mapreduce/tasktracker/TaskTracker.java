@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
@@ -162,7 +163,18 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	/*----------------Private Method----------------*/
 	
-
+	private void rmTask(String id) {
+		for (Task task : this.taskList) {
+			if ((task.getJobId() + task.getTaskId()).equals(id)) {
+				this.taskList.remove(task);
+				if (MapReduce.DEBUG) {
+					System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
+							task.getJobId(), task.getTaskId());
+				}
+				break;
+			}
+		}
+	}
 	
 	/*--------------------RMI-----------------------*/
 	
@@ -196,12 +208,17 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				TaskTrackerReport report = reporter();
 				
-				
-				List<Task> newAddedTasks = null;
+				JobTrackerACK ack = null;
 				try {
-					newAddedTasks = TaskTracker.this.jobTrackerStub.heartBeat(report);
+					ack = TaskTracker.this.jobTrackerStub.heartBeat(report);
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
+				}
+				
+				List<Task> newAddedTasks = ack.newAddedTasks;
+				
+				for (TaskStatus ackTask : ack.rcvTasks) {
+					TaskTracker.this.rmTask(ackTask.jobId + ackTask.taskId);
 				}
 				
 				if (newAddedTasks != null && newAddedTasks.size() > 0) {
@@ -389,32 +406,66 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		
 		@Override
 		public void run() {
+			BufferedReader in = null;
+			BufferedOutputStream out = null;
+			FileInputStream fin = null;
+			
 			try {
 				
 				/* Set up */
-				BufferedReader in =
+				in =
 				        new BufferedReader(
 				            new InputStreamReader(soc.getInputStream()));
 				
-				BufferedOutputStream out =
+				out =
 				        new BufferedOutputStream(soc.getOutputStream());
 				
 				/* Receive requested file */
 				String fileName = in.readLine();
 				File file = new File(TaskTracker.this.taskTrackerMapperFolder +"/" + fileName);
-				FileInputStream fin = new FileInputStream(file);
+				fin = new FileInputStream(file);
 				byte[] buff = new byte[MapReduce.TaskTracker.BUFF_SIZE];
 				int readBytes = 0;
 				while((readBytes = fin.read(buff)) != -1) {
 					out.write(buff, 0, readBytes);
 				}
-				out.flush();
-				out.close();
-				in.close();
-				fin.close();
-				soc.close();
+				
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					if (out != null) {
+						out.flush();
+						out.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				try {
+					if (in !=null) {
+						in.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		
+				if (fin != null) {
+					try {
+						fin.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				if (soc != null) {
+					try {
+						soc.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
 			}
 			
 		}

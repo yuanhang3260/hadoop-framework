@@ -13,7 +13,7 @@ import mapreduce.task.Task;
  */
 public class JobTrackerACK implements Serializable{
 
-	private static final long serialVersionUID = -6359644594992260439L;
+	private static final long serialVersionUID = 1004271801317456453L;
 	public List<Task> newAddedTasks;
 	public List<TaskStatus> rcvTasks;
 	

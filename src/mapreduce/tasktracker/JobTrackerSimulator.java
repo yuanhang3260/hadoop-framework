@@ -18,8 +18,11 @@ import java.util.List;
 
 import mapreduce.Job;
 import mapreduce.io.Split;
+import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
+import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
+import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
@@ -109,39 +112,37 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 
 	@Override
-	public List<Task> heartBeat(TaskTrackerReport report) {
-		counter++;
-		if (counter % 7 == 0) {
-			report.printReport();
-		}
-//		if (this.update) {
-//			switch (this.taskList.size()) {
-//				case 1: List<Task> rst = new ArrayList<Task>();
-//						rst.add(this.taskList.get(0));
-//						System.out.println("JobTrackerSimu: We should run mapper task now!");
-//						this.update = false;
-//						return rst;
-//				case 2: rst = new ArrayList<Task>();
-//						rst.add(this.taskList.get(1));
-//						System.out.println("JobTrackerSimu: We should run reducer-0 task now!");
-//						this.update = false;
-//						return rst;
-//				case 3: rst = new ArrayList<Task>();
-//						rst.add(this.taskList.get(2));
-//						System.out.println("JobTrackerSimu: We should run reducer-1 task now!");
-//						this.update = false;
-//						return rst;
-//				default: break;
-//			}
-//		}
+	public JobTrackerACK heartBeat(TaskTrackerReport report) {
+
+		report.printReport();
+		
+		JobTrackerACK rst = new JobTrackerACK();
+		rst.newAddedTasks = new ArrayList<Task>();
+		rst.rcvTasks = new ArrayList<TaskStatus>();
+		
 		if (this.task != null) {
 			System.out.println("JobTrackerSimu: run a task!");
-			List<Task> rst = new ArrayList<Task>();
-			rst.add(this.task);
+			rst.newAddedTasks.add(this.task);
 			this.task = null;
-			return rst;
+			
+			if (report != null && report.taskStatus != null && report.taskStatus.size() > 0 ) {
+				for (TaskStatus rcvTask : report.taskStatus) {
+					if (rcvTask.status == WorkStatus.FAILED || rcvTask.status == WorkStatus.SUCCESS) {
+						rst.rcvTasks.add(rcvTask);
+					}
+				}
+			}
+			
+		} else {
+			if (report != null && report.taskStatus != null && report.taskStatus.size() > 0 ) {
+				for (TaskStatus rcvTask : report.taskStatus) {
+					if (rcvTask.status == WorkStatus.FAILED || rcvTask.status == WorkStatus.SUCCESS) {
+						rst.rcvTasks.add(rcvTask);
+					}
+				}
+			}
 		}
-		return null;
+		return rst;
 	}
 
 	@Override
