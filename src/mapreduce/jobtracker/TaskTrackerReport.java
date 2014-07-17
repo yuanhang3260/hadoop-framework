@@ -1,17 +1,28 @@
 package mapreduce.jobtracker;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
-import mapreduce.task.Task;
+public class TaskTrackerReport implements Serializable {
+	public String taskTrackerIp;
+	public int emptySlot;
+	public List<TaskStatus> taskStatus;
 
-public class TaskTrackerReport {
-	public int emptyMapSlot;
-	public int emptyReduceSlot;
-	public List<Task> tasks;
+	public TaskTrackerReport(String ip, int numSlot, List<TaskStatus> taskStatus) {
+		this.taskTrackerIp = ip;
+		this.emptySlot = numSlot;
+		this.taskStatus = taskStatus;
+	}
 	
-	public TaskTrackerReport(int mapSlot, int reduceSlot, List<Task> taskStatus) {
-		this.emptyMapSlot = mapSlot;
-		this.emptyReduceSlot = reduceSlot;
-		this.tasks = taskStatus;
+	public void printReport() {
+		System.out.format(">>>>>>>>>>>>>>>>>>>>>>%s\n", (new Date()).toString());
+		System.out.format("REPORT:\nSlots=%d\n", this.emptySlot);
+		int i = 1;
+		for (TaskStatus task : this.taskStatus) {
+			System.out.format("%d\ttask id=%s\tstatus=%s\n", i, task.taskId, task.status);
+			i++;
+		}
+		System.out.format("<<<<<<<<<<<<<<<<<<<<<<\n\n\n\n", (new Date()).getTime());
 	}
 }

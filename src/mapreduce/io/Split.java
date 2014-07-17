@@ -1,10 +1,15 @@
 package mapreduce.io;
 
-import java.io.Serializable;
-
 import hdfs.DataStructure.HDFSFile;
 
-public class Split {
+import java.io.Serializable;
+
+public class Split implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9178405296046575926L;
+
 	public HDFSFile file;
 	
 	/* for now, take a whole chunk as a split */

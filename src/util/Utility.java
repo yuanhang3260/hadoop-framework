@@ -186,7 +186,7 @@ public class Utility {
 	}
 	
 	public static void printUsage() {
-		System.out.print("Usage:\thadoop <op> \n<op>:\n\tput\n\tget");
+		System.out.println("Usage:\thadoop <op> \n<op>:\n\tput\n\tget");
 	}
 	
 	private static void printPutUsage() {

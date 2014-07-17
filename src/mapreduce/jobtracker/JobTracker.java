@@ -1,8 +1,8 @@
 package mapreduce.jobtracker;
 
-import hdfs.DataStructure.DataNodeEntry;
 import global.Hdfs;
 import global.MapReduce;
+import hdfs.DataStructure.DataNodeEntry;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -13,15 +13,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mapreduce.Job;
 import mapreduce.io.Split;
 import mapreduce.task.MapperTask;
-import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
-import mapreduce.task.TaskTrackerRemoteInterface;
+import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class JobTracker implements JobTrackerRemoteInterface {
 	
@@ -82,7 +80,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		try {
 			taskTrackerRegistry = LocateRegistry.getRegistry(taskTrackerIp, taskTrackerPort);
 			TaskTrackerRemoteInterface taskTrackerStub = (TaskTrackerRemoteInterface) taskTrackerRegistry.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
-			boolean ret = taskTrackerStub.runTask(task);
+//			boolean ret = taskTrackerStub.runTask(task);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {

@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,10 @@ import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.RecordReconstructor;
 import mapreduce.io.writable.Writable;
+import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
+import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {
 	
@@ -36,12 +40,14 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		try {
 			//Configure task
 			if (MapReduce.UNITEST) {
-				ReducerTask task = new ReducerTask(null, null, 0, WordCountReducer.class, null, "reducerOutput2");
+				ReducerTask task = new ReducerTask("job001", "task002", 0, WordCountReducer.class, null, "output");
 				rr.task = task;	
 			} else {
-				//TODO: USE RMI to construct task
+				Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
+				TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
+						.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
+				rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
 			}
-			
 			
 			RecordReconstructor<Writable, Writable> recordReconstructor = 
 					new RecordReconstructor<Writable, Writable>();
@@ -49,16 +55,20 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			//Collect Partition
 			if (MapReduce.UNITEST) {
 				for (int i = 0; i < 2; i++) {
-					String tmpName = "null-null-" + i;
+					String tmpName = "tmp/TaskTracker-001/Mapper/job001-task001-" + i;
 					recordReconstructor.reconstruct(tmpName);
 				}
 			} else {
 				rr.collectPartition(recordReconstructor);
 			}
 			
+			System.out.println("RunReducer: Start to sort");
+			
 			//Merge Sort & construct Iterator
 			recordReconstructor.sort();
 			recordReconstructor.merge();
+			
+			Thread.sleep(1000 * 10); //TODO: remove this after debugging
 			
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
 			
@@ -75,6 +85,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			if (MapReduce.DEBUG) {
 				e.printStackTrace();
 			}
+			System.out.println("RemoteException caught");
 			System.exit(1);
 		} catch (FileNotFoundException e) {
 			if (MapReduce.DEBUG) {
@@ -133,21 +144,22 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 	public void collectPartition(RecordReconstructor<K1, V1> recordReconstructor) 
 			throws UnknownHostException, IOException, InterruptedException {
 		
+		
 		List<Thread> threadList = new ArrayList<Thread>();
 		
 
 		for (PartitionEntry taskEntry : this.task.getEntries()) {
 			
-			String tmpName = OutputCollector.tmpOutputFileName(this.task.getJobId(), taskEntry.getTID(), this.task.getSEQ());
-			
-			File localFile = new File(tmpName);
+			String localFileName = this.task.localReducerFileNameWrapper(taskEntry.getTID());
+			File localFile = new File(localFileName);
 			FileOutputStream fout = new FileOutputStream(localFile);
 			
 			Socket soc = new Socket(taskEntry.getHost(), taskEntry.getPort());
 			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 			BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
 			
-			String request = String.format("%s\n", tmpName);
+			String request = String.format("%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
+			System.out.println("REQUESTING:" + request + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
 			out.write(request.toCharArray());
 			out.flush();
 			
@@ -160,15 +172,17 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			in.close();
 			out.close();
 			fout.close();
+			soc.close();
 			
-			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, tmpName);
+			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
 			Thread collectorThread = new Thread(collectorRunnable);
 			collectorThread.start();
+//			collectorThread.join();
 			threadList.add(collectorThread);
 		}
 		
 		for (Thread th : threadList) {
-			th.wait();
+			th.join();
 		}
 	}
 	
@@ -181,19 +195,21 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			this.rr = arg;
 			this.fileName = file;
 		}
+		
 		@Override
 		public void run() {
+			System.out.println("RunReducer.Collector.run(): Start to recontsruct file=" + this.fileName);
 			try {
 				this.rr.reconstruct(this.fileName);
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.exit(12);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.exit(13);
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.exit(14);
 			}
 		}
 		
