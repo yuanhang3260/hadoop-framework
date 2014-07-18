@@ -11,7 +11,7 @@ public class testJobSubmit {
 		
 		conf.setJobName("jobSubmitTest");
 		
-		conf.setInputPath("hello");
+		conf.setInputPath("wordCount");
 		conf.setOutputPath("another");
 		
 		conf.setMapperClass(WordCountMapper.class);

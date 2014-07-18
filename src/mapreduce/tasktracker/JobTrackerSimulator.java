@@ -116,7 +116,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 
 		report.printReport();
 		
-		JobTrackerACK rst = new JobTrackerACK();
+		JobTrackerACK rst = new JobTrackerACK(null, null);
 		rst.newAddedTasks = new ArrayList<Task>();
 		rst.rcvTasks = new ArrayList<TaskStatus>();
 		

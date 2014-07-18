@@ -44,14 +44,18 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	int jobTrackerPort;
 	JobTrackerRemoteInterface jobTrackerStub;
 	
-	List<Task> taskList;
 	int slots;
 	List<Process> ProcessList;
-	Collection<Task> taskListMutex;
+	List<Task> syncTaskList;
 	
 	String taskTrackerTmpFolder;
-	String taskTrackerMapperFolder;
-	String taskTrackerReducerFolder;
+	String taskTrackerMapperFolderName;
+	String taskTrackerReducerFolderName;
+	
+	
+	/*------------------ FOR DEBUGGING ----------------*/
+	//TODO: REMOVE THE NEXT LINE
+	int failureTimes = 0;
 	
 	/*------------------ Constructor -----------------*/
 	/**
@@ -77,9 +81,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			tmpFolder.mkdir();
 		}
 		
-		this.taskList = new ArrayList<Task>();
+
 		this.ProcessList = new ArrayList<Process>();
-		this.taskListMutex = Collections.synchronizedCollection(taskList);
+		this.syncTaskList = Collections.synchronizedList(new ArrayList<Task>());
 
 	}
 	
@@ -111,32 +115,32 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		} 
 		
 		
-		this.taskTrackerMapperFolder  = this.taskTrackerTmpFolder + "/" + "Mapper";
-		this.taskTrackerReducerFolder = this.taskTrackerTmpFolder + "/" + "Reducer";
+		this.taskTrackerMapperFolderName  = this.taskTrackerTmpFolder + "/" + "Mapper";
+		this.taskTrackerReducerFolderName = this.taskTrackerTmpFolder + "/" + "Reducer";
 		
-		File taskTrackerMapperFolderFile = new File(this.taskTrackerMapperFolder);
-		if (!taskTrackerMapperFolderFile.exists()) {
-			taskTrackerMapperFolderFile.mkdir();
+		File taskTrackerMapperFolder = new File(this.taskTrackerMapperFolderName);
+		if (!taskTrackerMapperFolder.exists()) {
+			taskTrackerMapperFolder.mkdir();
 		} else {
-			for (File staleFile : taskTrackerMapperFolderFile.listFiles()) {
+			for (File staleFile : taskTrackerMapperFolder.listFiles()) {
 				staleFile.delete();
 			}
 		}
 		
-		File taskTrackerReducerFolderFile = new File(this.taskTrackerReducerFolder);
-		if (!taskTrackerReducerFolderFile.exists()) {
-			taskTrackerReducerFolderFile.mkdir();
+		File taskTrackerReducerFolder = new File(this.taskTrackerReducerFolderName);
+		if (!taskTrackerReducerFolder.exists()) {
+			taskTrackerReducerFolder.mkdir();
 		} else {
-			for (File staleFile : taskTrackerMapperFolderFile.listFiles()) {
+			for (File staleFile : taskTrackerMapperFolder.listFiles()) {
 				staleFile.delete();
 			}
 		}
 		
-		/* Init tmp file folder*/
-		File tmpFileDirectory = new File(this.taskTrackerTmpFolder);
-		if (!tmpFileDirectory.exists()) {
-			tmpFileDirectory.mkdirs();
-		}
+//		/* Init tmp file folder*/
+//		File tmpFileDirectory = new File(this.taskTrackerTmpFolder);
+//		if (!tmpFileDirectory.exists()) {
+//			tmpFileDirectory.mkdirs();
+//		}
 
 		/* Start Heart beat */
 		HeartBeat hb = new HeartBeat();
@@ -164,14 +168,16 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	/*----------------Private Method----------------*/
 	
 	private void rmTask(String id) {
-		for (Task task : this.taskList) {
-			if ((task.getJobId() + task.getTaskId()).equals(id)) {
-				this.taskList.remove(task);
-				if (MapReduce.DEBUG) {
-					System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
-							task.getJobId(), task.getTaskId());
+		synchronized (this.syncTaskList) {
+			for (Task task : this.syncTaskList) {
+				if ((task.getJobId() + task.getTaskId()).equals(id)) {
+					this.syncTaskList.remove(task);
+					if (MapReduce.DEBUG) {
+						System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
+								task.getJobId(), task.getTaskId());
+					}
+					break;
 				}
-				break;
 			}
 		}
 	}
@@ -180,16 +186,20 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	@Override
 	public Task getTask(String taskID) throws RemoteException {
-//		synchronized (this.taskListMutex) {
-			for (int i = this.taskList.size() - 1; i >= 0; i--) {
-				Task taskRecord = this.taskList.get(i);
+		synchronized (this.syncTaskList) {
+			for (int i = this.syncTaskList.size() - 1; i >= 0; i--) {
+				Task taskRecord = this.syncTaskList.get(i);
 				if (String.format("%s-%s", taskRecord.getJobId(), taskRecord.getTaskId()).equals(taskID)) {
-//					Task rst = new Task(taskRecord);
 					return taskRecord;
 				}
 			}
-			return null;
-//		}
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean toFail()  {
+		return (failureTimes++ < 1);
 	}
 	
 	
@@ -210,32 +220,48 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				JobTrackerACK ack = null;
 				try {
-					ack = TaskTracker.this.jobTrackerStub.heartBeat(report);
+					ack = TaskTracker.this
+							.jobTrackerStub.heartBeat(report); //ack is local variable
 				} catch (RemoteException e1) {
-					e1.printStackTrace();
+					// wait for next heart beat;
+					try {
+						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
+					} catch (InterruptedException e) { //Do nothing
+						if (MapReduce.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+					continue;
 				}
 				
-				List<Task> newAddedTasks = ack.newAddedTasks;
+				if (ack == null) {
+					continue;
+				}
+				
+//				List<Task> newAddedTasks = ack.newAddedTasks;
 				
 				for (TaskStatus ackTask : ack.rcvTasks) {
 					TaskTracker.this.rmTask(ackTask.jobId + ackTask.taskId);
 				}
 				
-				if (newAddedTasks != null && newAddedTasks.size() > 0) {
-					synchronized (TaskTracker.this.taskListMutex) {
-						for (Task newTask : newAddedTasks) {
-							if (newTask instanceof MapperTask) {
-								newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolder);
-								System.out.println("TaskTracker.HeartBeat.run(): The new task is a Mapper");
-							} else if (newTask instanceof ReducerTask) {
-								newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolder);
-								System.out.println("TaskTracker.HeartBeat.run(): The new task is a Reducer");
-							}
-							TaskTracker.this.taskList.add(newTask);
+				if (ack.newAddedTasks != null && ack.newAddedTasks.size() > 0) {
+					for (Task newTask : ack.newAddedTasks) {
+						if (newTask instanceof MapperTask) {
+							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
+						
+						} else if (newTask instanceof ReducerTask) {
+							newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolderName);
+							
+						} else {
+							//Unknown task: Do nothing;
+							ack.newAddedTasks.remove(newTask);
 						}
+						
+						TaskTracker.this.syncTaskList.add(newTask);
 					}
+					
 					/* Allocate a thread to start new added tasks */
-					StartTask st = new StartTask(newAddedTasks);
+					StartTask st = new StartTask(ack.newAddedTasks);
 					Thread startTaskTh = new Thread(st);
 					startTaskTh.start();
 				}
@@ -249,23 +275,30 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
-		private TaskTrackerReport reporter() {
+		
+		private TaskTrackerReport reporter() {  //This is within the heart beat thread
 			List<TaskStatus> taskStatusList = new ArrayList<TaskStatus>();
 			int runningCounter = 0;
-			for (Task task : TaskTracker.this.taskList) {
-				if (task.getTaskStatus() == WorkStatus.RUNNING) {
-					runningCounter++;
+			
+			/* Obtain the status for each task */
+			synchronized (TaskTracker.this.syncTaskList) {
+				for (Task task : TaskTracker.this.syncTaskList) {
+					if (task.getTaskStatus() == WorkStatus.RUNNING) {
+						runningCounter++;
+					}
+					taskStatusList.add(
+							new TaskStatus(task.getJobId(), 
+									task.getTaskId(), 
+									task.getTaskStatus(), 
+									TaskTracker.this.taskTrackerIp, 
+									TaskTracker.this.registryPort));
 				}
-				taskStatusList.add(
-						new TaskStatus(task.getJobId(), 
-								task.getTaskId(), 
-								task.getTaskStatus(), 
-								TaskTracker.this.taskTrackerIp, 
-								TaskTracker.this.registryPort));
 			}
 			
+			/* Create report for JobTracker */
 			TaskTrackerReport report = new TaskTrackerReport(TaskTracker.this.taskTrackerIp, 
 					MapReduce.TaskTracker1.CORE_NUM - runningCounter, taskStatusList);
+			
 			return report;
 		}
 		
@@ -276,26 +309,36 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 			while (true) {
-//				synchronized (TaskTracker.this.taskListMutex) { //TODO: PUT BACK sync
-					for (Task task : TaskTracker.this.taskList) {
+				synchronized (TaskTracker.this.syncTaskList) {
+					for (Task task : TaskTracker.this.syncTaskList) {
 						if (task.isRunning()) {
-							try {
-								if (task.getProcRef() == null) {
-									task.printInfo();
-								} else {
+							if (task.getProcRef() != null) {
+								try{
 									int exitVal = task.getProcRef().exitValue();
 									if (exitVal == 0) {
 										task.commitTask();
+										if (MapReduce.DEBUG) {
+											String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+											System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+												+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
+												task.getJobId(), task.getTaskId(), type);
+										}
 									} else {
 										task.failedTask();
+										if (MapReduce.DEBUG) {
+											String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+											System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+												+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
+												task.getJobId(), task.getTaskId(), type, exitVal);
+										}
 									}
+								} catch (IllegalThreadStateException e) {
+									//The process hasn't exited yet.
 								}
-							} catch (IllegalThreadStateException e) {
-								//DO NOTHING
-							}
+							} 
 						}
 					}
-//				}
+				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -312,59 +355,70 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		private List<Task> taskList;
 		
 		public StartTask(List<Task> newAddedTaskList) {
-			this.taskList = newAddedTaskList;
+			/* 
+			 * Although this task list is shared by StartTask and 
+			 * HeartBeat, but HeartBeat won't access it.
+			 * 
+			 * On the other hand, the those inside tasks would be shared
+			 * by main thread.
+			 * 
+			 * */
+			this.taskList = newAddedTaskList;	
 		}
 		
 		@Override
 		public void run() {
-			String portString = "" + TaskTracker.this.registryPort;
-//			synchronized (TaskTracker.this.taskListMutex) {
+	
+			synchronized (TaskTracker.this.syncTaskList) {
 				for (Task task : taskList) {
+					
 					String taskID = String.format("%s-%s", task.getJobId(), task.getTaskId());
+					
 					ProcessBuilder pb = null;
+					
 					if (task instanceof MapperTask) {
-						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", portString, taskID);
+						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
 					} else if (task instanceof ReducerTask) {
-						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",portString, taskID);
+						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
 					}
+					
 					try {
 						Process p = pb.start();
 						TaskTracker.this.ProcessList.add(p);
 						task.setProcRef(p);
 						task.startTask();
-//						TaskTracker.this.slots--;
-//						TODO: DELETE following block
-						if (task instanceof ReducerTask) {
-							System.out.println("The task is running");
-							InputStream in = p.getInputStream();
-							BufferedInputStream bin = new BufferedInputStream(in);
-							InputStream errin = p.getErrorStream();
-							
-							byte[] buff = new byte[1024];
-							int c = 0;
-							while((c = bin.read(buff)) != -1){
-								System.out.print(new String(buff, 0, c));
-							}
-							while ((c = errin.read(buff)) != -1) {
-								System.out.println(new String(buff, 0, c));
-							}
-							
-							
-							try {
-								p.waitFor();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							System.out.println("The reducuer ends with CODE:" + p.exitValue());
-						}						
+////						TODO: DELETE following block
+//						if (task instanceof ReducerTask) {
+//							System.out.println("The task is running");
+//							InputStream in = p.getInputStream();
+//							BufferedInputStream bin = new BufferedInputStream(in);
+//							InputStream errin = p.getErrorStream();
+//							
+//							byte[] buff = new byte[1024];
+//							int c = 0;
+//							while((c = bin.read(buff)) != -1){
+//								System.out.print(new String(buff, 0, c));
+//							}
+//							while ((c = errin.read(buff)) != -1) {
+//								System.out.println(new String(buff, 0, c));
+//							}
+//							
+//							
+//							try {
+//								p.waitFor();
+//							} catch (InterruptedException e) {
+//								e.printStackTrace();
+//							}
+//							System.out.println("The reducuer ends with CODE:" + p.exitValue());
+//						}						
  					} catch (IOException e) {
 						e.printStackTrace();
 						task.failedTask();
 					}
 					
-//				}
+				}
 				
 
 			}
@@ -422,7 +476,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				/* Receive requested file */
 				String fileName = in.readLine();
-				File file = new File(TaskTracker.this.taskTrackerMapperFolder +"/" + fileName);
+				File file = new File(TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
 				fin = new FileInputStream(file);
 				byte[] buff = new byte[MapReduce.TaskTracker.BUFF_SIZE];
 				int readBytes = 0;

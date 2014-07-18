@@ -28,7 +28,6 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	List<KeyValue<K, V>> keyvalueList;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
-//	PrintWriter[] printWriterArr;
 	ObjectOutputStream[] objOutArr;
 	Task task;
 	int partitionNum;
@@ -65,23 +64,17 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			String tmpFileName = task.localFileNameWrapper(i);
 			File tmpFile = new File(tmpFileName);
 			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
-//			this.printWriterArr[i] = new PrintWriter(tmpFOS);
 			this.objOutArr[i] = new ObjectOutputStream(tmpFOS);
 		}
 		
 		while (it.hasNext()) {
 			KeyValue<K, V> keyvalue = it.next();
 			int parNum = partitioner.getPartition(keyvalue.getKey(), keyvalue.getValue(), this.partitionNum);
-//			this.printWriterArr[parNum].print(keyvalue.getKey().toString());
-//			this.printWriterArr[parNum].print("\t");
-//			this.printWriterArr[parNum].println(keyvalue.getValue().toString());
 			this.objOutArr[parNum].writeObject(keyvalue);
 		}
 		
 		
 		for (int j = 0 ; j < this.partitionNum; j++) {
-//			this.printWriterArr[j].flush();
-//			this.printWriterArr[j].close();
 			this.objOutArr[j].flush();
 			this.objOutArr[j].close();
 		}
@@ -94,7 +87,11 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
 		HDFSFile file = nameNodeS.create(filename);
-		HDFSOutputStream out = file.getOutputStream();//TODO: file == null means duplicate file
+		if (file == null) {
+			throw new IOException("Duplicate file name on HDFS.");
+		}
+		HDFSOutputStream out = file.getOutputStream();
+		
 		for (KeyValue<K, V> pair : this.keyvalueList) {
 			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
 			out.write(content);

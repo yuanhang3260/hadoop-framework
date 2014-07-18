@@ -81,9 +81,9 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		}
 		
 		
-		if (MapReduce.TaskTracker.FAULT_TEST) {
+		if (MapReduce.TaskTracker.MAPPER_FAULT_TEST) {
 			try {
-				Thread.sleep(1000 * 10);
+				Thread.sleep(1000 * 5);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
