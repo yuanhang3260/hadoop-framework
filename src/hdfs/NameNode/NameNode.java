@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -310,7 +311,8 @@ public class NameNode implements NameNodeRemoteInterface{
 						= new HashMap<String, ChunkStatisticsForDataNode>();
 					HashMap<String, ChunkStatisticsForNameNode> chunkAbstractFromNameNode
 						= new HashMap<String, ChunkStatisticsForNameNode>();
-	
+					Set<String> toDeleteFilesName = new HashSet<String>();
+					
 					if (Hdfs.DEBUG) {
 						System.out.println("DEBUG NameNode.SystemCheck.run(): Start SystemCheck.");
 					}
@@ -321,6 +323,10 @@ public class NameNode implements NameNodeRemoteInterface{
 						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
 						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.dataNodePartitionTolerance) {
 							dataNodeInfo.disableDataNode();
+						} else {
+							if (!dataNodeInfo.isAvailable()) {
+								dataNodeInfo.enableDataNode();
+							}
 						}
 					}
 					
@@ -385,6 +391,7 @@ public class NameNode implements NameNodeRemoteInterface{
 						}
 					}
 					
+					
 					/* Compare two abstracts */
 					Set<String> chunksOnNameNode = chunkAbstractFromNameNode.keySet();
 					for (String chunkOnNameNode : chunksOnNameNode) {
@@ -393,9 +400,11 @@ public class NameNode implements NameNodeRemoteInterface{
 						if(chunkAbstractFromDataNode.containsKey(chunkOnNameNode)) {
 							chunkStat = chunkAbstractFromDataNode.get(chunkOnNameNode);
 						} else {
-							//TODO: DISABLE the file
+							//This chunk on NameNode cannot be found on any DataNode.
+							toDeleteFilesName.add(chunkAbstractFromNameNode.get(chunkOnNameNode).filePath);
 							continue;
 						}
+						
 						int replicaFac = chunkAbstractFromNameNode.get(chunkOnNameNode).replicaFactor;
 						if (chunkStat.replicaNum == replicaFac) {
 							if (Hdfs.DEBUG) {
@@ -420,9 +429,16 @@ public class NameNode implements NameNodeRemoteInterface{
 							String dataNodeName = chunkStat.dataNodes.get(0);
 							deleteChunk(chunkOnNameNode, NameNode.this.dataNodeStubTbl.get(dataNodeName));
 						}
+						
+						
+						/* Delete files whose at least one chunk cannot be found on any DataNode */
+						for (String fileName : toDeleteFilesName) {
+							NameNode.this.fileTbl.remove(fileName);
+						}
 					}
 				}
-				/* TODO:Disable file that has one or more chunks equals to 0 */
+				
+				
 
 				if (Hdfs.DEBUG) {
 					System.out.println("DEBUG NameNode.SystemCheck.run(): Finish SystemCheck.");
