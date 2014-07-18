@@ -209,10 +209,21 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				TaskTrackerReport report = reporter();
 				
 				JobTrackerACK ack = null;
+				
 				try {
 					ack = TaskTracker.this.jobTrackerStub.heartBeat(report);
 				} catch (RemoteException e1) {
 					e1.printStackTrace();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						
+					}
+					continue;
+				}
+				
+				if (ack == null) {
+					continue;
 				}
 				
 				List<Task> newAddedTasks = ack.newAddedTasks;
