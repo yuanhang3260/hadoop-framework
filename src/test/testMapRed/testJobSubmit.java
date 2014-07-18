@@ -17,7 +17,7 @@ public class testJobSubmit {
 		conf.setMapperClass(WordCountMapper.class);
 		conf.setReducerClass(WordCountReducer.class);
 		
-		conf.setNumReduceTasks(1);
+		conf.setNumReduceTasks(2);
 		conf.setPriority(0);
 		
 		String jobId = JobClient.runJob(conf);

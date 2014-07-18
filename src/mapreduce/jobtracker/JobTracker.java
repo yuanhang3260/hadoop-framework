@@ -12,15 +12,14 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import mapreduce.Job;
 import mapreduce.io.Split;
@@ -28,7 +27,6 @@ import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
-import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class JobTracker implements JobTrackerRemoteInterface {
 	
@@ -51,7 +49,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	public void init() {
 		jobScheduler = new JobScheduler();
+		Thread t = new Thread(new TaskTrackerCheck());
+		t.start();
 		//TimerTask taskTrackerCheck = new TaskTrackerCheck();
+		
 		try {
 			Registry jtRegistry = LocateRegistry.createRegistry(MapReduce.JobTracker.jobTrackerRegistryPort);
 			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
@@ -67,58 +68,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (!taskTrackerTbl.containsKey(ip)) {
 			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port/*, mapSlots, reduceSlots*/);
 			taskTrackerTbl.put(ip, stat);
-			//this.jobScheduler.taskScheduleTbl.put(ip, new PriorityQueue<Task>(MAX_NUM_MAP_TASK, new SchedulorComparator()));
-			this.jobScheduler.taskScheduleTbl.put(ip, new PriorityQueue<Task>(MAX_NUM_MAP_TASK, new Comparator<Task>() {
-				@Override
-				public int compare(Task t1, Task t2) {
-					if (t1.getPriority() != t2.getPriority()) {
-						/* higher priority goes first */
-						return t2.getPriority() - t1.getPriority();
-					}
-					long time1 = Long.parseLong(t1.getJobId());
-					long time2 = Long.parseLong(t2.getJobId());
-					if (time1 > time2) {
-						return 1;
-					} else if (time1 < time2) {
-						return -1;
-					} else {
-//						long taskId1 = Long.parseLong(t1.getTaskId());
-//						long taskId2 = Long.parseLong(t2.getTaskId());
-//						if (taskId1 > taskId2) {
-//							return 1;
-//						} else {
-//							return -1;
-//						}
-						return t1.getTaskId().compareTo(t2.getTaskId());
-					}
-				}
-			}));
+			this.jobScheduler.taskScheduleTbl.put(ip, new PriorityBlockingQueue<Task>(MAX_NUM_MAP_TASK, new SchedulerComparator()));
 		}
 		if (Hdfs.DEBUG) {
 			System.out.println("DEBUG JobTracker.join(): TaskTracker " + taskTrackerName + " join cluster");
 		}
 		//TODO: upon a tasktracker recover from failure, what about those tasks assigned on it?
 		return taskTrackerName;
-	}
-	
-	/**
-	 * call a specific task tracker to sumbit a task to run
-	 * 
-	 * @param task
-	 * @param taskTrackerIp
-	 * @param taskTrackerPort
-	 */
-	public void submitTask(Task task, String taskTrackerIp, int taskTrackerPort) {
-		Registry taskTrackerRegistry;
-		try {
-			taskTrackerRegistry = LocateRegistry.getRegistry(taskTrackerIp, taskTrackerPort);
-			TaskTrackerRemoteInterface taskTrackerStub = (TaskTrackerRemoteInterface) taskTrackerRegistry.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
-//			boolean ret = taskTrackerStub.runTask(task);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
@@ -245,6 +201,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		//TODO: leave for parallel
 		
 		this.taskTrackerTbl.get(report.taskTrackerIp).updateTimeStamp();
+		this.taskTrackerTbl.get(report.taskTrackerIp).enable();
 		List<TaskStatus> allStatus = report.taskStatus;
 		/* acknowledge those FAILED and SUCCESS tasks */
 		List<TaskStatus> ackTasks = new ArrayList<TaskStatus>();
@@ -445,32 +402,32 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		public ConcurrentHashMap<String, Queue<Task>> taskScheduleTbl = new ConcurrentHashMap<String, Queue<Task>>();
 		
-		public class SchedulorComparator implements Comparator<Task> {
-
-			@Override
-			public int compare(Task t1, Task t2) {
-				if (t1.getPriority() != t2.getPriority()) {
-					/* higher priority goes first */
-					return t2.getPriority() - t1.getPriority();
-				}
-				long time1 = Long.parseLong(t1.getJobId());
-				long time2 = Long.parseLong(t2.getJobId());
-				if (time1 > time2) {
-					return 1;
-				} else if (time1 < time2) {
-					return -1;
-				} else {
-					long taskId1 = Long.parseLong(t1.getTaskId());
-					long taskId2 = Long.parseLong(t2.getTaskId());
-					if (taskId1 > taskId2) {
-						return 1;
-					} else {
-						return -1;
-					}
-				}
-			}
-	
-		}
+//		public class SchedulorComparator implements Comparator<Task> {
+//
+//			@Override
+//			public int compare(Task t1, Task t2) {
+//				if (t1.getPriority() != t2.getPriority()) {
+//					/* higher priority goes first */
+//					return t2.getPriority() - t1.getPriority();
+//				}
+//				long time1 = Long.parseLong(t1.getJobId());
+//				long time2 = Long.parseLong(t2.getJobId());
+//				if (time1 > time2) {
+//					return 1;
+//				} else if (time1 < time2) {
+//					return -1;
+//				} else {
+//					long taskId1 = Long.parseLong(t1.getTaskId());
+//					long taskId2 = Long.parseLong(t2.getTaskId());
+//					if (taskId1 > taskId2) {
+//						return 1;
+//					} else {
+//						return -1;
+//					}
+//				}
+//			}
+//	
+//		}
 		
 		/**
 		 * Schedule a map task with data locality first
@@ -579,29 +536,70 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}	
 	}
 	
-	private class TaskTrackerCheck extends TimerTask {
+	private class TaskTrackerCheck implements Runnable {
 		
 		@Override
 		public void run() {
-			Set<String> taskTrackers = JobTracker.this.taskTrackerTbl.keySet();
-			for (String taskTrackerIp : taskTrackers) {
-				long lastHeartBeat = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getTimeStamp();
-				if (System.currentTimeMillis() - lastHeartBeat >= MapReduce.JobTracker.TASK_TRACKER_EXPIRATION) {
-					JobTracker.this.taskTrackerTbl.get(taskTrackerIp).disable();
-					/* re-schedule all tasks previously complete and currently running on this TaskTracker */
-					/* A. re-schedule tasks in associative scheduling queue */
-					//synchronized(JobTracker.this.jobScheduler.taskScheduleTbl) {
-					Queue<Task> tasks = JobTracker.this.jobScheduler.taskScheduleTbl.get(taskTrackerIp);
-					for (Task task : tasks) {
-						if (task instanceof MapperTask) {
-							JobTracker.this.jobScheduler.addMapTask((MapperTask) task);
-						} else {
-							JobTracker.this.jobScheduler.addReduceTask((ReducerTask) task);
+			while (true) {
+				if (Hdfs.DEBUG) {
+					System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTrackerCheck start running");
+				}
+				Set<String> taskTrackers = JobTracker.this.taskTrackerTbl.keySet();
+				for (String taskTrackerIp : taskTrackers) {
+					long lastHeartBeat = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getTimeStamp();
+					if (System.currentTimeMillis() - lastHeartBeat >= MapReduce.JobTracker.TASK_TRACKER_EXPIRATION) {
+						if (Hdfs.DEBUG) {
+							System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTracker " + taskTrackerIp + " not available now, reschedule all relate tasks");
+						}
+						/* mark the TaskTracker as unavailable so that further tasks
+						 * will not be scheduled into its task queue */
+						TaskTrackerInfo taskTrackerInfo = JobTracker.this.taskTrackerTbl.get(taskTrackerIp);
+						synchronized(taskTrackerInfo) {
+							//taskTrackerInfo.disable();
+						}
+						/* re-schedule all tasks previously complete and currently running on this TaskTracker */
+						/* A. re-schedule tasks in associative scheduling queue */
+						//synchronized(JobTracker.this.jobScheduler.taskScheduleTbl) {
+						Queue<Task> tasks = JobTracker.this.jobScheduler.taskScheduleTbl.get(taskTrackerIp);
+						synchronized(tasks) {
+							for (Task task : tasks) {
+								if (task instanceof MapperTask) {
+									JobTracker.this.jobScheduler.addMapTask((MapperTask) task);
+								} else {
+									JobTracker.this.jobScheduler.addReduceTask((ReducerTask) task);
+								}
+							}
+						}
+
+						/* clean the queue */
+						JobTracker.this.jobScheduler.taskScheduleTbl.put(taskTrackerIp, new PriorityBlockingQueue<Task>(MAX_NUM_MAP_TASK, new SchedulerComparator()));;
+						//}
+						/* B. re-schedule related tasks on this TaskTracker */
+						Set<String> taskIds = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getRelatedTasks();
+						for (String taskId : taskIds) {
+							Task taskToSchedule = JobTracker.this.taskTbl.get(taskId);
+							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(taskToSchedule.getJobId());
+							if (taskToSchedule instanceof MapperTask) {
+								if (jobStatus.mapperStatusTbl.get(taskId).status
+										== WorkStatus.SUCCESS) {
+									jobStatus.mapTaskLeft++;
+									jobStatus.mapperStatusTbl.get(taskId).status = WorkStatus.RUNNING;
+								}
+								JobTracker.this.jobScheduler.addMapTask((MapperTask) taskToSchedule);
+							} else {
+								/* only re-schedule currently running reducer task */
+								if (jobStatus.reducerStatusTbl.get(taskId).status
+										== WorkStatus.RUNNING) {
+									JobTracker.this.jobScheduler.addReduceTask((ReducerTask) taskToSchedule);
+								}
+							}
 						}
 					}
-					
-					//}
-					/* B. re-schedule related tasks on this TaskTracker */
+				}
+				try {
+					Thread.sleep(1000 * 20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			

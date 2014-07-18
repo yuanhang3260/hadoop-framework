@@ -15,9 +15,9 @@ public class Task implements Serializable {
 	private transient Process procRef;
 	private int bindProcTimes = 0;
 	private String filePrefix;
-	int priorityLevel;
+	transient int priorityLevel;
 	/* indicate the number of times that this task has been re-scheduled after failure */
-	int rescheduleNum;
+	transient int rescheduleNum;
 	WorkStatus status;
 	
 	public Task(String jobId, String tid, int level) {

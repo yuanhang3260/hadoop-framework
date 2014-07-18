@@ -63,9 +63,13 @@ public class taskTrackerSimulator {
 					
 					allStatus.add(status);
 				}
+				if (ack.newAddedTasks.size() > 0) {
+					Thread.sleep(1000 * 60);//make it unavailable
+				}
 				
 				Thread.sleep(1000 * 5);
-				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
+				//report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
+				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, new ArrayList<TaskStatus>());
 				ack = jtStub.heartBeat(report);
 			}
 			
