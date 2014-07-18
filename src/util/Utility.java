@@ -75,7 +75,7 @@ public class Utility {
 			}
 			HDFSInputStream in = file.getInputStream();
 			int c = 0;
-			int buff_len = Hdfs.READ_BUFF_SIZE;
+			int buff_len = Hdfs.Client.READ_BUFFER_SIZE;
 			byte[] buff = new byte[buff_len];
 			File newFile = new File(localFilePath);
 			FileOutputStream out = null;

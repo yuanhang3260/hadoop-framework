@@ -36,7 +36,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 	public static void main(String[] args) {
 		
 		RunReducer<Writable, Writable, Writable, Writable> rr = new RunReducer<Writable, Writable, Writable, Writable>();
-		
+		boolean toFail = false;
 		try {
 			//Configure task
 			if (MapReduce.UNITEST) {
@@ -47,11 +47,16 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
 						.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
 				rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
+				toFail = taskTrackerS.toFail();
 			}
 			
 			RecordReconstructor<Writable, Writable> recordReconstructor = 
 					new RecordReconstructor<Writable, Writable>();
 			
+			
+			if (MapReduce.TaskTracker.REDUCER_FAULT_TEST && toFail) {
+				System.exit(134);
+			}
 			//Collect Partition
 			if (MapReduce.UNITEST) {
 				for (int i = 0; i < 2; i++) {
