@@ -18,6 +18,7 @@ import java.util.List;
 
 import mapreduce.Job;
 import mapreduce.io.Split;
+import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
@@ -100,7 +101,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 
 	@Override
-	public String join(String ip, int port, int mapSlots, int reduceSlots)
+	public String join(String ip, int port, int mapSlots)
 			throws RemoteException {
 		
 		this.taskTrackerIp = ip;
@@ -155,6 +156,12 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	public int checkReduceProgress(String jobId) throws RemoteException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public JobStatus getJobProgress(String jobId) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
