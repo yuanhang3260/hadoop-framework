@@ -31,12 +31,20 @@ public class TaskTrackerInfo {
 	
 	public void addTask(List<Task> tasks) {
 		for (Task task : tasks) {
-			this.relateTasks.add(task.getTaskId());
+			String taskId = task.getTaskId();
+			if (taskId == null) {
+				System.out.println("DEBUG: taskId null");
+			}
+			this.relateTasks.add(taskId);
 		}
 	}
 	
 	public void removeTask(String taskId) {
 		this.relateTasks.remove(taskId);
+	}
+	
+	public Set<String> getRelatedTasks() {
+		return this.relateTasks;
 	}
 	
 	public String getIp() {

@@ -23,7 +23,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @return String the name of the Task Tracker upon success, the name is 
 	 * 				  currently formed by ip : port
 	 */
-	public String join(String ip, int port, int mapSlots, int reduceSlots) throws RemoteException;
+	public String join(String ip, int port, int numSlots) throws RemoteException;
 	
 	/**
 	 * Periodically heatBeat and get tasks assignment from job tracker
@@ -33,7 +33,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	public JobTrackerACK heartBeat(TaskTrackerReport report) throws RemoteException;
 	
 	/**
-	 * 
+	 * @deprecated
 	 * @param jobId
 	 * @return int The number of incomplete map tasks
 	 * @throws RemoteException
@@ -41,11 +41,18 @@ public interface JobTrackerRemoteInterface extends Remote {
 	public int checkMapProgress(String jobId) throws RemoteException;
 	
 	/**
-	 * 
+	 * @deprecated
 	 * @param jobId
 	 * @return int The number of incomplete reduce tasks
 	 * @throws RemoteException
 	 */
 	public int checkReduceProgress(String jobId) throws RemoteException;
 	
+	/**
+	 * Client get a job's current progress by this function
+	 * @param jobId
+	 * @return JobStatus current status of the job
+	 * @throws RemoteException
+	 */
+	public JobStatus getJobProgress(String jobId) throws RemoteException;
 }

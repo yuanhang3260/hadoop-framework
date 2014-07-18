@@ -105,7 +105,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		this.taskTrackerIp = Inet4Address.getLocalHost().getHostAddress();
 		this.name = 
 			this.jobTrackerStub.join( this.taskTrackerIp,
-				this.registryPort, this.slots, 0); //TODO: FIX THE LAST ARGUMENT
+				this.registryPort, this.slots); //TODO: FIX THE LAST ARGUMENT
 		
 		/* Finish the TaskTracker temporary folder */
 		this.taskTrackerTmpFolder += "/" + this.name;
@@ -219,10 +219,12 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				TaskTrackerReport report = reporter();
 				
 				JobTrackerACK ack = null;
+				
 				try {
 					ack = TaskTracker.this
 							.jobTrackerStub.heartBeat(report); //ack is local variable
 				} catch (RemoteException e1) {
+
 					// wait for next heart beat;
 					try {
 						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
