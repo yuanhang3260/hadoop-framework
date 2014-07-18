@@ -57,6 +57,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			if (MapReduce.TaskTracker.REDUCER_FAULT_TEST && toFail) {
 				System.exit(134);
 			}
+			
 			//Collect Partition
 			if (MapReduce.UNITEST) {
 				for (int i = 0; i < 2; i++) {

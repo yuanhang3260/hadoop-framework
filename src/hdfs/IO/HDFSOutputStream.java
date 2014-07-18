@@ -36,9 +36,9 @@ public class HDFSOutputStream implements Serializable {
 		this.nameNodeStub = stub;
 	}
 
-	public void write(byte[] content) throws IOException {
+	public void write(byte[] b) throws IOException {
 		
-		if (this.chunkOffset == this.chunksize && content.length > 0 || firstWrite) { //Apply for a new chunk
+		if (this.chunkOffset == this.chunksize && b.length > 0 || firstWrite) { //Apply for a new chunk
 			file.addChunk();
 			this.chunkOffset = 0;
 		}
@@ -54,11 +54,13 @@ public class HDFSOutputStream implements Serializable {
 		int bufferOffset = 0;
 
 		
-		while (bufferOffset < content.length) {
+		while (bufferOffset < b.length) {
 			
-			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
-				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
-				System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
+			if (availableBytes + bufferOffset < b.length) { // need to create a new chunk
+				byte[] writeToDataNodeBuf = Arrays.copyOfRange(b, bufferOffset, bufferOffset + availableBytes);
+				if (Hdfs.DEBUG) {
+					System.out.println("DEBUG HDFSOutputStream.write():\twrite to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
+				}
 				bufferOffset += availableBytes;
 				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
 					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
@@ -68,22 +70,22 @@ public class HDFSOutputStream implements Serializable {
 				/* Continue writing till new line feed */
 				if (writeToDataNodeBuf[writeToDataNodeBuf.length - 1] != '\n') {
 					int i = 0;
-					while (bufferOffset < content.length && content[bufferOffset] != '\n') {
+					while (bufferOffset < b.length && b[bufferOffset] != '\n') {
 						i++;
 						bufferOffset++;
 					}
-					if (bufferOffset < content.length && content[bufferOffset] == '\n') {
+					if (bufferOffset < b.length && b[bufferOffset] == '\n') {
 						i++;
 						bufferOffset++;
 					}
-					byte[] actualWrittenBuf = Arrays.copyOfRange(content, bufferOffset - i, bufferOffset);
+					byte[] actualWrittenBuf = Arrays.copyOfRange(b, bufferOffset - i, bufferOffset);
 					for (int j = 0; j < getCurrentChunk().getReplicaFactor(); j++) {
 						writeToDataNode(actualWrittenBuf, getCurrentChunk().getDataNode(j), getCurrentChunk().getChunkName());
 					}
 				}
 				
 				/* Apply for a new chunk */
-				if (bufferOffset < content.length) {
+				if (bufferOffset < b.length) {
 					file.addChunk();
 					this.chunkOffset = 0;
 					availableBytes = this.chunksize;
@@ -91,9 +93,9 @@ public class HDFSOutputStream implements Serializable {
 					break;
 				}
 			} else { // enough to finish write
-				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, content.length);
+				byte[] writeToDataNodeBuf = Arrays.copyOfRange(b, bufferOffset, b.length);
 				if (Hdfs.DEBUG) {
-					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
+					System.out.println("DEBUG HDFSOutputStream.wirte():\t[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + b.length);
 				}
 				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
 					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
@@ -104,29 +106,14 @@ public class HDFSOutputStream implements Serializable {
 
 		}
 		if (Hdfs.DEBUG) {
-			System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
+			System.out.println("DEBUG HDFSOutputStream.write():\tFinish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
 		}
 	}
 	
 	
 	
 	public void close() throws IOException{
-//		List<HDFSChunk> allChunks = file.getChunkList();
-//		for (HDFSChunk chunk : allChunks) {
-//			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
-//				try {
-//					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
-//					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-//					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
-//				} catch (RemoteException e) {
-//					throw new IOException("Cannot connect to Name Node");
-//				} catch (NotBoundException e) {
-//					throw new IOException("Cannot connect to Name Node");
-//				}
-//			}
-//		}
 		this.nameNodeStub.commitFile(file);
-
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {

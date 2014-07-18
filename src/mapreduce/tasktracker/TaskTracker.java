@@ -332,6 +332,17 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 											System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
 												+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
 												task.getJobId(), task.getTaskId(), type, exitVal);
+											
+											byte[] errBuff = new byte[1024];
+											int c = 0;
+											try {
+												while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
+													System.out.print(new String(errBuff, 0 ,c));
+												}
+											} catch (IOException e) {
+												e.printStackTrace();
+											}
+											
 										}
 									}
 								} catch (IllegalThreadStateException e) {

@@ -1,5 +1,6 @@
 package mapreduce.task;
 
+import java.io.InputStream;
 import java.io.Serializable;
 
 import mapreduce.jobtracker.WorkStatus;
@@ -13,6 +14,7 @@ public class Task implements Serializable {
 	private String jobId;
 	private String tid;
 	private transient Process procRef;
+	private transient InputStream ErrorInputStream;
 	private int bindProcTimes = 0;
 	private String filePrefix;
 	transient int priorityLevel;
@@ -75,7 +77,14 @@ public class Task implements Serializable {
 	
 	public void setProcRef(Process p) {
 		this.procRef = p;
+		this.ErrorInputStream = p.getErrorStream();
 	}
+	
+	public InputStream getErrInputStream() {
+		return this.ErrorInputStream;
+	}
+	
+
 		
 	/*--------- Task status update ----------*/
 	public void startTask() {
