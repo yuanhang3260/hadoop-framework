@@ -16,7 +16,9 @@ import java.util.Date;
 import java.util.List;
 
 import mapreduce.io.Split;
+import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
+import mapreduce.jobtracker.WorkStatus;
 
 public class JobClient {
 	public static String runJob(JobConf conf) {
@@ -40,16 +42,33 @@ public class JobClient {
 			
 			int prevMap = -1; 
 			int prevReduce = reduceTotal;
+			int prevRescheduleNum = 0;
+			System.out.println(String.format("INFO: %s Job (Id = %s) start running", dateFormat.format( new Date()), jobId));
+			System.out.println("INFO: Number of Map task = " + mapTotal);
+			System.out.println("INFO: Number of Reduce task = " + reduceTotal);
 			while (true) {
 				Thread.sleep(1000 * 3);
-				int numMapIncomplete = jobTrackerStub.checkMapProgress(jobId);
-				int numReduceIncomplete = jobTrackerStub.checkReduceProgress(jobId);
+//				int numMapIncomplete = jobTrackerStub.checkMapProgress(jobId);
+//				int numReduceIncomplete = jobTrackerStub.checkReduceProgress(jobId);
+				JobStatus jobStatus = jobTrackerStub.getJobProgress(jobId);
+				int numMapIncomplete = jobStatus.mapTaskLeft;
+				int numReduceIncomplete = jobStatus.reduceTaskLeft;
+				
+				if (jobStatus.status == WorkStatus.FAILED) {
+					System.out.println(String.format("INFO: Job (Id = %S) failed, existed from execution!", jobId));
+					break;
+				}
+				
+				if (jobStatus.rescheduleNum != prevRescheduleNum) {
+					System.out.println(String.format("INFO: Job (Id = %S) failed, try reschedule now!", jobId));
+					prevRescheduleNum = jobStatus.rescheduleNum;
+				}
 				if (numMapIncomplete != prevMap) {
 					System.out.print(String.format("INFO: %s In Map Progress, current progress: %.2f%% ", dateFormat.format(new Date()), 100 * (float)(mapTotal - numMapIncomplete) / (float)mapTotal));
 					System.out.println(String.format("(%d / %d)", mapTotal - numMapIncomplete, mapTotal));
 					prevMap = numMapIncomplete;
 					if (numMapIncomplete == 0) {
-						System.out.println("INFO: Entering Reduce Progress");
+						System.out.println(String.format("INFO: Job (Id = %s) enter reduce process", jobId));
 					}
 				}
 

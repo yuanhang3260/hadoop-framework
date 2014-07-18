@@ -62,7 +62,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	@Override
-	public synchronized String join(String ip, int port, int mapSlots, int reduceSlots) {
+	public synchronized String join(String ip, int port, int numSlots) {
 		String taskTrackerName = ip + ":" + port;
 		if (!taskTrackerTbl.containsKey(ip)) {
 			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port/*, mapSlots, reduceSlots*/);
@@ -342,7 +342,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						/* disable the bad task tracker so that the failed task
 						 * will not be scheduled to this TaskTracker */
 						TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
-						badTaskTracker.disable();
+						//badTaskTracker.disable();
 						this.jobScheduler.addMapTask((MapperTask) task);
 						badTaskTracker.enable();
 					} else {
@@ -382,6 +382,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	private void resetJob(JobStatus jobStatus) {
+		if (jobStatus.rescheduleNum >= MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {
+			jobFail(jobStatus.jobId);
+			return;
+		}
+		jobStatus.rescheduleNum++;
 		jobStatus.mapTaskLeft = jobStatus.mapTaskTotal;
 		jobStatus.reduceTaskLeft = jobStatus.reduceTaskTotal;
 		/* delete result on HDFS from reducer */
@@ -411,6 +416,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 	}
 	
+	/**
+	 * Upon job failure, set the status of the job as FAILED so that the client
+	 * will get notified eventually
+	 * @param jobId
+	 */
+	private void jobFail(String jobId) {
+		this.jobStatusTbl.get(jobId).status = WorkStatus.FAILED;
+	}
+	
 	@Override
 	public int checkMapProgress(String jobId) throws RemoteException {
 		return this.jobStatusTbl.get(jobId).mapTaskLeft;
@@ -419,6 +433,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	@Override
 	public int checkReduceProgress(String jobId) throws RemoteException {
 		return this.jobStatusTbl.get(jobId).reduceTaskLeft;
+	}
+	
+	@Override
+	public JobStatus getJobProgress(String jobId) throws RemoteException {
+		return this.jobStatusTbl.get(jobId);
 	}
 	
 	/* JobScheduler */
