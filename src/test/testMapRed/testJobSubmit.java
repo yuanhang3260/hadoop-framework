@@ -20,7 +20,6 @@ public class testJobSubmit {
 		conf.setNumReduceTasks(2);
 		conf.setPriority(0);
 		
-		
 		String jobId = JobClient.runJob(conf);
 		System.out.println("Job ID: " + jobId);
 		System.out.println("DEBUG testJobSubmit(): numReduceTasks = " + conf.getNumReduceTasks());

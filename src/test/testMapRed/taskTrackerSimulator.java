@@ -18,9 +18,14 @@ import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.MapperTask;
+import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
 
 public class taskTrackerSimulator {
+	
+	public static boolean randomStatusGen = false;
+	public static int NUM_OF_HEART_BEAT = 7;
+	
 	public static void main(String[] args) {
 		try {
 			Registry jtRegistry = LocateRegistry.getRegistry(MapReduce.JobTracker.jobTrackerRegistryIp, MapReduce.JobTracker.jobTrackerRegistryPort);
@@ -31,25 +36,34 @@ public class taskTrackerSimulator {
 			JobTrackerACK ack = jtStub.heartBeat(report);
 			List<TaskStatus> allStatus;
 			
-			for (int i = 0; i < 20; i++) {
+			int reducerCount = 0;
+			
+			for (int i = 0; i < NUM_OF_HEART_BEAT; i++) {
 				System.out.println("DEBUG taskTrackerSimulator.main(): receive tasks from jobTracker:");
 				allStatus = new ArrayList<TaskStatus>();
 				for (Task task : ack.newAddedTasks) {
-					WorkStatus thisStatus = randomStatusGenerator();
+					WorkStatus thisStatus;
+					if (randomStatusGen) {
+						thisStatus = randomStatusGenerator();
+					} else {
+						thisStatus = WorkStatus.SUCCESS;
+						if ( task instanceof ReducerTask && reducerCount < 2) {
+							thisStatus = WorkStatus.FAILED;
+							reducerCount++;
+						}
+					}
 					TaskStatus status = new TaskStatus(task.getJobId(), task.getTaskId(), thisStatus, Inet4Address.getLocalHost().getHostAddress(), 9999);
 					System.out.print("Get task: JobId: " + task.getJobId() + " TaksId: " + task.getTaskId() + " Process result: " + thisStatus);
 					if (task instanceof MapperTask) {
 						System.out.println(" Map task");
 					} else {
 						System.out.println(" Reduce task");
-						if (i != 4) {
-							status.status = WorkStatus.FAILED;
-						}
 					}
+					
 					allStatus.add(status);
 				}
 				
-				Thread.sleep(1000 * 10);
+				Thread.sleep(1000 * 5);
 				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
 				ack = jtStub.heartBeat(report);
 			}

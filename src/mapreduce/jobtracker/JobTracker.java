@@ -3,7 +3,9 @@ package mapreduce.jobtracker;
 import global.Hdfs;
 import global.MapReduce;
 import hdfs.DataStructure.DataNodeEntry;
+import hdfs.NameNode.NameNodeRemoteInterface;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,6 +21,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+
 import mapreduce.Job;
 import mapreduce.io.Split;
 import mapreduce.task.MapperTask;
@@ -125,13 +128,18 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + reducerSEQ);
+		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + "-" + "part" + "-" + reducerSEQ);
 		return task;
 	}
 	
 	private synchronized String nameTask() {
 		long taskName = taskNaming++;
-		return "task" + Long.toString(taskName);
+		String name = String.format("task%05d", taskName);
+		return name;
+	}
+	
+	private String nameJob() {
+		return String.format("%d", new Date().getTime());
 	}
 	
 	/**
@@ -139,20 +147,30 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	@Override
 	public synchronized String submitJob(Job job) {
-		String jobId = String.format("%d", new Date().getTime());
+		String jobId = nameJob();
 		job.setJobId(jobId);
 		jobTbl.put(jobId, job);
 		
 		/* initialize job status record */
-		JobStatus jobStatus = new JobStatus(job.getSplit().size(), job.getJobConf().getNumReduceTasks());
-		if (Hdfs.DEBUG) {
-			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
-		}
-		this.jobStatusTbl.put(jobId, jobStatus);
+//		JobStatus jobStatus = new JobStatus(job.getSplit().size(), job.getJobConf().getNumReduceTasks());
+//		if (Hdfs.DEBUG) {
+//			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
+//		}
+//		this.jobStatusTbl.put(jobId, jobStatus);
+		initJob(job);
 		System.out.println("DEBUG JobTracker.submitJob() jobId: " + jobId);
 		initMapTasks(job);
 		
 		return jobId;
+	}
+	
+	
+	private void initJob(Job job) {
+		JobStatus jobStatus = new JobStatus(job.getJobId(), job.getSplit().size(), job.getJobConf().getNumReduceTasks());
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
+		}
+		this.jobStatusTbl.put(job.getJobId(), jobStatus);
 	}
 	
 	/**
@@ -207,6 +225,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			ReducerTask task = createReduceTask(job.getJobId(), job.getJobConf().getPriority(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
 			this.taskTbl.put(task.getTaskId(), task);
 			this.jobScheduler.addReduceTask(task);
+			
 			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
 			this.jobStatusTbl.get(job.getJobId()).reducerStatusTbl.put(task.getTaskId(), stat);
 		}
@@ -215,13 +234,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	@Override
 	public JobTrackerACK heartBeat(TaskTrackerReport report) {
-		if (Hdfs.DEBUG) {
-			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
-		}
+//		if (Hdfs.DEBUG) {
+//			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
+//		}
 		
-		if (Math.random() > 0.5) {
-			return null;
-		}
+//		if (Math.random() > 0.5) {
+//			return null;
+//		}
 		
 		//TODO: leave for parallel
 		
@@ -297,6 +316,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				} else {
 					System.out.println(" reduce task");
 					jobStatus.reduceTaskLeft--;
+					/* if job finished, check if all reducers are SUCCESS,
+					 * otherwise restart the whole job */
+					if (jobStatus.reduceTaskLeft == 0 && !reducerAllSuccess(jobStatus.reducerStatusTbl)) {
+						resetJob(jobStatus);
+					}
+					
 				}			
 			} else if (taskStatus.status == WorkStatus.FAILED) {
 				/* The task will be scheduled again so the intermediate result may not be on this TaskTracker */
@@ -308,30 +333,81 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				}
 				/* try to re-schedule this task */
 				Task task = this.taskTbl.get(taskStatus.taskId);
-				if (task.getRescheduleNum() < MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {
-					/* increase schedule priority of this task */
-					/* disable the bad task tracker so that the failed task
-					 * will not be scheduled to this TaskTracker */
-					TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
-					badTaskTracker.disable();
+				if (task.getRescheduleNum() < MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {				
 					task.increasePriority();
 					task.increaseRescheuleNum();
 					if (isMapper) {
 						System.out.println(" map task");
+						/* increase schedule priority of this task */
+						/* disable the bad task tracker so that the failed task
+						 * will not be scheduled to this TaskTracker */
+						TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
+						badTaskTracker.disable();
 						this.jobScheduler.addMapTask((MapperTask) task);
+						badTaskTracker.enable();
 					} else {
 						//TODO:re-schedule the whole job
 						System.out.println(" reduce task");
-						this.jobScheduler.addReduceTask((ReducerTask) task);
-					}
-					badTaskTracker.enable();
+						//this.jobScheduler.addReduceTask((ReducerTask) task);
+						jobStatus.reduceTaskLeft--;
+						/* if job finished, check if all reducers are SUCCESS,
+						 * otherwise restart the whole job */
+						if (jobStatus.reduceTaskLeft == 0 && !reducerAllSuccess(jobStatus.reducerStatusTbl)) {
+							resetJob(jobStatus);
+						}
+					}					
 					
 				} else {
 					/* reach max task reschedule limit, task failed / job failed */
-					System.out.println("                                     Task " + taskStatus.taskId + " cannot be rescheduled anymore");
+					System.out.println("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in Job " + taskStatus.jobId + " cannot be rescheduled anymore");
+					/* mark this job as failed */
+					jobStatus.status = WorkStatus.FAILED;
 				}
 
 			}
+		}
+	}
+	
+	private boolean reducerAllSuccess(ConcurrentHashMap<String, TaskStatus> reducerStatusTbl) {
+		Set<String> taskId = reducerStatusTbl.keySet();
+		for (String id : taskId) {
+			if (reducerStatusTbl.get(id).status == WorkStatus.FAILED) {
+				if (Hdfs.DEBUG) {
+					System.out.println("DEBUG JobTracker.reducerAllSuccess(): FAILED reducer task found, taskId: " + id);
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void resetJob(JobStatus jobStatus) {
+		jobStatus.mapTaskLeft = jobStatus.mapTaskTotal;
+		jobStatus.reduceTaskLeft = jobStatus.reduceTaskTotal;
+		/* delete result on HDFS from reducer */
+		try {
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			String outputPath = this.jobTbl.get(jobStatus.jobId).getJobConf().getOutputPath();
+			for (int i = 0; i < jobStatus.reduceTaskTotal; i++) {
+				try {
+					nameNodeStub.delete(String.format("%s-part-%d", outputPath, i));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		jobStatus.reducerStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
+		Set<String> mapTaskIds = jobStatus.mapperStatusTbl.keySet();
+		for (String id : mapTaskIds) {
+			jobStatus.mapperStatusTbl.get(id).status = WorkStatus.RUNNING;
+			this.jobScheduler.addMapTask((MapperTask) this.taskTbl.get(id));
 		}
 	}
 	
@@ -374,8 +450,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					}
 				}
 			}
-
-			
+	
 		}
 		
 		/**
@@ -464,44 +539,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			}
 			taskScheduleTbl.get(bestIp).add(task); 
 		}
-		
-//		public synchronized TaskTrackerInfo pickTaskTrackerForMap(MapperTask task) {
-//			int chunkIdx = task.getSplit().getChunkIdx();
-//			List<DataNodeEntry> nodes = task.getSplit().getFile().getChunkList().get(chunkIdx).getAllLocations();
-//			for (DataNodeEntry node : nodes) {
-//				String ip = node.dataNodeRegistryIP;
-//				if (taskTrackerTbl.containsKey(ip)) {
-//					TaskTrackerInfo taskTrackerInfo = taskTrackerTbl.get(ip);
-//					if (taskTrackerInfo.getStatus() == TaskTrackerInfo.Status.RUNNING && 
-//							taskTrackerInfo.getMapSlot() > 0) {
-//						return taskTrackerInfo;
-//					}
-//				}
-//			}
-//			
-//			/* all data nodes with that split locally is busy now, pick a nearest one */
-//			long baseIp = ipToLong(nodes.get(0).dataNodeRegistryIP);
-//			long minDist = Long.MAX_VALUE;
-//			String nearestIp = null;
-//			Set<String> allNodes = taskTrackerTbl.keySet();
-//			for (String ip : allNodes) {
-//				TaskTrackerInfo taskTrackerInfo = taskTrackerTbl.get(ip);
-//				if (taskTrackerInfo.getStatus() == TaskTrackerInfo.Status.RUNNING && taskTrackerInfo.getMapSlot() > 0) {
-//					long thisIp = ipToLong(ip);
-//					long dist = Math.abs(thisIp - baseIp);
-//					if (dist < minDist) {
-//						nearestIp = ip;
-//						minDist = dist;
-//					}
-//				}
-//			}
-//			if (nearestIp != null) {
-//				return taskTrackerTbl.get(nearestIp);
-//			} else {
-//				/* all tasktrackers are full */
-//				return null;
-//			}
-//		}
 		
 		private long ipToLong(String ip) {
 			String newIp = ip.replace(".", "");
