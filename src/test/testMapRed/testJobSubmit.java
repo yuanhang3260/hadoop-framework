@@ -12,7 +12,7 @@ public class testJobSubmit {
 		conf.setJobName("jobSubmitTest");
 		
 		conf.setInputPath("hello");
-		conf.setOutputPath("hello_diubao");
+		conf.setOutputPath("hello_correct");
 		
 		conf.setMapperClass(WordCountMapper.class);
 		conf.setReducerClass(WordCountReducer.class);

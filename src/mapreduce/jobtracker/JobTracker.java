@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,7 +62,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	@Override
-	public synchronized String join(String ip, int port, int numSlots) {
+	public String join(String ip, int port, int numSlots) {
 		String taskTrackerName = ip + ":" + port;
 		if (!taskTrackerTbl.containsKey(ip)) {
 			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port/*, mapSlots, reduceSlots*/);
@@ -541,9 +540,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		@Override
 		public void run() {
 			while (true) {
-				if (Hdfs.DEBUG) {
-					System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTrackerCheck start running");
-				}
+//				if (Hdfs.DEBUG) {
+//					System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTrackerCheck start running");
+//				}
 				Set<String> taskTrackers = JobTracker.this.taskTrackerTbl.keySet();
 				for (String taskTrackerIp : taskTrackers) {
 					long lastHeartBeat = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getTimeStamp();

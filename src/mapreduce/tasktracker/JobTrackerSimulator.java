@@ -100,7 +100,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 
 	@Override
-	public String join(String ip, int port, int mapSlots, int reduceSlots)
+	public String join(String ip, int port, int mapSlots)
 			throws RemoteException {
 		
 		this.taskTrackerIp = ip;
