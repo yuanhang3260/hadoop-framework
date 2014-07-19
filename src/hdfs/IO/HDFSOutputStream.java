@@ -25,6 +25,7 @@ public class HDFSOutputStream implements Serializable {
 	private int chunksize;
 	private NameNodeRemoteInterface nameNodeStub;
 	private boolean firstWrite = true;
+	private boolean DEBUG = false;
 
 	
 	
@@ -48,7 +49,7 @@ public class HDFSOutputStream implements Serializable {
 		}
 		
 		int availableBytes = this.chunksize - this.chunkOffset;
-		if (Hdfs.DEBUG) {
+		if (Hdfs.DEBUG && this.DEBUG) {
 			System.out.println("DEBUG HDFSOutputStream.write(): availabelBytes = " + availableBytes); 
 		}
 		int bufferOffset = 0;
@@ -58,7 +59,7 @@ public class HDFSOutputStream implements Serializable {
 			
 			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
-				if (Hdfs.DEBUG) {
+				if (Hdfs.DEBUG && this.DEBUG) {
 					System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
 				}
 				bufferOffset += availableBytes;
@@ -94,7 +95,7 @@ public class HDFSOutputStream implements Serializable {
 				}
 			} else { // enough to finish write
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, content.length);
-				if (Hdfs.DEBUG) {
+				if (Hdfs.DEBUG && this.DEBUG) {
 					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
 				}
 				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
@@ -105,7 +106,7 @@ public class HDFSOutputStream implements Serializable {
 			}
 
 		}
-		if (Hdfs.DEBUG) {
+		if (Hdfs.DEBUG && this.DEBUG) {
 			System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
 		}
 	}
@@ -132,7 +133,7 @@ public class HDFSOutputStream implements Serializable {
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
-		if (Hdfs.DEBUG) {
+		if (Hdfs.DEBUG  && this.DEBUG) {
 			System.out.println("DEBUG: HDFSOutputStream: Write to DataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
 		}
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
