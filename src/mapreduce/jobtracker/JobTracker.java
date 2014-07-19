@@ -198,6 +198,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		List<TaskStatus> ackTasks = new ArrayList<TaskStatus>();
 		if (allStatus != null) {
 			for (TaskStatus taskStatus : allStatus) {
+				if (this.jobStatusTbl.get(taskStatus.jobId).status
+						== WorkStatus.SUCCESS) {
+					/* if the job has already SUCCESS, discard further task update (from network partition etc.)*/
+					continue;
+				}
+				
 				/* update taskStatus */
 				//TODO: SERVERAL CASES EXIST!
 				updateTaskStatus(taskStatus);
@@ -299,7 +305,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						jobStatus.reduceTaskLeft--;
 						/* if job finished, check if all reducers are SUCCESS,
 						 * otherwise restart the whole job */
-						if (jobStatus.reduceTaskLeft == 0 && !reducerAllSuccess(jobStatus.reducerStatusTbl)) {
+						if (jobStatus.reduceTaskLeft == 0 /*&& !reducerAllSuccess(jobStatus.reducerStatusTbl)*/) {
 							resetJob(jobStatus);
 						}
 					}					

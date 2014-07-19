@@ -5,6 +5,7 @@ import hdfs.DataNode.DataNodeRemoteInterface;
 import hdfs.DataStructure.DataNodeEntry;
 import hdfs.DataStructure.HDFSChunk;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -64,8 +65,9 @@ public class HDFSInputStream implements Serializable{
 	 * Given a chunk index among this file's chunks, read the whole chunk
 	 * @param idx
 	 * @return String the whole chunk data
+	 * @throws Exception 
 	 */
-	public String readChunk(int idx) {
+	public String readChunk(int idx) throws Exception {
 		int size = fileChunkInfoList.size();
 		if (idx >= size) {
 			/* chunk index out of bound */
@@ -80,9 +82,11 @@ public class HDFSInputStream implements Serializable{
 			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.Common.DATA_NODE_SERVICE_NAME);
 			data = nodeStub.readChunk(chunkInfo.getChunkName());
 		} catch (RemoteException e) {
-			e.printStackTrace();
+			throw e;
 		} catch (NotBoundException e) {
-			e.printStackTrace();
+			throw e;
+		} catch (IOException e) {
+			throw new IOException("IOException", e);
 		}
 		return data;
 	}

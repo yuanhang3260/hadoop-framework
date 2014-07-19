@@ -122,6 +122,9 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-9);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-10);
 		}
 		
 	}

@@ -10,7 +10,7 @@ public class KeyValueLineRecordReader extends RecordReader<Text, Text>{
 	private String[] values;
 	private int index;
 	
-	public KeyValueLineRecordReader(Split s) {
+	public KeyValueLineRecordReader(Split s) throws Exception {
 		this.split = s;
 		HDFSInputStream in = this.split.file.getInputStream();
 		String content = in.readChunk(this.split.chunkIdx);

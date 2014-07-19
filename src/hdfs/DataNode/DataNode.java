@@ -123,7 +123,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		return;
 	}
 	
-	public String readChunk(String chunkName) throws RemoteException {
+	public String readChunk(String chunkName) throws IOException {
 		FileReader in = null;
 		StringBuilder sb = new StringBuilder();
 		try {
@@ -134,11 +134,13 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			while ((k = in.read(buf)) != -1) {
 				sb.append(buf, 0, k);
 			}
+			in.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw new FileNotFoundException("ChunkNotFound");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new IOException("IOException", e);
 		}
+		
 
 		return sb.toString();
 	}
