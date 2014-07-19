@@ -12,7 +12,7 @@ public class MapReduce {
 //		public static String jobTrackerRegistryIp = "localhost";
 
 		public static int MAX_RESCHEDULE_ATTEMPTS = 2;
-		public static long TASK_TRACKER_EXPIRATION = 1000 * 50;
+		public static long TASK_TRACKER_EXPIRATION = 1000 * 40;
 
 		public static int jobTrackerRegistryPort = 2000;
 	}

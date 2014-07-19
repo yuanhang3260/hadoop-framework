@@ -11,7 +11,8 @@ public class WordCountMapper extends Mapper<Text, Text, Text, IntWritable> {
 	public void map(Text key, Text value, OutputCollector<Text, IntWritable> output) {
 		String[] words = value.toString().split(" ");
 		for (String word : words) {
-			output.collect(new Text(word), new IntWritable(1));
+			String filtered = word.replaceAll("[^a-zA-Z]", "");
+			output.collect(new Text(filtered), new IntWritable(1));
 		}
 	}
 
