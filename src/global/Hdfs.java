@@ -20,6 +20,8 @@ public class Hdfs {
 		
 		public static String DATA_NODE_SERVICE_NAME = "DataNode"; //Unconfigurable
 		
+		public static int DATA_NODE_NUM = 3;
+		
 	}
 
 	public static class NameNode {
@@ -28,20 +30,8 @@ public class Hdfs {
 		
 	}
 	
-	public static class DataNode1 {
-		public static int registryPort = 1100;
-	}
-	public static class DataNode2 {
-		public static int registryPort = 1101;
-	}
-	public static class DataNode3 {
-		public static int registryPort = 1102;
-	}
-	public static class DataNode4 {
-		public static int registryPort = 1103;
-	}
-	public static class DataNode5 {
-		public static int registryPort = 1104;
+	public static class DataNode {
+		public static int dataNodeRegistryPort = 1100;
 	}
 
 }
