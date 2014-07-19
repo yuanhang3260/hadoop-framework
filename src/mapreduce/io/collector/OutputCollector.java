@@ -2,6 +2,7 @@ package mapreduce.io.collector;
 
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
+import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -87,16 +88,14 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
 		HDFSFile file = nameNodeS.create(filename);
-		if (file == null) {
-			throw new IOException("Duplicate file name on HDFS.");
-		}
 		HDFSOutputStream out = file.getOutputStream();
+		HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 		
 		for (KeyValue<K, V> pair : this.keyvalueList) {
 			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
-			out.write(content);
+			bout.write(content);
 		}
-		out.close();
+		bout.close();
 	}
 	
 	public void collect(K key, V value) {

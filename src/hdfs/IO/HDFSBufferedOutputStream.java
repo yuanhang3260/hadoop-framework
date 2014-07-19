@@ -61,6 +61,10 @@ public class HDFSBufferedOutputStream implements Serializable {
 		fin.close();
 	}
 	
+	public void write(byte[] b) throws ArrayIndexOutOfBoundsException, IOException {
+		this.write(b, 0, b.length);
+	}
+	
 	public void write(byte[] b, int offset, int len) throws ArrayIndexOutOfBoundsException, IOException {
 		
 		if (Hdfs.DEBUG) {
