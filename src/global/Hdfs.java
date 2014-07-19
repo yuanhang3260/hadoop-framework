@@ -3,7 +3,7 @@ package global;
 /* port range: 1099 - 1148*/
 public class Hdfs {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	
 	public static int WRITE_BUFF_SIZE = 1024 * 1024;
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min

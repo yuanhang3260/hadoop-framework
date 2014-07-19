@@ -14,6 +14,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import mapreduce.Job;
@@ -36,61 +38,47 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	private int taskTrackerServerPort;
 	private int counter = 0;
 
-	private Task task;
+	private List<Task> taskList = Collections.synchronizedList(new LinkedList<Task>());
 	
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException, NotBoundException, InterruptedException {
+		
 		JobTrackerSimulator jt = new JobTrackerSimulator();
+		
 		Registry registry = LocateRegistry.createRegistry(MapReduce.JobTracker.jobTrackerRegistryPort);
 		JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) UnicastRemoteObject.exportObject(jt, 0);
 		registry.bind(MapReduce.JobTracker.jobTrackerServiceName, jtStub);
 		
+		int chunksNum = 8;
+		int reducerNum = 1;
+		
+		
 		String jid = "job001";
 		
-		String tid1 = "task001";
-		String tid2 = "task002";
-		String tid3 = "task003";
-		String tid4 = "task004";
-		String tid5 = "task005";
-		String tid6 = "task006";
+		String tidPrefix = "task";
+		int taskCounter = 1;
 		
+		/* Open file */
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
-		HDFSFile file1 = nameNodeS.open(MapReduce.TaskTrackerTest1.fileName);
+		HDFSFile file1 = nameNodeS.open("hello");
+		
+		Thread.sleep(1000 * 3);
+		
+		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
+			Split split = new Split(file1, mapperSEQ);
+			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, WordCountMapper.class, reducerNum));
+		}
 
+		Thread.sleep(1000 * 15);
 		
-		Split split1 = new Split(file1, 0);
-		Split split2 = new Split(file1, 1);
-		Split split3 = new Split(file1, 2);
-		
-		jt.task = new MapperTask(jid, tid1, split1, WordCountMapper.class, 3);
-		
-		Thread.sleep(1000 * 5);
-		jt.task = new MapperTask(jid, tid2, split2, WordCountMapper.class, 3);
-		
-		Thread.sleep(1000 * 5);
-		jt.task = new MapperTask(jid, tid3, split3, WordCountMapper.class, 3);
-
-		Thread.sleep(1000 * 5);
-		PartitionEntry[] partitionEntry0 = new PartitionEntry[3];
-		partitionEntry0[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry0[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry0[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		jt.task = new ReducerTask(jid, tid4, 0, WordCountReducer.class, partitionEntry0, "output-part1");
-
-		Thread.sleep(1000 * 5);
-		PartitionEntry[] partitionEntry1 = new PartitionEntry[3];
-		partitionEntry1[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry1[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry1[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		jt.task = new ReducerTask(jid, tid5, 1, WordCountReducer.class, partitionEntry1, "output-part2");
-		
-		Thread.sleep(1000 * 5);
-		PartitionEntry[] partitionEntry2 = new PartitionEntry[3];
-		partitionEntry2[0] = new PartitionEntry(tid1, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry2[1] = new PartitionEntry(tid2, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		partitionEntry2[2] = new PartitionEntry(tid3, "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
-		jt.task = new ReducerTask(jid, tid6, 2, WordCountReducer.class, partitionEntry2, "output-part3");
-		
+		for (int reducerSEQ = 0; reducerSEQ < reducerNum; reducerSEQ++) {
+			PartitionEntry[] partitionEntry = new PartitionEntry[chunksNum];
+			for (int i = 0; i < chunksNum; i++) {
+				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
+			}
+			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, WordCountReducer.class, partitionEntry, "output-part" + reducerSEQ));
+		}	
 
 	}
 	
@@ -121,28 +109,22 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		rst.newAddedTasks = new ArrayList<Task>();
 		rst.rcvTasks = new ArrayList<TaskStatus>();
 		
-		if (this.task != null) {
+		while (this.taskList.size() > 0) {
 			System.out.println("JobTrackerSimu: run a task!");
-			rst.newAddedTasks.add(this.task);
-			this.task = null;
-			
-			if (report != null && report.taskStatus != null && report.taskStatus.size() > 0 ) {
-				for (TaskStatus rcvTask : report.taskStatus) {
-					if (rcvTask.status == WorkStatus.FAILED || rcvTask.status == WorkStatus.SUCCESS) {
-						rst.rcvTasks.add(rcvTask);
-					}
-				}
+			synchronized (this.taskList) {
+				rst.newAddedTasks.add(this.taskList.get(0));
+				this.taskList.remove(0);
 			}
+		}
 			
-		} else {
-			if (report != null && report.taskStatus != null && report.taskStatus.size() > 0 ) {
-				for (TaskStatus rcvTask : report.taskStatus) {
-					if (rcvTask.status == WorkStatus.FAILED || rcvTask.status == WorkStatus.SUCCESS) {
-						rst.rcvTasks.add(rcvTask);
-					}
+		if (report != null && report.taskStatus != null && report.taskStatus.size() > 0 ) {
+			for (TaskStatus rcvTask : report.taskStatus) {
+				if (rcvTask.status == WorkStatus.FAILED || rcvTask.status == WorkStatus.SUCCESS) {
+					rst.rcvTasks.add(rcvTask);
 				}
 			}
 		}
+			
 		return rst;
 	}
 
