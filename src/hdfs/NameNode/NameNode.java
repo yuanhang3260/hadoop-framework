@@ -109,12 +109,12 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	
 	@Override
-	public synchronized HDFSFile create(String filePath) throws RemoteException {
+	public synchronized HDFSFile create(String filePath) throws RemoteException, IOException {
 		if (this.fileTbl.containsKey(filePath)) {
 			if (Hdfs.DEBUG) {
 				System.err.format("File(%s) is duplicated", filePath);
 			}
-			return null;
+			throw new IOException(String.format("File(%s) is duplicated", filePath));
 		} 
 		HDFSFile newFile = new HDFSFile(filePath, Hdfs.NameNode.REPLICA_FACTOR, this.nameNodeStub);
 		this.fileTbl.put(filePath, newFile);

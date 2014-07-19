@@ -2,6 +2,7 @@ package util;
 
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
+import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSInputStream;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
@@ -119,26 +120,28 @@ public class Utility {
 		byte[] buff = new byte[Hdfs.WRITE_BUFF_SIZE];
 		try {
 			FileInputStream in = new FileInputStream(newFile);
-			int readBytes;
+			int c;
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
-			if (file == null) {
-				System.out.println("Error! File name has been used.");
-				System.exit(-1);
-			}
 			HDFSOutputStream out = file.getOutputStream();
+			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 			
-			while ((readBytes = in.read(buff)) != -1) {
-				if (readBytes == 1024) {
+			while ((c = in.read(buff)) != -1) {
+				if (c == 1024) {
 					out.write(buff);
 				} else {
-					byte[] tmp_buff = Arrays.copyOfRange(buff, 0, readBytes);
+					byte[] tmp_buff = Arrays.copyOfRange(buff, 0, c);
 					out.write(tmp_buff);
 				}
 			}
-			out.close();
+			
+//			while ((c = in.read(buff)) != -1) {
+//				bout.write(buff, 0, c);
+//			}
+			
+			bout.close();
 			in.close();
 		} catch (Exception e) {
 			System.out.println("Error! Failed to put file to HDFS.");

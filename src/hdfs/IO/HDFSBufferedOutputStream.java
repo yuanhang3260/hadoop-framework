@@ -2,7 +2,6 @@ package hdfs.IO;
 
 import global.Hdfs;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -17,35 +16,24 @@ public class HDFSBufferedOutputStream implements Serializable {
 	private byte[] buff;
 	private HDFSOutputStream outputStream;
 	
-	private boolean toHDFS;
-	private FileOutputStream outputStreamToLocal;
-	
 	public HDFSBufferedOutputStream (HDFSOutputStream outputStream) {
-		this.toHDFS  = true;
 		this.outputStream = outputStream;
 		this.buffOffset = 0;
 		this.buff = new byte[Hdfs.WRITE_BUFF_SIZE];
 	}
 	
-	public HDFSBufferedOutputStream (FileOutputStream outputStream) {
-		this.toHDFS = false;
-		this.outputStreamToLocal = outputStream;
-		this.buffOffset = 0;
-		this.buff = new byte[Hdfs.WRITE_BUFF_SIZE];
-	}
-	
-	public void write(byte[] b, int offset, int len) throws IOException {
+	public void write(byte[] b, int offset, int len) throws ArrayIndexOutOfBoundsException, IOException {
 		
-		System.out.println("------------------>Objective:" + new String(b, offset, len));
+		if (Hdfs.DEBUG) {
+			System.out.println("------------------>Objective:" + new String(b, offset, len));
+		}
 		
 		if (offset + len > b.length) {
-			throw new IOException("Out of index");
+			throw new ArrayIndexOutOfBoundsException("" + offset + len);
 		}
 		
 		if ((this.buff.length - this.buffOffset) >= len) {
-			System.arraycopy(b, offset, this.buff, this.buffOffset, len);
 			this.buffOffset += len;
-			System.out.println("Finish writing, current buffer:" + new String(this.buff, 0, this.buffOffset));
 		} 
 		
 		else {
@@ -56,43 +44,39 @@ public class HDFSBufferedOutputStream implements Serializable {
 				
 				int towrite = Math.min(len - written, this.buff.length - this.buffOffset);
 				
-				System.out.format("Put %d to buffer.\n", towrite);
-				
+				/* Copy to buffer */
 				System.arraycopy(b, offset + written, this.buff, this.buffOffset, towrite);
 				this.buffOffset += towrite;
 				written += towrite;
 				
+				/* Stop writing to buffer if all bytes are fit in */
 				if (written == len) {
 					break;
 				} else {
-					if (toHDFS) {
-						this.outputStream.write(buff);
-					} else {
-						this.outputStreamToLocal.write(buff);
+					this.outputStream.write(buff);
+					
+					if (Hdfs.DEBUG) {
 						System.out.print("Flush:" + new String(this.buff));
 					}
+					
+					/* Reset the inner buffer offset */
 					this.buffOffset = 0;
-					System.out.println("\twritten=" + written + "\tpointer=" + (offset + written) + "\tbuffOffset=" + this.buffOffset);
+					if (Hdfs.DEBUG) {
+						System.out.println("\twritten=" + written + "\tpointer=" + (offset + written) + "\tbuffOffset=" + this.buffOffset);
+					}
 				}
-				
-				
 			}
 		}
-		System.out.format("<------------------status:buff offset=%d\n\n\n",this.buffOffset);
+		
+		if (Hdfs.DEBUG) {
+			System.out.format("<------------------status:buff offset=%d\n\n\n",this.buffOffset);
+		}
 	}
 	
 	public void close() throws IOException {
-		if (toHDFS) {
-			if (this.buffOffset != 0) {
-				this.outputStream.write(Arrays.copyOfRange(this.buff, 0, this.buffOffset));
-			}
-			this.outputStream.close();
-		} else {
-			if (this.buffOffset != 0) {
-				this.outputStreamToLocal.write(Arrays.copyOfRange(this.buff, 0, this.buffOffset));
-				System.out.println("Close:" + new String(this.buff, 0, this.buffOffset));
-			}
-			this.outputStreamToLocal.close();
+		if (this.buffOffset != 0) {
+			this.outputStream.write(Arrays.copyOfRange(this.buff, 0, this.buffOffset));
 		}
+		this.outputStream.close();
 	}
 }

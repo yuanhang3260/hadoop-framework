@@ -5,7 +5,7 @@ public class Hdfs {
 
 	public static boolean DEBUG = false;
 	
-	public static int WRITE_BUFF_SIZE = 1024;
+	public static int WRITE_BUFF_SIZE = 512;
 	public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
 
 	public static class NameNode {

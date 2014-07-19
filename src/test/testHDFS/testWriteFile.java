@@ -11,7 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class testWriteFile {
-	public static void main (String[] args) throws RemoteException, NotBoundException {
+	public static void main (String[] args) throws NotBoundException, IOException {
 		String nameNodeRegistryIP = "128.237.222.59";
 		int nameNodeRegistryPort = 1099;
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
