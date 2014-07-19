@@ -194,13 +194,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		this.taskTrackerTbl.get(report.taskTrackerIp).updateTimeStamp();
 		this.taskTrackerTbl.get(report.taskTrackerIp).enable();
 		List<TaskStatus> allStatus = report.taskStatus;
+		
 		/* acknowledge those FAILED and SUCCESS tasks */
 		List<TaskStatus> ackTasks = new ArrayList<TaskStatus>();
 		if (allStatus != null) {
 			for (TaskStatus taskStatus : allStatus) {
 				if (this.jobStatusTbl.get(taskStatus.jobId).status
-						== WorkStatus.SUCCESS) {
-					/* if the job has already SUCCESS, discard further task update (from network partition etc.)*/
+						!= WorkStatus.RUNNING) {
+					/* if the job is not RUNNING, discard further task update (from network partition etc.)*/
 					continue;
 				}
 				
@@ -225,6 +226,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* update tasks status */
 		TaskTrackerInfo taskTracker = this.taskTrackerTbl.get(report.taskTrackerIp);
+		
 		taskTracker.addTask(assignment);
 		
 		JobTrackerACK ack = new JobTrackerACK(assignment, ackTasks);
@@ -272,8 +274,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					jobStatus.reduceTaskLeft--;
 					/* if job finished, check if all reducers are SUCCESS,
 					 * otherwise restart the whole job */
-					if (jobStatus.reduceTaskLeft == 0 && !reducerAllSuccess(jobStatus.reducerStatusTbl)) {
-						resetJob(jobStatus);
+					if (jobStatus.reduceTaskLeft == 0 ) {
+						if (!reducerAllSuccess(jobStatus.reducerStatusTbl)) {
+							resetJob(jobStatus);
+						} else {
+							/* job success */
+							jobStatus.status = WorkStatus.SUCCESS;
+							//TODO: CLEAN UP ALL THE INTERMEDIATE FILES
+						}
+						
 					}
 					
 				}			
@@ -378,6 +387,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		this.jobStatusTbl.get(jobId).status = WorkStatus.FAILED;
 	}
 	
+	public void terminateJob(String jobId) {
+		this.jobStatusTbl.get(jobId).status = WorkStatus.TERMINATED;
+	}
+	
+	private void cleanUp() {
+		
+	}
+	
 	@Override
 	public int checkMapProgress(String jobId) throws RemoteException {
 		return this.jobStatusTbl.get(jobId).mapTaskLeft;
@@ -397,33 +414,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	private class JobScheduler {
 		
 		public ConcurrentHashMap<String, Queue<Task>> taskScheduleTbl = new ConcurrentHashMap<String, Queue<Task>>();
-		
-//		public class SchedulorComparator implements Comparator<Task> {
-//
-//			@Override
-//			public int compare(Task t1, Task t2) {
-//				if (t1.getPriority() != t2.getPriority()) {
-//					/* higher priority goes first */
-//					return t2.getPriority() - t1.getPriority();
-//				}
-//				long time1 = Long.parseLong(t1.getJobId());
-//				long time2 = Long.parseLong(t2.getJobId());
-//				if (time1 > time2) {
-//					return 1;
-//				} else if (time1 < time2) {
-//					return -1;
-//				} else {
-//					long taskId1 = Long.parseLong(t1.getTaskId());
-//					long taskId2 = Long.parseLong(t2.getTaskId());
-//					if (taskId1 > taskId2) {
-//						return 1;
-//					} else {
-//						return -1;
-//					}
-//				}
-//			}
-//	
-//		}
+	
 		
 		/**
 		 * Schedule a map task with data locality first
@@ -446,28 +437,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				}
 			}
 			
-//			if (bestIp == null) {
-//				/* all the optimal task trackers are full, pick a nearest one */
-//				long baseIp = ipToLong(entries.get(0).dataNodeRegistryIP);
-//				long minDist = Long.MAX_VALUE;
-//				Set<String> allNodes = taskScheduleTbl.keySet();
-//				for (String ip : allNodes) {
-//					int workLoad = taskScheduleTbl.get(ip).size();
-//					if (workLoad < minLoad && workLoad < MapReduce.TaskTracker.MAX_NUM_MAP_TASK 
-//							&& taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
-//						long thisIp = ipToLong(ip);
-//						long dist = Math.abs(thisIp - baseIp);
-//						if (dist < minDist) {
-//							bestIp = ip;
-//							minDist = dist;
-//						}
-//					}
-//				}
-//			}
 			if (bestIp == null) {
 				/* all the optimal task trackers are full, pick a task tracker with lightest workload among all */
 				minLoad = Integer.MAX_VALUE;
 				Set<String> allNodes = taskScheduleTbl.keySet();
+				
 				for (String ip : allNodes) {
 					int workLoad = taskScheduleTbl.get(ip).size();
 					if (taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING && workLoad < minLoad) {
@@ -496,6 +470,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			String bestIp = null;
 			int minLoad = Integer.MAX_VALUE;
 			Set<String> allNodes = taskScheduleTbl.keySet();
+			
 			for (String ip : allNodes) {
 				if (taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
 					int workLoad = taskScheduleTbl.get(ip).size();
@@ -514,12 +489,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add reduce task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");
 			}
 			taskScheduleTbl.get(bestIp).add(task); 
-		}
-		
-		private long ipToLong(String ip) {
-			String newIp = ip.replace(".", "");
-			long ipInt = Long.parseLong(newIp);
-			return ipInt;
 		}
 		
 		private void printScheduleTbl() {
@@ -602,11 +571,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 								jobStatus.reducerStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
 								jobIds.add(jobStatus.jobId);
 							} else {
-								/* only re-schedule currently running reducer task */
-//								if (jobStatus.reducerStatusTbl.get(taskId).status
-//										== WorkStatus.RUNNING) {
-//									JobTracker.this.jobScheduler.addReduceTask((ReducerTask) taskToSchedule);
-//								}
+								/* if a mapper task of the same job has been re-scheduled, this reducer
+								 * does not need to re-schedule, it will be upon all mappers finished */
 								reducerTaskIds.add(taskToSchedule.getTaskId());
 							}
 						}
