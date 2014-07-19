@@ -1,10 +1,6 @@
 package mapreduce.core;
 
-import example.WordCount.WordCountMapper;
-import global.Hdfs;
 import global.MapReduce;
-import hdfs.DataStructure.HDFSFile;
-import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -14,7 +10,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import mapreduce.io.KeyValue;
-import mapreduce.io.Split;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.KeyValueLineRecordReader;
 import mapreduce.io.writable.Text;
@@ -35,97 +30,92 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		RunMapper<Writable, Writable, Writable, Writable> rm = new RunMapper<Writable, Writable, Writable, Writable>();
-		if (MapReduce.UNITEST) {
-			try {
-				Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-				NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
-				HDFSFile file = nameNodeS.open("wordCount");
-				Split split = new Split(file,0);
-				rm.task = new MapperTask("job001", "task001", split, WordCountMapper.class, 2);
-				rm.task.setFilePrefix("tmp/TaskTracker-001/Mapper");
-				System.out.println("CLASS:" + rm.task.mapperClass + "\t" + WordCountMapper.class);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				System.exit(-10);
-			} catch (NotBoundException e) {
-				e.printStackTrace();
-				System.exit(-11);
+		try {
+			
+			/*------------------ Retrieve Task ----------------*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunMapper.main(): Try to Retrived task.");
 			}
 			
-		} else {
-			try {
-				if (MapReduce.DEBUG) {
-					System.out.println("DEBUG RunMapper.main(): Try to Retrived task.");
-				}
-				Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
-				
-				if (MapReduce.DEBUG) {
-					System.out.println("DEBUG RunMapper.main(): Formed registry, port:" + Integer.parseInt(args[0]));
-				}
-				TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
-						.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
-				rm.task = (MapperTask) taskTrackerS.getTask(args[1]);
-				if (MapReduce.DEBUG) {
-					System.out.println("DEBUG RunMapper.main(): Retrived task.");
-				}
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				System.exit(-2);
-			} catch (NotBoundException e) {
-				e.printStackTrace();
-				System.exit(-3);
+			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
+			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
+					.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
+			rm.task = (MapperTask) taskTrackerS.getTask(args[1]);
+			
+			
+			
+			/* The following block is for fault-tolerance test */
+			if (MapReduce.TaskTracker.MAPPER_FAULT_TEST) {
+				try {
+					Thread.sleep(1000 * 2);
+				} catch (InterruptedException e) { }
+				System.exit(128);
 			}
-		}
-		
-		
-		if (MapReduce.TaskTracker.MAPPER_FAULT_TEST) {
-			try {
-				Thread.sleep(1000 * 2);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			
+			/*------------------ Prepare input records ----------------*/
+			
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunMapper.main(): RunMapper retrived task and start to prepare records");
 			}
-			System.exit(128);
-		}
-		
-		
-		try {
-			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task);
 			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);
+			recordReader.parseRecords();
+			
+			
+			/*------------------ Map Phase ----------------*/
+			
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunMapper.main(): All input records are ready and now move to map phase.");
+			}
+			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task);
 			rm.mapper = (Mapper<Writable, Writable, Writable, Writable>) rm.task.mapperClass.getConstructors()[0].newInstance();
 			while (recordReader.hasNext()) {
 				KeyValue<Text, Text> nextLine = recordReader.nextKeyValue();
 				rm.mapper.map(nextLine.getKey(), nextLine.getValue(), output);
 			}
+			
+			/*------------------ Sort intermediate values ----------------*/
+			
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunMapper.main(): Finish map phase and start to sort intermediate <key, value> pair by key.");
+			}
 			output.sort();
-			output.printOutputCollector();
+			
+			/*------------------ Write intermediate values to local  ----------------*/
+			
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunMapper.main(): The last step is to write mapper intermediate value to local file system.");
+			}
 			output.writeToLocal();
+			
 			return;
-		}  catch (InstantiationException e) {
-			e.printStackTrace();
-			System.exit(-6);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			System.exit(-7);
+		} catch (NumberFormatException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(1);
+		} catch (RemoteException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(2);
+		} catch (NotBoundException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(3);
+		} catch (IOException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(4);
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			System.exit(-10);
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(5);
 		} catch (SecurityException e) {
-			e.printStackTrace();
-			System.exit(11);
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(6);
+		} catch (InstantiationException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(7);
+		} catch (IllegalAccessException e) {
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(8);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-			System.exit(-8);
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
-			System.exit(-9);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(-10);
+			if (MapReduce.DEBUG) {e.printStackTrace();}
+			System.exit(9);
 		}
 		
-	}
+	}	
 }

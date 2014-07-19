@@ -65,9 +65,11 @@ public class HDFSInputStream implements Serializable{
 	 * Given a chunk index among this file's chunks, read the whole chunk
 	 * @param idx
 	 * @return String the whole chunk data
+	 * @throws RemoteException 
+	 * @throws NotBoundException 
 	 * @throws Exception 
 	 */
-	public String readChunk(int idx) throws Exception {
+	public String readChunk(int idx) throws IOException {
 		int size = fileChunkInfoList.size();
 		if (idx >= size) {
 			/* chunk index out of bound */
@@ -82,12 +84,11 @@ public class HDFSInputStream implements Serializable{
 			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.Common.DATA_NODE_SERVICE_NAME);
 			data = nodeStub.readChunk(chunkInfo.getChunkName());
 		} catch (RemoteException e) {
-			throw e;
+			throw new IOException("Failed to read chunk", e);
 		} catch (NotBoundException e) {
-			throw e;
-		} catch (IOException e) {
-			throw new IOException("IOException", e);
+			throw new IOException("Unable to reach datanode", e);
 		}
+		
 		return data;
 	}
 	

@@ -1,5 +1,7 @@
 package mapreduce.io.recordreader;
 
+import java.io.IOException;
+
 import hdfs.IO.HDFSInputStream;
 import mapreduce.io.KeyValue;
 import mapreduce.io.Split;
@@ -10,13 +12,18 @@ public class KeyValueLineRecordReader extends RecordReader<Text, Text>{
 	private String[] values;
 	private int index;
 	
-	public KeyValueLineRecordReader(Split s) throws Exception {
+	public KeyValueLineRecordReader(Split s) {
 		this.split = s;
+		this.index = 0;
+	}
+	
+	public void parseRecords () throws IOException {
 		HDFSInputStream in = this.split.file.getInputStream();
 		String content = in.readChunk(this.split.chunkIdx);
 		this.values = content.split("\n");
-		this.index = 0;
 	}
+	
+	
 	
 	public KeyValue<Text, Text> nextKeyValue() {
 		KeyValue<Text, Text> rst = new KeyValue<Text, Text>(new Text(this.split.file.getName()),new Text(this.values[index]));

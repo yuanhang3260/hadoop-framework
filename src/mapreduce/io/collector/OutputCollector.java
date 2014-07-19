@@ -29,7 +29,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	List<KeyValue<K, V>> keyvalueList;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
-	ObjectOutputStream[] objOutArr;
+	ObjectOutputStream[] objOutputStreamArr;
 	Task task;
 	int partitionNum;
 	
@@ -45,7 +45,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		this.partitionNum = ((MapperTask)this.task).getPartitionNum();
 		
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
-		this.objOutArr = new ObjectOutputStream[this.partitionNum];
+		this.objOutputStreamArr = new ObjectOutputStream[this.partitionNum];
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 */
 	public OutputCollector() {
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
-		this.objOutArr = new ObjectOutputStream[1];
+		this.objOutputStreamArr = new ObjectOutputStream[1];
 	}
 	
 	public void writeToLocal() throws IOException {
@@ -65,19 +65,19 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			String tmpFileName = task.localFileNameWrapper(i);
 			File tmpFile = new File(tmpFileName);
 			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
-			this.objOutArr[i] = new ObjectOutputStream(tmpFOS);
+			this.objOutputStreamArr[i] = new ObjectOutputStream(tmpFOS);
 		}
 		
 		while (it.hasNext()) {
 			KeyValue<K, V> keyvalue = it.next();
 			int parNum = partitioner.getPartition(keyvalue.getKey(), keyvalue.getValue(), this.partitionNum);
-			this.objOutArr[parNum].writeObject(keyvalue);
+			this.objOutputStreamArr[parNum].writeObject(keyvalue);
 		}
 		
 		
 		for (int j = 0 ; j < this.partitionNum; j++) {
-			this.objOutArr[j].flush();
-			this.objOutArr[j].close();
+			this.objOutputStreamArr[j].flush();
+			this.objOutputStreamArr[j].close();
 		}
 		
 		return;
