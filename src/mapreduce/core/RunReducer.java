@@ -166,6 +166,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			
 			String request = String.format("%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
 			System.err.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
+			System.out.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
 			out.write(request.toCharArray());
 			out.flush();
 			
