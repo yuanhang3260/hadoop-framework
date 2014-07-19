@@ -32,7 +32,7 @@ public class JobClient {
 			jobToSubmit.setSplit(splits);
 			jobId = jobTrackerStub.submitJob(jobToSubmit);
 			
-			if (Hdfs.DEBUG) {
+			if (Hdfs.Common.DEBUG) {
 				System.out.println("DEBUG JobClient.runJob(): Job already submitted, job Id = " + jobId);
 			}
 			
@@ -95,7 +95,7 @@ public class JobClient {
 	public static List<Split> splitFile(String inputFile) throws Exception {
 		try {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.NameNode.nameNodeServiceName);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 			HDFSFile file = nameNodeStub.open(inputFile);
 			if (file == null) {
 				throw new Exception("Input file " + inputFile + " doesn't exist in HDFS");

@@ -28,7 +28,7 @@ public class HDFSBufferedOutputStream implements Serializable {
 	public HDFSBufferedOutputStream (HDFSOutputStream outputStream) {
 		this.outputStream = outputStream;
 		this.buffOffset = 0;
-		this.buff = new byte[Hdfs.WRITE_BUFF_SIZE];
+		this.buff = new byte[Hdfs.Common.WRITE_BUFF_SIZE];
 	}
 	
 	public static void main (String[] args) throws NotBoundException, IOException {
@@ -37,7 +37,7 @@ public class HDFSBufferedOutputStream implements Serializable {
 		FileInputStream fin = new FileInputStream(file);
 		
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-		NameNodeRemoteInterface nameNodeI = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
+		NameNodeRemoteInterface nameNodeI = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 		HDFSFile fileNONBuffered = nameNodeI.create("non-buffered");
 		HDFSFile fileBuffered = nameNodeI.create("buffered");
 		
@@ -67,7 +67,7 @@ public class HDFSBufferedOutputStream implements Serializable {
 	
 	public void write(byte[] b, int offset, int len) throws ArrayIndexOutOfBoundsException, IOException {
 		
-		if (Hdfs.DEBUG) {
+		if (Hdfs.Common.DEBUG) {
 			System.out.println("------------------>Objective:" + new String(b, offset, len));
 		}
 		
@@ -99,20 +99,20 @@ public class HDFSBufferedOutputStream implements Serializable {
 				} else {
 					this.outputStream.write(buff);
 					
-					if (Hdfs.DEBUG) {
+					if (Hdfs.Common.DEBUG) {
 						System.out.print("Flush:" + new String(this.buff));
 					}
 					
 					/* Reset the inner buffer offset */
 					this.buffOffset = 0;
-					if (Hdfs.DEBUG) {
+					if (Hdfs.Common.DEBUG) {
 						System.out.println("\twritten=" + written + "\tpointer=" + (offset + written) + "\tbuffOffset=" + this.buffOffset);
 					}
 				}
 			}
 		}
 		
-		if (Hdfs.DEBUG) {
+		if (Hdfs.Common.DEBUG) {
 			System.out.format("<------------------status:buff offset=%d\n\n\n",this.buffOffset);
 		}
 	}

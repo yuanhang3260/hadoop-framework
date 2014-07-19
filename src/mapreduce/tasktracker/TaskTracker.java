@@ -365,7 +365,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 								}
 							} catch (IllegalThreadStateException e) {
-								if (Hdfs.DEBUG || MapReduce.DEBUG) {
+								if (Hdfs.Common.DEBUG || MapReduce.DEBUG) {
 									if (task instanceof ReducerTask) {
 										
 										InputStream tmpInputStream = task.getInputStream();

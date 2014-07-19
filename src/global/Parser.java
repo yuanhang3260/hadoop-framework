@@ -36,20 +36,20 @@ public class Parser {
 				Element eElement = (Element) nNode;
 				
 				/* Parse DEBUG */
-				Hdfs.DEBUG = eElement.getElementsByTagName("debug").item(0).getTextContent().trim().equals("true");
+				Hdfs.Common.DEBUG = eElement.getElementsByTagName("debug").item(0).getTextContent().trim().equals("true");
 				
 				/* Parse replica factor */
 				try {
-					Hdfs.NameNode.REPLICA_FACTOR = 
+					Hdfs.Common.REPLICA_FACTOR = 
 							Integer.parseInt(eElement.getElementsByTagName("replica-factor")
 									.item(0).getTextContent().trim());
 				} catch (NumberFormatException e) {
-					Hdfs.NameNode.REPLICA_FACTOR = 2;
+					Hdfs.Common.REPLICA_FACTOR = 2;
 				}
 				
 				/* Parse buffer size */
 				try {
-					Hdfs.Client.READ_BUFFER_SIZE =
+					Hdfs.Common.READ_BUFFER_SIZE =
 							Integer.parseInt(eElement.getElementsByTagName("buff-size")
 									.item(0).getTextContent().trim());
 					int unit = 0;
@@ -65,19 +65,19 @@ public class Parser {
 						unit = 1;
 					}
 					
-					Hdfs.Client.READ_BUFFER_SIZE *= unit;
-					if (Hdfs.Client.READ_BUFFER_SIZE <= 0) {
+					Hdfs.Common.READ_BUFFER_SIZE *= unit;
+					if (Hdfs.Common.READ_BUFFER_SIZE <= 0) {
 						throw new NonPositiveException("buffer size cannot be non-positive");
 					}
 				} catch (NumberFormatException e) {
-					Hdfs.Client.READ_BUFFER_SIZE = 1024 * 4; //Default buffer size is 4K
+					Hdfs.Common.READ_BUFFER_SIZE = 1024 * 4; //Default buffer size is 4K
 				} catch (NonPositiveException e) {
-					Hdfs.Client.READ_BUFFER_SIZE = 1024 * 4;
+					Hdfs.Common.READ_BUFFER_SIZE = 1024 * 4;
 				}
 				
 				/* Parse chunk size */
 				try {
-					Hdfs.NameNode.CHUNK_SIZE =
+					Hdfs.Common.CHUNK_SIZE =
 							Integer.parseInt(eElement.getElementsByTagName("chunk-size")
 									.item(0).getTextContent().trim());
 					int unit = 0;
@@ -93,9 +93,9 @@ public class Parser {
 						unit = 1;
 					}
 					
-					Hdfs.NameNode.CHUNK_SIZE *= unit;
+					Hdfs.Common.CHUNK_SIZE *= unit;
 				} catch (NumberFormatException e) {
-					Hdfs.NameNode.CHUNK_SIZE *= 10;
+					Hdfs.Common.CHUNK_SIZE *= 10;
 				}
 	 
 			}

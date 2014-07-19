@@ -59,7 +59,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		/* Open file */
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
+		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 		HDFSFile file1 = nameNodeS.open("hello");
 		
 		Thread.sleep(1000 * 3);
