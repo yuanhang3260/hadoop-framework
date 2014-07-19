@@ -1,16 +1,9 @@
 package hdfs.IO;
 
 import global.Hdfs;
-import hdfs.DataStructure.HDFSFile;
-import hdfs.NameNode.NameNodeRemoteInterface;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.rmi.NotBoundException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Arrays;
 
 public class HDFSBufferedOutputStream implements Serializable {
