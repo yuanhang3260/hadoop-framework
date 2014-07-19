@@ -1,5 +1,6 @@
 package mapreduce.tasktracker;
 
+import global.Hdfs;
 import global.MapReduce;
 
 import java.io.BufferedOutputStream;
@@ -345,18 +346,20 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 										}
 									}
 								} catch (IllegalThreadStateException e) {
-//									if (task instanceof ReducerTask) {
-//										InputStream tmpInputStream = task.getInputStream();
-//										byte[] buff = new byte[20];
-//										int c = 0;
-//										try {
-//											while ((c = tmpInputStream.read(buff)) != -1) {
-//												System.out.print(new String(buff, 0, c));
-//											}
-//										} catch (IOException e1) {
-//											e1.printStackTrace();
-//										}
-//									}
+									if (Hdfs.DEBUG || MapReduce.DEBUG) {
+										if (task instanceof ReducerTask) {
+											InputStream tmpInputStream = task.getInputStream();
+											byte[] buff = new byte[20];
+											int c = 0;
+											try {
+												while ((c = tmpInputStream.read(buff)) != -1) {
+													System.out.print(new String(buff, 0, c));
+												}
+											} catch (IOException e1) {
+												e1.printStackTrace();
+											}
+										}
+									}
 								}
 							} 
 						}
