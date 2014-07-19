@@ -81,7 +81,10 @@ public class HDFSBufferedOutputStream implements Serializable {
 	
 	public void close() throws IOException {
 		if (this.buffOffset != 0) {
-			System.out.format("DEBUG HDFSOutputStream.close():\t[status:%d, buff:%s]\n", this.buffOffset, new String(this.buff, 0, this.buffOffset));
+			if (Hdfs.Common.DEBUG && this.DEBUG) {
+				System.out.format("DEBUG HDFSBufferedOutputStream.close():\t[status:%d, buff:%s]\n"
+						, this.buffOffset, new String(this.buff, 0, this.buffOffset));
+			}
 			this.outputStream.write(Arrays.copyOfRange(this.buff, 0, this.buffOffset));
 		}
 		this.outputStream.close();
