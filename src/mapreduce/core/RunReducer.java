@@ -68,10 +68,13 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				rr.collectPartition(recordReconstructor);
 			}
 			
-			System.out.println("RunReducer: Start to sort");
+			System.out.println("DEBUG RunReducer.main(): Start to sort");
+			
 			
 			//Merge Sort & construct Iterator
 			recordReconstructor.sort();
+			
+			System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
 			recordReconstructor.merge();
 			
 //			Thread.sleep(1000 * 10); //TODO: remove this after debugging
@@ -85,7 +88,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
 			}
 			output.sort();
-//			output.printOutputCollector();
 			output.writeToHDFS(rr.task.getOutputPath());
 		} catch (RemoteException e) {
 			if (MapReduce.DEBUG) {
