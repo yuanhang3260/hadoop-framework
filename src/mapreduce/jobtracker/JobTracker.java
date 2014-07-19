@@ -49,8 +49,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	public void init() {
 		jobScheduler = new JobScheduler();
-		Thread t = new Thread(new TaskTrackerCheck());
-		t.start();
+//		Thread t = new Thread(new TaskTrackerCheck());
+//		t.start();
 		//TimerTask taskTrackerCheck = new TaskTrackerCheck();
 		
 		try {
