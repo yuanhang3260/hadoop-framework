@@ -310,7 +310,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 			while (true) {
-				synchronized (TaskTracker.this.syncTaskList) {
+//				synchronized (TaskTracker.this.syncTaskList) {
 					for (Task task : TaskTracker.this.syncTaskList) {
 						if (task.isRunning()) {
 							if (task.getProcRef() != null) {
@@ -339,7 +339,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 												while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
 													System.out.print(new String(errBuff, 0 ,c));
 												}
-												System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
 											} catch (IOException e) {
 												e.printStackTrace();
 											}
@@ -368,7 +367,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							} 
 						}
 					}
-				}
+//				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
