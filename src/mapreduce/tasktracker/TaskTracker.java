@@ -198,7 +198,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	@Override
 	public boolean toFail()  {
-		return (failureTimes++ < 1);
+		return (failureTimes++ < MapReduce.TaskTracker.REDUCER_FAILURE_TIMES);
 	}
 	
 	
@@ -225,7 +225,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				} catch (RemoteException e1) {
 
 					// wait for next heart beat;
-					try {
+					try {//TODO if JobTracker doesn't respond me for XXXX seconds, pull off the TaskTracker
 						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
 					} catch (InterruptedException e) { //Do nothing
 						if (MapReduce.DEBUG) {
