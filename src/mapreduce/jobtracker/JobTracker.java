@@ -49,8 +49,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	public void init() {
 		jobScheduler = new JobScheduler();
-//		Thread t = new Thread(new TaskTrackerCheck());
-//		t.start();
+		Thread t = new Thread(new TaskTrackerCheck());
+		t.start();
 		//TimerTask taskTrackerCheck = new TaskTrackerCheck();
 		
 		try {
@@ -108,11 +108,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		jobTbl.put(jobId, job);
 		
 		/* initialize job status record */
-//		JobStatus jobStatus = new JobStatus(job.getSplit().size(), job.getJobConf().getNumReduceTasks());
-//		if (Hdfs.DEBUG) {
-//			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
-//		}
-//		this.jobStatusTbl.put(jobId, jobStatus);
 		initJob(job);
 		System.out.println("DEBUG JobTracker.submitJob() jobId: " + jobId);
 		initMapTasks(job);
@@ -190,9 +185,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	@Override
 	public JobTrackerACK heartBeat(TaskTrackerReport report) {
-		if (Hdfs.Common.DEBUG) {
-			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
-		}
+//		if (Hdfs.DEBUG) {
+//			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
+//		}
 		
 		//TODO: leave for parallel
 		
@@ -242,8 +237,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		synchronized(jobStatus) {
 			TaskStatus preStatus = isMapper ? jobStatus.mapperStatusTbl.get(taskStatus.taskId) : jobStatus.reducerStatusTbl.get(taskStatus.taskId);
 			
-			if (preStatus.status == WorkStatus.SUCCESS) {
-				/* task already success, do nothing */
+			if ( preStatus == null || preStatus.status == WorkStatus.SUCCESS) {
+				/* task already discard or success, do nothing */
 				return;
 			}
 			/* previous Status: RUNNING or FAILED */
@@ -295,13 +290,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						/* disable the bad task tracker so that the failed task
 						 * will not be scheduled to this TaskTracker */
 						TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
-						//badTaskTracker.disable();
+						badTaskTracker.disable();
 						this.jobScheduler.addMapTask((MapperTask) task);
 						badTaskTracker.enable();
 					} else {
 						//TODO:re-schedule the whole job
 						System.out.println(" reduce task");
-						//this.jobScheduler.addReduceTask((ReducerTask) task);
 						jobStatus.reduceTaskLeft--;
 						/* if job finished, check if all reducers are SUCCESS,
 						 * otherwise restart the whole job */
@@ -480,7 +474,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					}
 				}
 			}
-			
+//			if (Hdfs.DEBUG) {
+//				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add map task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");
+//			}
 			taskScheduleTbl.get(bestIp).add(task);
 		}
 
@@ -490,24 +486,26 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		 * @param task The task to schedule
 		 */
 		public synchronized void addReduceTask(ReducerTask task) {
-			if (Hdfs.Common.DEBUG) {
-				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add reduce task, id = " + task.getTaskId());
-			}
 			/* pick the one with lightest workload */
 			String bestIp = null;
 			int minLoad = Integer.MAX_VALUE;
 			Set<String> allNodes = taskScheduleTbl.keySet();
 			for (String ip : allNodes) {
-				int workLoad = taskScheduleTbl.get(ip).size();
-				if (workLoad == 0) {
-					bestIp = ip;
-					break;
-				} else {
-					if (workLoad < minLoad) {
+				if (taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
+					int workLoad = taskScheduleTbl.get(ip).size();
+					if (workLoad == 0) {
 						bestIp = ip;
-						minLoad = workLoad;
+						break;
+					} else {
+						if (workLoad < minLoad) {
+							bestIp = ip;
+							minLoad = workLoad;
+						}
 					}
-				}
+				}	
+			}
+			if (Hdfs.Common.DEBUG) {
+				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add reduce task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");
 			}
 			taskScheduleTbl.get(bestIp).add(task); 
 		}
@@ -551,7 +549,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						 * will not be scheduled into its task queue */
 						TaskTrackerInfo taskTrackerInfo = JobTracker.this.taskTrackerTbl.get(taskTrackerIp);
 						synchronized(taskTrackerInfo) {
-							//taskTrackerInfo.disable();
+							taskTrackerInfo.disable();
 						}
 						/* re-schedule all tasks previously complete and currently running on this TaskTracker */
 						/* A. re-schedule tasks in associative scheduling queue */
@@ -592,7 +590,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 									System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task(map) " + taskId + " in job " + taskToSchedule.getJobId() + " out of tasktracker history");
 								}
 								JobTracker.this.jobScheduler.addMapTask((MapperTask) taskToSchedule);
-								
+								/* renew the reducerStatusTlb, all previous reducers should be discarded
+								 * because new reducer tasks will be assigned once mapperLeft count is 
+								 * zero */
+								jobStatus.reducerStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
 								jobIds.add(jobStatus.jobId);
 							} else {
 								/* only re-schedule currently running reducer task */
@@ -606,9 +607,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						for (String reducerId : reducerTaskIds) {
 							Task taskToSchedule = JobTracker.this.taskTbl.get(reducerId);
 							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(taskToSchedule.getJobId());
-							if (jobStatus.reducerStatusTbl.get(reducerId).status
-									== WorkStatus.RUNNING) {
-								if (!jobIds.contains(jobStatus.jobId)) {
+							if (!jobIds.contains(jobStatus.jobId)) {
+								if (jobStatus.reducerStatusTbl.get(reducerId).status
+										== WorkStatus.RUNNING) {						
 									if (Hdfs.Common.DEBUG) {
 										System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task(reduce) " + reducerId + " in job " + taskToSchedule.getJobId() + " out of tasktracker history");
 									}
@@ -629,6 +630,5 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			}
 			
 		}
-		
 	}
 }

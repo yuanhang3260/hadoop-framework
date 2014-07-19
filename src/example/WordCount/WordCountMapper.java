@@ -1,4 +1,4 @@
-package example;
+package example.WordCount;
 
 import mapreduce.core.Mapper;
 import mapreduce.io.collector.OutputCollector;

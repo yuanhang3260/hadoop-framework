@@ -1,4 +1,4 @@
-package example;
+package example.Ngram;
 
 import java.util.Iterator;
 
@@ -7,14 +7,15 @@ import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.writable.IntWritable;
 import mapreduce.io.writable.Text;
 
-public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable>{
+public class NgramReducer extends Reducer<Text, IntWritable, Text, IntWritable>{
 
 	@Override
 	public void reduce(Text key, Iterator<IntWritable> values,
 			OutputCollector<Text, IntWritable> output) {
 		int sum = 0;
 		while (values.hasNext()) {
-			sum += values.next().getValue();
+			sum++;
+			values.next();
 		}
 		
 		output.collect(key, new IntWritable(sum));

@@ -1,6 +1,6 @@
 package mapreduce.core;
 
-import example.WordCountReducer;
+import example.WordCount.WordCountReducer;
 import global.MapReduce;
 
 import java.io.BufferedInputStream;
