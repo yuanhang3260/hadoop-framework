@@ -120,7 +120,7 @@ public class Utility {
 		byte[] buff = new byte[Hdfs.WRITE_BUFF_SIZE];
 		try {
 			FileInputStream in = new FileInputStream(newFile);
-			int c;
+			int c = 0;
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
@@ -128,18 +128,18 @@ public class Utility {
 			HDFSOutputStream out = file.getOutputStream();
 			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 			
-			while ((c = in.read(buff)) != -1) {
-				if (c == 1024) {
-					out.write(buff);
-				} else {
-					byte[] tmp_buff = Arrays.copyOfRange(buff, 0, c);
-					out.write(tmp_buff);
-				}
-			}
-			
 //			while ((c = in.read(buff)) != -1) {
-//				bout.write(buff, 0, c);
+//				if (c == 1024) {
+//					out.write(buff);
+//				} else {
+//					byte[] tmp_buff = Arrays.copyOfRange(buff, 0, c);
+//					out.write(tmp_buff);
+//				}
 //			}
+			
+			while ((c = in.read(buff)) != -1) {
+				bout.write(buff, 0, c);
+			}
 			
 			bout.close();
 			in.close();

@@ -10,7 +10,7 @@ public class Hdfs {
 
 	public static class NameNode {
 		public static String nameNodeServiceName = "NameNode";
-		public static String nameNodeRegistryIP = "128.237.222.59"/*"localhost"*/;
+		public static String nameNodeRegistryIP = "10.0.0.16";//"128.237.222.59"/*"localhost"*/;
 		public static int nameNodeRegistryPort = 1099;
 		public static int REPLICA_FACTOR = 2;
 		public static int CHUNK_SIZE = 1024 * 8;

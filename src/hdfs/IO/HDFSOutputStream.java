@@ -25,7 +25,7 @@ public class HDFSOutputStream implements Serializable {
 	private int chunksize;
 	private NameNodeRemoteInterface nameNodeStub;
 	private boolean firstWrite = true;
-	private boolean DEBUG = false;
+	private boolean DEBUG = true;
 
 	
 	
