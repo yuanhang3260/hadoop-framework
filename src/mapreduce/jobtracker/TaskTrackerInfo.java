@@ -43,6 +43,10 @@ public class TaskTrackerInfo {
 		this.relateTasks.remove(taskId);
 	}
 	
+	public void cleanTasks() {
+		this.relateTasks = new HashSet<String>();
+	}
+	
 	public Set<String> getRelatedTasks() {
 		return this.relateTasks;
 	}
