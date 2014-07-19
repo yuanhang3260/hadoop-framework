@@ -55,7 +55,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	/*------------------ FOR DEBUGGING ----------------*/
 	//TODO: REMOVE THE NEXT LINE
 	int failureTimes = 0;
-	
+	int taskCounter = 0;
 	/*------------------ Constructor -----------------*/
 	/**
 	 * 
@@ -198,7 +198,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	@Override
 	public boolean toFail()  {
-		return (failureTimes++ < 1);
+		return (failureTimes++ < MapReduce.TaskTracker.REDUCER_FAILURE_TIMES);
 	}
 	
 	
@@ -225,7 +225,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				} catch (RemoteException e1) {
 
 					// wait for next heart beat;
-					try {
+					try {//TODO if JobTracker doesn't respond me for XXXX seconds, pull off the TaskTracker
 						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
 					} catch (InterruptedException e) { //Do nothing
 						if (MapReduce.DEBUG) {
@@ -246,6 +246,16 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				}
 				
 				if (ack.newAddedTasks != null && ack.newAddedTasks.size() > 0) {
+					
+					
+					//TODO: Remove the following line (for fault tolerance test)
+					TaskTracker.this.taskCounter += ack.newAddedTasks.size();
+					
+					//TODO: Remove the following line (for fault tolerance test)
+					if (TaskTracker.this.taskCounter == 5) {
+						System.exit(190);
+					}
+					
 					for (Task newTask : ack.newAddedTasks) {
 						if (newTask instanceof MapperTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
@@ -310,7 +320,12 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 			while (true) {
-				for (Task task : TaskTracker.this.syncTaskList) {
+				
+				Task[] taskArray = null;
+				synchronized (TaskTracker.this.syncTaskList) {
+					taskArray = TaskTracker.this.syncTaskList.toArray(new Task[0]);
+				}
+				for (Task task : taskArray) {
 					if (task == null) {
 						break;
 						

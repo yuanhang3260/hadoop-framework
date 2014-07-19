@@ -24,8 +24,9 @@ public class MapReduce {
 		public static int HEART_BEAT_FREQ = 1000; //milliseconds
 		public static int BUFF_SIZE = 1024 * 1024;
 		public static String TEMP_FILE_DIR = "tmp";
-		public static boolean MAPPER_FAULT_TEST = false;
-		public static boolean REDUCER_FAULT_TEST = false;
+		public static boolean MAPPER_FAULT_TEST = true;
+		public static boolean REDUCER_FAULT_TEST = true;
+		public static int REDUCER_FAILURE_TIMES = 1;
 	}
 	
 	public static class TaskTracker1 {
