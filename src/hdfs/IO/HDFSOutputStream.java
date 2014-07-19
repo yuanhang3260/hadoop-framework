@@ -10,11 +10,9 @@ import hdfs.NameNode.NameNodeRemoteInterface;
 import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
-import java.util.List;
 
 public class HDFSOutputStream implements Serializable {
 
@@ -25,7 +23,7 @@ public class HDFSOutputStream implements Serializable {
 	private int chunksize;
 	private NameNodeRemoteInterface nameNodeStub;
 	private boolean firstWrite = true;
-//	private boolean DEBUG = true;
+	private boolean DEBUG = false;
 
 	
 	
@@ -49,7 +47,7 @@ public class HDFSOutputStream implements Serializable {
 		}
 		
 		int availableBytes = this.chunksize - this.chunkOffset;
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Common.DEBUG && this.DEBUG) {
 			System.out.println("DEBUG HDFSOutputStream.write(): availabelBytes = " + availableBytes); 
 		}
 		int bufferOffset = 0;
@@ -59,7 +57,7 @@ public class HDFSOutputStream implements Serializable {
 			
 			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Common.DEBUG && this.DEBUG) {
 					System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
 				}
 				bufferOffset += availableBytes;
@@ -95,7 +93,7 @@ public class HDFSOutputStream implements Serializable {
 				}
 			} else { // enough to finish write
 				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, content.length);
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Common.DEBUG && this.DEBUG) {
 					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
 				}
 				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
@@ -106,7 +104,7 @@ public class HDFSOutputStream implements Serializable {
 			}
 
 		}
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Common.DEBUG && this.DEBUG) {
 			System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
 		}
 	}
