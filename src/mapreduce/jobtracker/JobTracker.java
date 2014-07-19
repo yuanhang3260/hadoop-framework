@@ -93,7 +93,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return name;
 	}
 	
-	private String nameJob() {
+	private synchronized String nameJob() {
 		return String.format("%d", new Date().getTime());
 	}
 	
@@ -101,7 +101,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * JobClient calls this method to submit a job to schedule
 	 */
 	@Override
-	public synchronized String submitJob(Job job) {
+	public String submitJob(Job job) {
 		String jobId = nameJob();
 		job.setJobId(jobId);
 		jobTbl.put(jobId, job);
@@ -574,6 +574,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						JobTracker.this.jobScheduler.taskScheduleTbl.put(taskTrackerIp, new PriorityBlockingQueue<Task>(MAX_NUM_MAP_TASK, new SchedulerComparator()));;
 						//}
 						/* B. re-schedule related tasks on this TaskTracker */
+						
 						Set<String> taskIds = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getRelatedTasks();
 						for (String taskId : taskIds) {
 							Task taskToSchedule = JobTracker.this.taskTbl.get(taskId);
