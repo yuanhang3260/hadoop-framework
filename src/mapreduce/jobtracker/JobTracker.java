@@ -190,9 +190,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	@Override
 	public JobTrackerACK heartBeat(TaskTrackerReport report) {
-//		if (Hdfs.DEBUG) {
-//			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
-//		}
+		if (Hdfs.DEBUG) {
+			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
+		}
 		
 //		if (Math.random() > 0.5) {
 //			return null;
