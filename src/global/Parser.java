@@ -176,6 +176,37 @@ public class Parser {
 		return;
 	}
 	
+	public static void dataNodeConf(int dataNodeSEQ) throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {
+		
+		hdfsCommonConf();
+		
+		File fXmlFile = new File("./conf/hdfs-core.xml");
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(fXmlFile);
+		doc.getDocumentElement().normalize();
+		NodeList nList = doc.getElementsByTagName("datanode");
+		
+		if (dataNodeSEQ >= nList.getLength()) {
+			throw new ConfFormatException(String.format("DataNode %d cannot be found."));
+		}
+		Node nNode = nList.item(dataNodeSEQ);
+ 
+		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+			
+			Element eElement = (Element) nNode;
+			
+			/* parse the DataNode port num */
+			try {
+				Hdfs.DataNode.dataNodeRegistryPort =
+						Integer.parseInt(eElement.getElementsByTagName("port")
+								.item(0).getTextContent().trim());
+			} catch (NumberFormatException e) {
+				throw e;
+			}
+		}
+	}
+	
 	private static int parseUnit (String unitType) {
 		int unit;
 		if (unitType.equals("B")) {

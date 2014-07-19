@@ -11,12 +11,21 @@
 		<write-buff-size unit="KB"> 8 </write-buff-size>
 		
 		<partition-tolerance unit="sec"> 120 </partition-tolerance>
+
 	</core>
 
 	<namenode>
 		<ip>128.237.222.59</ip>
 		<port>1099</port>
 	</namenode>
+
+	<datanode>
+		<port>1100</port>
+	</datanode>
+
+	<datanode>
+		<port>1101</port>
+	</datanode>
 </hdfs>
 
 	
