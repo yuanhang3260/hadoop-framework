@@ -202,7 +202,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
 		if (!chunkFile.exists()) {
 			System.err.println("chunk doesn't exists");
-			System.exit(-1);
+//			System.exit(-1);
 		}
 		chunkFile.setWritable(false, false);
 		chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
