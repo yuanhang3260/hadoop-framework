@@ -17,12 +17,13 @@ public class Hdfs {
 		public static int PARTITION_TOLERANCE = 1000 * 60 * 2;
 		
 		public static String NAME_NODE_SERVICE_NAME = "NameNode"; //Unconfigurable
+		
 		public static String DATA_NODE_SERVICE_NAME = "DataNode"; //Unconfigurable
 		
 	}
 
 	public static class NameNode {
-		public static String nameNodeRegistryIP = /*"128.237.222.59"*/"localhost";
+		public static String nameNodeRegistryIP = "128.237.222.59"/*"localhost"*/;
 		public static int nameNodeRegistryPort = 1099;
 		
 	}
