@@ -131,7 +131,7 @@ public class HDFSOutputStream implements Serializable {
 	}
 	
 	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Common.DEBUG && this.DEBUG) {
 			System.out.println("DEBUG: HDFSOutputStream: Write to DataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
 		}
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
