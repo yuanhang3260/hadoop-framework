@@ -32,6 +32,8 @@ public class HDFSInputStream implements Serializable{
 	private HDFSChunk currChunkInfo;
 	private DataNodeRemoteInterface dataNodeStub;
 	
+	private boolean DEBUG = false;
+	
 	
 	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {
 		this.fileChunkInfoList = chunkInfoList;
@@ -96,7 +98,7 @@ public class HDFSInputStream implements Serializable{
 		DataNodeEntry dataNodeEntry = null;
 		Registry dataNodeRegistry = null;
 		while (bytesLeft != 0 && (!endOfFile)) {
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Common.DEBUG && this.DEBUG) {
 				System.out.println("--->");
 				printInfo();
 				System.out.println("bytesLeft: " + bytesLeft);
@@ -104,7 +106,7 @@ public class HDFSInputStream implements Serializable{
 			}
 			/* Fetch chunk data and fill in readBuf */
 			if (bufferOffSet == readBuffer.length) {
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Common.DEBUG && this.DEBUG) {
 					System.out.println("DEBUG HDFSInputStream read() CASE 1: no read buffer/buffer need renew");
 				}
 				
@@ -137,7 +139,7 @@ public class HDFSInputStream implements Serializable{
 				this.bufferOffSet = 0;
 				this.chunkOffSet += readBuffer.length;
 			} else if (readBuffer.length - bufferOffSet > 0 ) {
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Common.DEBUG && this.DEBUG) {
 					System.out.println("DEBUG HDFSInputStream read() CASE 2: read from readBuffer");
 				}
 				/* still read from this buf into b*/
@@ -148,7 +150,7 @@ public class HDFSInputStream implements Serializable{
 			}
 		}
 		
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Common.DEBUG && this.DEBUG) {
 			System.out.println("--->");
 			System.out.println("DEBUG HDFSInputStream read() out of while loop");
 			printInfo();
