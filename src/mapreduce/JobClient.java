@@ -60,6 +60,7 @@ public class JobClient {
 				}
 				
 				if (jobStatus.rescheduleNum != prevRescheduleNum) {
+					System.out.println();
 					System.out.println(String.format("INFO: Job (Id = %S) failed, try reschedule now!", jobId));
 					prevRescheduleNum = jobStatus.rescheduleNum;
 				}

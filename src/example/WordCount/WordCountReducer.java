@@ -1,4 +1,4 @@
-package example;
+package example.WordCount;
 
 import java.util.Iterator;
 

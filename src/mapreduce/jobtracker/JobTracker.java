@@ -474,9 +474,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					}
 				}
 			}
-			if (Hdfs.DEBUG) {
-				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add map task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");
-			}
+//			if (Hdfs.DEBUG) {
+//				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add map task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");
+//			}
 			taskScheduleTbl.get(bestIp).add(task);
 		}
 
@@ -491,16 +491,18 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			int minLoad = Integer.MAX_VALUE;
 			Set<String> allNodes = taskScheduleTbl.keySet();
 			for (String ip : allNodes) {
-				int workLoad = taskScheduleTbl.get(ip).size();
-				if (workLoad == 0) {
-					bestIp = ip;
-					break;
-				} else {
-					if (workLoad < minLoad) {
+				if (taskTrackerTbl.get(ip).getStatus() == TaskTrackerInfo.Status.RUNNING) {
+					int workLoad = taskScheduleTbl.get(ip).size();
+					if (workLoad == 0) {
 						bestIp = ip;
-						minLoad = workLoad;
+						break;
+					} else {
+						if (workLoad < minLoad) {
+							bestIp = ip;
+							minLoad = workLoad;
+						}
 					}
-				}
+				}	
 			}
 			if (Hdfs.DEBUG) {
 				System.out.println("DEBUG JobTracker.Scheduler.addReduceTask(): add reduce task " + task.getTaskId() + " to TaskTracker " + bestIp + " Queue");

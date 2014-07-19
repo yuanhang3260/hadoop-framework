@@ -1,7 +1,7 @@
 package mapreduce.tasktracker;
 
-import example.WordCountMapper;
-import example.WordCountReducer;
+import example.WordCount.WordCountMapper;
+import example.WordCount.WordCountReducer;
 import global.Hdfs;
 import global.MapReduce;
 import hdfs.DataStructure.HDFSFile;

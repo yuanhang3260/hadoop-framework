@@ -8,8 +8,8 @@ public class MapReduce {
 	
 	public static class JobTracker {
 		public static String jobTrackerServiceName = "JobTracker";
-		public static String jobTrackerRegistryIp = "128.237.213.225";
-//		public static String jobTrackerRegistryIp = "localhost";
+//		public static String jobTrackerRegistryIp = "128.237.213.225";
+		public static String jobTrackerRegistryIp = "127.0.0.1";
 
 		public static int MAX_RESCHEDULE_ATTEMPTS = 2;
 		public static long TASK_TRACKER_EXPIRATION = 1000 * 40;
@@ -24,8 +24,8 @@ public class MapReduce {
 		public static int HEART_BEAT_FREQ = 1000; //milliseconds
 		public static int BUFF_SIZE = 1024 * 1024;
 		public static String TEMP_FILE_DIR = "tmp";
-		public static boolean MAPPER_FAULT_TEST = true;
-		public static boolean REDUCER_FAULT_TEST = true;
+		public static boolean MAPPER_FAULT_TEST = false;
+		public static boolean REDUCER_FAULT_TEST = false;
 		public static int REDUCER_FAILURE_TIMES = 1;
 	}
 	

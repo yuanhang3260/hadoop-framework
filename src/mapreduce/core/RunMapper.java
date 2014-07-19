@@ -1,6 +1,6 @@
 package mapreduce.core;
 
-import example.WordCountMapper;
+import example.WordCount.WordCountMapper;
 import global.Hdfs;
 import global.MapReduce;
 import hdfs.DataStructure.HDFSFile;
