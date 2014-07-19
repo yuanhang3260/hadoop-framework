@@ -350,7 +350,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 										if (task instanceof ReducerTask) {
 											
 											InputStream tmpInputStream = task.getInputStream();
-											byte[] buff = new byte[2];
+											byte[] buff = new byte[512];
 											int c = 0;
 											try {
 												System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");

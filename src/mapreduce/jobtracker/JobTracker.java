@@ -194,10 +194,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			System.out.println("DEBUG JobTracker.heartBeat(): Receive TaskTrackerReport from " + report.taskTrackerIp);
 		}
 		
-//		if (Math.random() > 0.5) {
-//			return null;
-//		}
-		
 		//TODO: leave for parallel
 		
 		this.taskTrackerTbl.get(report.taskTrackerIp).updateTimeStamp();
