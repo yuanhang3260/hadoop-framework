@@ -55,7 +55,7 @@ public class testReadFile {
 		int k = 0;
 		int total = 0;
 		while ((k = in.read(b)) != 0) {
-			if (Hdfs.DEBUG) {
+			if (Hdfs.Common.DEBUG) {
 				System.out.println("DEBUG testReadFile.main(): read "+ k + " bytes");
 			}
 			total += k;

@@ -252,9 +252,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					TaskTracker.this.taskCounter += ack.newAddedTasks.size();
 					
 					//TODO: Remove the following line (for fault tolerance test)
-					if (TaskTracker.this.taskCounter == 5) {
-						System.exit(190);
-					}
+//					if (TaskTracker.this.taskCounter == 5) {
+//						System.exit(190);
+//					}
 					
 					for (Task newTask : ack.newAddedTasks) {
 						if (newTask instanceof MapperTask) {
@@ -365,7 +365,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 								}
 							} catch (IllegalThreadStateException e) {
-								if (Hdfs.DEBUG || MapReduce.DEBUG) {
+								if (Hdfs.Common.DEBUG || MapReduce.DEBUG) {
 									if (task instanceof ReducerTask) {
 										
 										InputStream tmpInputStream = task.getInputStream();

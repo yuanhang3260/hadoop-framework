@@ -4,7 +4,6 @@ import global.Hdfs;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -59,7 +58,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			
 			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
 			List<String> chunkList = formChunkReport(true);
-			if (Hdfs.DEBUG) {
+			if (Hdfs.Common.DEBUG) {
 				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 			}
 			
@@ -70,7 +69,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			while (true) {
 				if (counter % this.chunkBlockPeriod ==  0) {
 					chunkList = formChunkReport(false);
-					if (Hdfs.DEBUG) {
+					if (Hdfs.Common.DEBUG) {
 						System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 					}
 					nameNode.chunkReport(dataNodeName, chunkList);
@@ -167,8 +166,8 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			e.printStackTrace();
 		}
 		
-		if (offSet + Hdfs.Client.READ_BUFFER_SIZE <= chunkSize) {
-			readBuf = new byte[Hdfs.Client.READ_BUFFER_SIZE];
+		if (offSet + Hdfs.Common.READ_BUFFER_SIZE <= chunkSize) {
+			readBuf = new byte[Hdfs.Common.READ_BUFFER_SIZE];
 		} else {
 			/* offSet + readBufSize > chunkSize */
 			readBuf = new byte[(int) (chunkSize - offSet)];
@@ -196,7 +195,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	
 	@Override
 	public void commitChunk(String globalChunkName) throws RemoteException {
-		if (Hdfs.DEBUG) {
+		if (Hdfs.Common.DEBUG) {
 			System.out.format("DEBUG DataNode.commitChunk(): To find chunk(%s) on Node(%s).\n",tmpFileWrapper(chunkNameWrapper(globalChunkName)), this.dataNodeName);
 		}
 		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));

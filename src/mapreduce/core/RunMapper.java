@@ -38,7 +38,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		if (MapReduce.UNITEST) {
 			try {
 				Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-				NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.NameNode.nameNodeServiceName);
+				NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 				HDFSFile file = nameNodeS.open("wordCount");
 				Split split = new Split(file,0);
 				rm.task = new MapperTask("job001", "task001", split, WordCountMapper.class, 2);

@@ -8,8 +8,7 @@ public class MapReduce {
 	
 	public static class JobTracker {
 		public static String jobTrackerServiceName = "JobTracker";
-//		public static String jobTrackerRegistryIp = "128.237.213.225";
-		public static String jobTrackerRegistryIp = "127.0.0.1";
+		public static String jobTrackerRegistryIp = "128.237.213.225";
 
 		public static int MAX_RESCHEDULE_ATTEMPTS = 2;
 		public static long TASK_TRACKER_EXPIRATION = 1000 * 40;

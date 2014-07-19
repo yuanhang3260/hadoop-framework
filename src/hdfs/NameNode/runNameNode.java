@@ -23,7 +23,7 @@ public class runNameNode {
 					+ "The NameNode routine is shutting down...");
 			System.exit(1);
 		}
-		if (Hdfs.DEBUG) {
+		if (Hdfs.Common.DEBUG) {
 			System.out.println("DEBUG runNameNode.main(): NameNode now is running");
 		}
 		
