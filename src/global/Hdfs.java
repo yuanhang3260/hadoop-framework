@@ -6,15 +6,18 @@ public class Hdfs {
 	public static class Common {
 		
 		public static boolean DEBUG = true;
-		public static int WRITE_BUFF_SIZE = 512;
-		public static int READ_BUFFER_SIZE = 1024 * 1024;
 		
-		public static int dataNodePartitionTolerance = 1000 * 60 * 2; //2 min
-
-		public static int CHUNK_SIZE = 1024 * 8;
 		public static int REPLICA_FACTOR = 2;
-		public static String NAME_NODE_SERVICE_NAME = "NameNode";
-		public static String DATA_NODE_SERVICE_NAME = "DataNode";
+		
+		public static int CHUNK_SIZE = 1024 * 8;
+		
+		public static int WRITE_BUFF_SIZE = 512;
+		public static int READ_BUFF_SIZE = 1024 * 1024;
+		
+		public static int PARTITION_TOLERANCE = 1000 * 60 * 2;
+		
+		public static String NAME_NODE_SERVICE_NAME = "NameNode"; //Unconfigurable
+		public static String DATA_NODE_SERVICE_NAME = "DataNode"; //Unconfigurable
 		
 	}
 	

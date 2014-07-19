@@ -8,11 +8,14 @@ import java.rmi.RemoteException;
 public class runNameNode {
 	public static void main(String[] args) {
 		try {
-			Parser.nameNodeParseConf();
+			Parser.nameNodeConf();
+			Parser.printConf(new String[] {"HDFSCommon", "NameNode"});
 		} catch (Exception e) {
 			System.err.println("The NameNode rountine cannot read configuration info.\n"
-					+ "Please confirm the hdfs.core.xml is placed as ./conf/hdfs.core.xml.\n"
+					+ "Please confirm the hdfs-core.xml is placed as ./conf/hdfs-core.xml.\n"
 					+ "The NameNode routine is shutting down...");
+			e.printStackTrace();
+			System.exit(1);
 		}
 		
 		NameNode nameNode = new NameNode(Hdfs.NameNode.nameNodeRegistryPort);

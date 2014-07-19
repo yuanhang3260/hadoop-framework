@@ -35,9 +35,9 @@ public class HDFSInputStream implements Serializable{
 	
 	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {
 		this.fileChunkInfoList = chunkInfoList;
-		this.readBuffer = new byte[Hdfs.Common.READ_BUFFER_SIZE];
+		this.readBuffer = new byte[Hdfs.Common.READ_BUFF_SIZE];
 		/* indicate no data in read buffer yet */
-		this.bufferOffSet = Hdfs.Common.READ_BUFFER_SIZE;
+		this.bufferOffSet = Hdfs.Common.READ_BUFF_SIZE;
 		this.chunkOffSet = 0;
 		this.chunkCounter = 0;	
 		this.endOfChunk = true;
@@ -126,7 +126,7 @@ public class HDFSInputStream implements Serializable{
 				
 				/* get buffer from data node */
 				readBuffer = dataNodeStub.read(currChunkInfo.getChunkName(), chunkOffSet);
-				if (readBuffer.length != Hdfs.Common.READ_BUFFER_SIZE) {
+				if (readBuffer.length != Hdfs.Common.READ_BUFF_SIZE) {
 					if (chunkCounter == fileChunkInfoList.size()) {
 						endOfFile = true;
 					}

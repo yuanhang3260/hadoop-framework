@@ -166,8 +166,8 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			e.printStackTrace();
 		}
 		
-		if (offSet + Hdfs.Common.READ_BUFFER_SIZE <= chunkSize) {
-			readBuf = new byte[Hdfs.Common.READ_BUFFER_SIZE];
+		if (offSet + Hdfs.Common.READ_BUFF_SIZE <= chunkSize) {
+			readBuf = new byte[Hdfs.Common.READ_BUFF_SIZE];
 		} else {
 			/* offSet + readBufSize > chunkSize */
 			readBuf = new byte[(int) (chunkSize - offSet)];

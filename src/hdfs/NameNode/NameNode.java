@@ -321,7 +321,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					Date now = new Date();
 					for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
 						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
-						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.Common.dataNodePartitionTolerance) {
+						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.Common.PARTITION_TOLERANCE) {
 							dataNodeInfo.disableDataNode();
 						} else {
 							if (!dataNodeInfo.isAvailable()) {
