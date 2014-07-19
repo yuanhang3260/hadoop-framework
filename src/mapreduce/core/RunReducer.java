@@ -68,27 +68,43 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				rr.collectPartition(recordReconstructor);
 			}
 			
-			System.out.println("DEBUG RunReducer.main(): Start to sort");
 			
-			
-			//Merge Sort & construct Iterator
+			/*------ Sort -----*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunReducer.main(): Start to sort");
+			}
 			recordReconstructor.sort();
 			
-			System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
+			/*------- Merge the value with the same key -------*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
+			}
 			recordReconstructor.merge();
 			
-//			Thread.sleep(1000 * 10); //TODO: remove this after debugging
 			
+			/*---------- Reduce ------------*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
+			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
-			
-			//Reduce phase
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
 			}
-			output.sort();
+			
+			/*----------- Sort Output by key -----------*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunReducer.main(): Finish reducing and start to sort output");
+			}
+			output.sort(); //TODO: check the necessity of sort again
+			
+			/*------------ Write to HDFS ---------------*/
+			if (MapReduce.DEBUG) {
+				System.out.println("DEBUG RunReducer.main(): Finish sorting and start write to HDFS");
+			}
 			output.writeToHDFS(rr.task.getOutputPath());
+			
 		} catch (RemoteException e) {
 			if (MapReduce.DEBUG) {
 				e.printStackTrace();
