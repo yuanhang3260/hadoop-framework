@@ -311,63 +311,67 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		public void run() {
 			while (true) {
 //				synchronized (TaskTracker.this.syncTaskList) {
-					for (Task task : TaskTracker.this.syncTaskList) {
-						if (task.isRunning()) {
-							if (task.getProcRef() != null) {
-								try{
-									int exitVal = task.getProcRef().exitValue();
-									
-									if (exitVal == 0) {
-										task.commitTask();
-										if (MapReduce.DEBUG) {
-											String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-											System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-												+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
-												task.getJobId(), task.getTaskId(), type);
-										}
-									} else {
-										task.failedTask();
-										if (MapReduce.DEBUG) {
-											String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-											System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-												+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
-												task.getJobId(), task.getTaskId(), type, exitVal);
-											
-											byte[] errBuff = new byte[1024];
-											int c = 0;
-											try {
-												while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
-													System.out.print(new String(errBuff, 0 ,c));
-												}
-											} catch (IOException e) {
-												e.printStackTrace();
-											}
-											
-										}
+				for (Task task : TaskTracker.this.syncTaskList) {
+					if (task == null) {
+						break;
+						
+					}
+					if (task.isRunning()) {
+						if (task.getProcRef() != null) {
+							try{
+								int exitVal = task.getProcRef().exitValue();
+								
+								if (exitVal == 0) {
+									task.commitTask();
+									if (MapReduce.DEBUG) {
+										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+											+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
+											task.getJobId(), task.getTaskId(), type);
 									}
-								} catch (IllegalThreadStateException e) {
-									if (Hdfs.DEBUG || MapReduce.DEBUG) {
-										if (task instanceof ReducerTask) {
-											
-											InputStream tmpInputStream = task.getInputStream();
-											byte[] buff = new byte[512];
-											int c = 0;
-											try {
-												System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
-												while ((c = tmpInputStream.read(buff)) != -1) {
-													System.out.print(new String(buff, 0, c));
-												}
-												System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
-											} catch (IOException e1) {
-												e1.printStackTrace();
+								} else {
+									task.failedTask();
+									if (MapReduce.DEBUG) {
+										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+											+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
+											task.getJobId(), task.getTaskId(), type, exitVal);
+										
+										byte[] errBuff = new byte[1024];
+										int c = 0;
+										try {
+											while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
+												System.out.print(new String(errBuff, 0 ,c));
 											}
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+										
+									}
+								}
+							} catch (IllegalThreadStateException e) {
+								if (Hdfs.DEBUG || MapReduce.DEBUG) {
+									if (task instanceof ReducerTask) {
+										
+										InputStream tmpInputStream = task.getInputStream();
+										byte[] buff = new byte[512];
+										int c = 0;
+										try {
+											System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
+											while ((c = tmpInputStream.read(buff)) != -1) {
+												System.out.print(new String(buff, 0, c));
+											}
+											System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
+										} catch (IOException e1) {
+											e1.printStackTrace();
 										}
 									}
 								}
-							} 
-						}
+							}
+						} 
 					}
-//				}
+				}
+
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
