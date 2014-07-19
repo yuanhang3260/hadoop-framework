@@ -339,6 +339,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 												while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
 													System.out.print(new String(errBuff, 0 ,c));
 												}
+												System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
 											} catch (IOException e) {
 												e.printStackTrace();
 											}
@@ -348,13 +349,16 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								} catch (IllegalThreadStateException e) {
 									if (Hdfs.DEBUG || MapReduce.DEBUG) {
 										if (task instanceof ReducerTask) {
+											
 											InputStream tmpInputStream = task.getInputStream();
 											byte[] buff = new byte[2];
 											int c = 0;
 											try {
+												System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
 												while ((c = tmpInputStream.read(buff)) != -1) {
 													System.out.print(new String(buff, 0, c));
 												}
+												System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
 											} catch (IOException e1) {
 												e1.printStackTrace();
 											}
@@ -415,30 +419,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						TaskTracker.this.ProcessList.add(p);
 						task.setProcRef(p);
 						task.startTask();
-////						TODO: DELETE following block
-//						if (task instanceof ReducerTask) {
-//							System.out.println("The task is running");
-//							InputStream in = p.getInputStream();
-//							BufferedInputStream bin = new BufferedInputStream(in);
-//							InputStream errin = p.getErrorStream();
-//							
-//							byte[] buff = new byte[1024];
-//							int c = 0;
-//							while((c = bin.read(buff)) != -1){
-//								System.out.print(new String(buff, 0, c));
-//							}
-//							while ((c = errin.read(buff)) != -1) {
-//								System.out.println(new String(buff, 0, c));
-//							}
-//							
-//							
-//							try {
-//								p.waitFor();
-//							} catch (InterruptedException e) {
-//								e.printStackTrace();
-//							}
-//							System.out.println("The reducuer ends with CODE:" + p.exitValue());
-//						}						
+				
  					} catch (IOException e) {
 						e.printStackTrace();
 						task.failedTask();
