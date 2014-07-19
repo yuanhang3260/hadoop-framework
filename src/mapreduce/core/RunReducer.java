@@ -85,7 +85,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
 			}
 			output.sort();
-			output.printOutputCollector();
+//			output.printOutputCollector();
 			output.writeToHDFS(rr.task.getOutputPath());
 		} catch (RemoteException e) {
 			if (MapReduce.DEBUG) {
@@ -165,7 +165,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
 			
 			String request = String.format("%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
-			System.out.println("REQUESTING:" + request + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
+			System.err.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
 			out.write(request.toCharArray());
 			out.flush();
 			
@@ -183,7 +183,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
 			Thread collectorThread = new Thread(collectorRunnable);
 			collectorThread.start();
-//			collectorThread.join();
 			threadList.add(collectorThread);
 		}
 		

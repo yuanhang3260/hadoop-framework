@@ -38,7 +38,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * @return HDFS file descriptor.
 	 * @throws RemoteException
 	 */
-	public HDFSFile create(String path) throws RemoteException;
+	public HDFSFile create(String path) throws RemoteException, IOException;
 	
 	/**
 	 * Open a file on HDFS in order to read a file.

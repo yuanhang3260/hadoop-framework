@@ -24,7 +24,7 @@ public class RecordReconstructor<K extends Writable, V extends Writable> {
 	int index = 0;
 	
 	public void reconstruct(String filename) throws FileNotFoundException, IOException, ClassNotFoundException {
-		System.out.println("RecordRecontsructor.reconstruct(): Finish collecet file=" + filename);
+		System.err.println("RecordRecontsructor.reconstruct(): Finish collecet file=" + filename);
 		ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(filename)));
 		
 		try {

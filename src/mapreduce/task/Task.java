@@ -15,6 +15,7 @@ public class Task implements Serializable {
 	private String tid;
 	private transient Process procRef;
 	private transient InputStream ErrorInputStream;
+	private transient InputStream inputStream;
 	private int bindProcTimes = 0;
 	private String filePrefix;
 	transient int priorityLevel;
@@ -78,10 +79,15 @@ public class Task implements Serializable {
 	public void setProcRef(Process p) {
 		this.procRef = p;
 		this.ErrorInputStream = p.getErrorStream();
+		this.inputStream = p.getInputStream();
 	}
 	
 	public InputStream getErrInputStream() {
 		return this.ErrorInputStream;
+	}
+	
+	public InputStream getInputStream() {
+		return this.inputStream;
 	}
 	
 

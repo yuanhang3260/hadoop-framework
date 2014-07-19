@@ -2,7 +2,6 @@ package mapreduce.tasktracker;
 
 import global.MapReduce;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +19,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -317,6 +315,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							if (task.getProcRef() != null) {
 								try{
 									int exitVal = task.getProcRef().exitValue();
+									
 									if (exitVal == 0) {
 										task.commitTask();
 										if (MapReduce.DEBUG) {
@@ -346,7 +345,18 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 										}
 									}
 								} catch (IllegalThreadStateException e) {
-									//The process hasn't exited yet.
+//									if (task instanceof ReducerTask) {
+//										InputStream tmpInputStream = task.getInputStream();
+//										byte[] buff = new byte[20];
+//										int c = 0;
+//										try {
+//											while ((c = tmpInputStream.read(buff)) != -1) {
+//												System.out.print(new String(buff, 0, c));
+//											}
+//										} catch (IOException e1) {
+//											e1.printStackTrace();
+//										}
+//									}
 								}
 							} 
 						}
@@ -490,6 +500,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				/* Receive requested file */
 				String fileName = in.readLine();
 				File file = new File(TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
+				System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t OPENNING " + TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
 				fin = new FileInputStream(file);
 				byte[] buff = new byte[MapReduce.TaskTracker.BUFF_SIZE];
 				int readBytes = 0;
