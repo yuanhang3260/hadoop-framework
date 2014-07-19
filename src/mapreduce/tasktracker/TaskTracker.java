@@ -349,7 +349,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 									if (Hdfs.DEBUG || MapReduce.DEBUG) {
 										if (task instanceof ReducerTask) {
 											InputStream tmpInputStream = task.getInputStream();
-											byte[] buff = new byte[20];
+											byte[] buff = new byte[2];
 											int c = 0;
 											try {
 												while ((c = tmpInputStream.read(buff)) != -1) {
