@@ -3,7 +3,7 @@ package test.testHDFS;
 import global.Hdfs;
 import global.Parser;
 import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSNewOutputStream;
+import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class testNewOutputStream {
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		
 		HDFSFile file = nameNodeStub.create("test-file-1");
-		HDFSNewOutputStream newout = file.getNewOutputStream();
+		HDFSOutputStream newout = file.getNewOutputStream();
 		
 		String str1 = "abcde123\n\n";
 		String str2 = "fghij\n67890";

@@ -2,7 +2,7 @@ package hdfs.DataStructure;
 
 import global.Hdfs;
 import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSNewOutputStream;
+import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.Serializable;
@@ -19,7 +19,7 @@ public class HDFSFile implements Serializable {
 	private List<HDFSChunk> totalChunkList; //Contains all chunks. Some chunks may be excluded after rearrange.
 	private int replicaFactor; 
 	private boolean available; //TODO: define the semantics
-	private HDFSNewOutputStream newOutputStream = null;
+	private HDFSOutputStream newOutputStream = null;
 	private NameNodeRemoteInterface nameNodeStub;
 
 	
@@ -89,8 +89,8 @@ public class HDFSFile implements Serializable {
 	}
 	
 	
-	public HDFSNewOutputStream getNewOutputStream() {
-		this.newOutputStream = new HDFSNewOutputStream(this, this.nameNodeStub);
+	public HDFSOutputStream getNewOutputStream() {
+		this.newOutputStream = new HDFSOutputStream(this, this.nameNodeStub);
 		return this.newOutputStream;
 	}
 	

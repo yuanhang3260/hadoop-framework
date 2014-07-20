@@ -5,7 +5,7 @@ import global.Parser;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSNewOutputStream;
+import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -139,7 +139,7 @@ public class Utility {
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
-			HDFSNewOutputStream out = file.getNewOutputStream();
+			HDFSOutputStream out = file.getNewOutputStream();
 			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 			
 			while ((c = in.read(buff)) != -1) {

@@ -3,7 +3,7 @@ package mapreduce.io.collector;
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSBufferedOutputStream;
-import hdfs.IO.HDFSNewOutputStream;
+import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -90,7 +90,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		System.err.println("dst ip:" + Hdfs.Core.NAME_NODE_IP + "\t dst port:" + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeS.create(filename);
-		HDFSNewOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getNewOutputStream();
 		HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 		
 		for (KeyValue<K, V> pair : this.keyvalueList) {

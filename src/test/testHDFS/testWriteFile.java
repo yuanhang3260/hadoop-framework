@@ -1,7 +1,7 @@
 package test.testHDFS;
 
 import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSNewOutputStream;
+import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class testWriteFile {
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		HDFSFile file = nameNodeStub.create("test-file-1");
-		HDFSNewOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getNewOutputStream();
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);
