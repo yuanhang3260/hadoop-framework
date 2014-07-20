@@ -33,7 +33,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		try {
 			
 			/*------------------ Retrieve Task ----------------*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): Try to Retrived task.");
 			}
 			
@@ -54,7 +54,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			
 			/*------------------ Prepare input records ----------------*/
 			
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): RunMapper retrived task and start to prepare records");
 			}
 			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);
@@ -63,7 +63,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			
 			/*------------------ Map Phase ----------------*/
 			
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): All input records are ready and now move to map phase.");
 			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rm.task);
@@ -75,45 +75,45 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			
 			/*------------------ Sort intermediate values ----------------*/
 			
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): Finish map phase and start to sort intermediate <key, value> pair by key.");
 			}
 			output.sort();
 			
 			/*------------------ Write intermediate values to local  ----------------*/
 			
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): The last step is to write mapper intermediate value to local file system.");
 			}
 			output.writeToLocal();
 			
 			return;
 		} catch (NumberFormatException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(1);
 		} catch (RemoteException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(2);
 		} catch (NotBoundException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(3);
 		} catch (IOException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(4);
 		} catch (IllegalArgumentException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(5);
 		} catch (SecurityException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(6);
 		} catch (InstantiationException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(7);
 		} catch (IllegalAccessException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(8);
 		} catch (InvocationTargetException e) {
-			if (MapReduce.DEBUG) {e.printStackTrace();}
+			if (MapReduce.Common.DEBUG) {e.printStackTrace();}
 			System.exit(9);
 		}
 		

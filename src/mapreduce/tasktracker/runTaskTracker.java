@@ -20,26 +20,26 @@ public class runTaskTracker {
 		try {
 			tt.init();
 		} catch (RemoteException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				e.printStackTrace();
 			}
 			System.err.println("Failed to create registry. TaskTracker is shutting down...");
 			System.exit(1);
 		} catch (UnknownHostException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				e.printStackTrace();
 			}
 			System.err.println("The Internet is unacessible. TaskTracker is shutting down...");
 			System.exit(2);
 			
 		} catch (NotBoundException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				e.printStackTrace();
 			}
 			System.err.println("Cannot find the JobTracker. TaskTracker is shutting down...");
 			System.exit(3);
 		} catch (IOException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Common.DEBUG) {
 				e.printStackTrace();
 			}
 			System.err.println("IOException. TaskTracker is shutting down...");

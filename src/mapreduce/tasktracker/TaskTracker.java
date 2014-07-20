@@ -156,7 +156,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		Thread serverTh = new Thread(sv);
 		serverTh.start();
 		
-		if (MapReduce.DEBUG) {
+		if (MapReduce.Common.DEBUG) {
 			System.out.println("DEBUG TaskTracker.init(): TaskTracker Initialization succeeds.");
 		}
 	}
@@ -171,7 +171,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			for (Task task : this.syncTaskList) {
 				if ((task.getJobId() + task.getTaskId()).equals(id)) {
 					this.syncTaskList.remove(task);
-					if (MapReduce.DEBUG) {
+					if (MapReduce.Common.DEBUG) {
 						System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
 								task.getJobId(), task.getTaskId());
 					}
@@ -228,7 +228,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					try {//TODO if JobTracker doesn't respond me for XXXX seconds, pull off the TaskTracker
 						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
 					} catch (InterruptedException e) { //Do nothing
-						if (MapReduce.DEBUG) {
+						if (MapReduce.Common.DEBUG) {
 							e.printStackTrace();
 						}
 					}
@@ -279,7 +279,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				try {
 					Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
 				} catch (InterruptedException e) { //Do nothing
-					if (MapReduce.DEBUG) {
+					if (MapReduce.Common.DEBUG) {
 						e.printStackTrace();
 					}
 				}
@@ -337,7 +337,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								
 								if (exitVal == 0) {
 									task.commitTask();
-									if (MapReduce.DEBUG) {
+									if (MapReduce.Common.DEBUG) {
 										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
 										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
 											+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
@@ -345,7 +345,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 									}
 								} else {
 									task.failedTask();
-									if (MapReduce.DEBUG) {
+									if (MapReduce.Common.DEBUG) {
 										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
 										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
 											+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
@@ -365,7 +365,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 								}
 							} catch (IllegalThreadStateException e) {
-								if (Hdfs.Common.DEBUG || MapReduce.DEBUG) {
+								if (Hdfs.Common.DEBUG || MapReduce.Common.DEBUG) {
 									if (task instanceof ReducerTask) {
 										
 										InputStream tmpInputStream = task.getInputStream();
