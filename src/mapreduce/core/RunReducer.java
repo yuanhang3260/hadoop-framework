@@ -1,6 +1,5 @@
 package mapreduce.core;
 
-import example.WordCount.WordCountReducer;
 import global.MapReduce;
 
 import java.io.BufferedInputStream;
@@ -9,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -23,7 +23,6 @@ import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.RecordReconstructor;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
 import mapreduce.tasktracker.TaskTrackerRemoteInterface;
@@ -38,17 +37,14 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		RunReducer<Writable, Writable, Writable, Writable> rr = new RunReducer<Writable, Writable, Writable, Writable>();
 		boolean toFail = false;
 		try {
-			//Configure task
-			if (MapReduce.UNITEST) {
-				ReducerTask task = new ReducerTask("job001", "task002", 0, WordCountReducer.class, null, "output");
-				rr.task = task;	
-			} else {
-				Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
-				TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
-						.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
-				rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
-				toFail = taskTrackerS.toFail();
-			}
+			
+			/*----- Retrieve task --------*/
+			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
+			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
+					.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
+			rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
+			toFail = taskTrackerS.toFail();
+
 			
 			RecordReconstructor<Writable, Writable> recordReconstructor = 
 					new RecordReconstructor<Writable, Writable>();
@@ -58,16 +54,9 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				System.exit(134);
 			}
 			
-			//Collect Partition
-			if (MapReduce.UNITEST) {
-				for (int i = 0; i < 2; i++) {
-					String tmpName = "tmp/TaskTracker-001/Mapper/job001-task001-" + i;
-					recordReconstructor.reconstruct(tmpName);
-				}
-			} else {
-				rr.collectPartition(recordReconstructor);
-			}
-			
+			/*------ Collect partitions -----*/
+			rr.collectPartition(recordReconstructor);
+
 			
 			/*------ Sort -----*/
 			if (MapReduce.Common.DEBUG) {
@@ -87,6 +76,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
 			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
+			Constructor<Reducer<Writable, Writable, Writable, Writable>> constr = (Constructor<Reducer<Writable, Writable, Writable, Writable>>) rr.task.getTask().getConstructors()[0];
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
@@ -121,11 +111,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				e.printStackTrace();
 			}
 			System.exit(3);
-		} catch (ClassNotFoundException e) {
-			if (MapReduce.Common.DEBUG) {
-				e.printStackTrace();
-			}
-			System.exit(4);
 		} catch (InterruptedException e) {
 			if (MapReduce.Common.DEBUG) {
 				e.printStackTrace();

@@ -8,7 +8,7 @@ public class MapReduce {
 	}
 	
 	
-	public static boolean UNITEST = false;
+//	public static boolean UNITEST = false;
 
 	
 	public static class JobTracker {
