@@ -49,13 +49,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private ConcurrentHashMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
 	
-	public static void main(String[] args) {
-		JobTracker jt = new JobTracker();
-		jt.init();
-		if (Hdfs.Core.DEBUG) {
-			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
-		}
-	}
+//	public static void main(String[] args) {
+//		JobTracker jt = new JobTracker();
+//		jt.init();
+//		if (Hdfs.Core.DEBUG) {
+//			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
+//		}
+//	}
 	
 	public void init() {
 		jobScheduler = new JobScheduler();

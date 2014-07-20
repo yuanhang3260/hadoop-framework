@@ -22,7 +22,7 @@ public class MapReduce {
 		public static class Common {
 			
 			public static int HEART_BEAT_FREQ; //milliseconds
-			public static String TASK_TRACKER_SERVICE_NAME;  //non-configurable
+			public static String TASK_TRACKER_SERVICE_NAME = "TaskTracker";  //non-configurable
 			public static String TEMP_FILE_DIR;
 			public static boolean MAPPER_FAULT_TEST = false;  //non-configurable
 			public static boolean REDUCER_FAULT_TEST = false;  //non-configurable
