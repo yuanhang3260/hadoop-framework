@@ -1,6 +1,8 @@
 package util;
 
 import global.Hdfs;
+import global.Parser;
+import global.Parser.ConfFormatException;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSInputStream;
@@ -17,11 +19,28 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 public class Utility {
 	
 	public static void main(String[] args) {
+		
+		try {
+			Parser.hdfsCoreConf();
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			
+			System.err.println("The Utility cannot read configuration info.\n"
+					+ "Please confirm the hdfs.xml is placed as ./conf/hdfs.xml.\n"
+					+ "The Utility is shutting down...");
+			
+			System.exit(1);
+		} 
+		
 		if (args.length < 2) {
 			printUsage();
 			return;
