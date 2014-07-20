@@ -2,6 +2,7 @@ package mapreduce.tasktracker;
 
 import global.MapReduce;
 import global.Parser;
+import global.Parser.ConfOpt;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -25,6 +26,7 @@ public class runTaskTracker {
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
 			Parser.mapreduceTaskTrackerIndividualConf(tasktrackerSEQ);
+			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.MAPREDCORE, ConfOpt.TASKTRACKERCOMMON, ConfOpt.TASKTRACKERINDIVIDUAL});
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("The TaskTracker rountine cannot read configuration info.\n"
