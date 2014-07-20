@@ -20,7 +20,7 @@ public class testPutToHDFS {
 		byte[] buff = new byte[1024];
 		FileInputStream in = new FileInputStream(newFile);
 		int readBytes = 0;
-		Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+		Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		
 		

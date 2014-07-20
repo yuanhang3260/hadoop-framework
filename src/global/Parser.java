@@ -18,6 +18,8 @@ public class Parser {
 	public static void hdfsCommonConf() throws ParserConfigurationException, 
 		SAXException, IOException, ConfFormatException, NumberFormatException {
 		
+		IPAddressValidator ipValidator = new IPAddressValidator();
+		
 		File fXmlFile = new File("./conf/hdfs-core.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -119,7 +121,14 @@ public class Parser {
 				}
 				
 				
+				/* parse NameNode IP Address */
+				Hdfs.Common.nameNodeRegistryIP =
+						eElement.getElementsByTagName("ip")
+								.item(0).getTextContent().trim();
 				
+				if (!ipValidator.validate(Hdfs.Common.nameNodeRegistryIP)) {
+					throw new ConfFormatException("NameNode IP value is invalid");
+				}
 				
 
 				
@@ -130,8 +139,6 @@ public class Parser {
 	public static void nameNodeConf() throws ParserConfigurationException, SAXException, IOException, ConfFormatException {
 		
 		hdfsCommonConf();
-		
-		IPAddressValidator ipValidator = new IPAddressValidator();
 		
 		File fXmlFile = new File("./conf/hdfs-core.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -147,16 +154,6 @@ public class Parser {
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 				
 				Element eElement = (Element) nNode;
-				
-				/* parse NameNode IP Address */
-				Hdfs.NameNode.nameNodeRegistryIP =
-						eElement.getElementsByTagName("ip")
-								.item(0).getTextContent().trim();
-				
-				if (!ipValidator.validate(Hdfs.NameNode.nameNodeRegistryIP)) {
-					throw new ConfFormatException("NameNode IP value is invalid");
-				}
-				
 				
 				/* parse NameNode port */
 				Hdfs.NameNode.nameNodeRegistryPort =
@@ -244,12 +241,12 @@ public class Parser {
 		System.out.println("HDFS.Common.WRITE_BUFF_SIZE = " + Hdfs.Common.WRITE_BUFF_SIZE);
 		System.out.println("HDFS.Common.READ_BUFF_SIZE = " + Hdfs.Common.READ_BUFF_SIZE);
 		System.out.println("HDFS.Common.PARTITION_TOLERANCE = " + Hdfs.Common.PARTITION_TOLERANCE);
+		System.out.println("HDFS NameNode.IP = " + Hdfs.Common.nameNodeRegistryIP);
 		System.out.println("\n\n\n");
 	}
 	
 	public static void printHDFSNameNodeConf() {
 		System.out.println("HDFS NameNode:");
-		System.out.println("HDFS NameNode.IP = " + Hdfs.NameNode.nameNodeRegistryIP);
 		System.out.println("HDFS NameNode.Port = " + Hdfs.NameNode.nameNodeRegistryPort);
 		System.out.println("\n\n\n");
 	}

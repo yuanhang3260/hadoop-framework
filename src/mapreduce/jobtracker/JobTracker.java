@@ -353,7 +353,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		jobStatus.reduceTaskLeft = jobStatus.reduceTaskTotal;
 		/* delete result on HDFS from reducer */
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 			String outputPath = this.jobTbl.get(jobStatus.jobId).getJobConf().getOutputPath();
 			for (int i = 0; i < jobStatus.reduceTaskTotal; i++) {

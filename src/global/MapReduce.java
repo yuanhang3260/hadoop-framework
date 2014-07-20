@@ -7,10 +7,6 @@ public class MapReduce {
 		public static boolean DEBUG = true;
 	}
 	
-	
-//	public static boolean UNITEST = false;
-
-	
 	public static class JobTracker {
 		public static String jobTrackerServiceName = "JobTracker";
 		public static String jobTrackerRegistryIp = "128.237.213.225";

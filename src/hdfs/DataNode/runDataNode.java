@@ -25,7 +25,7 @@ public class runDataNode {
 			System.exit(1);
 		}
 		
-		DataNode dataNode = new DataNode(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode.dataNodeRegistryPort);
+		DataNode dataNode = new DataNode(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort, Hdfs.DataNode.dataNodeRegistryPort);
 		dataNode.init();
 		Thread t1 = new Thread(dataNode);
 		t1.start();

@@ -22,10 +22,11 @@ public class Hdfs {
 		
 		public static int DATA_NODE_NUM = 3;
 		
+		public static String nameNodeRegistryIP = "128.237.222.59"/*"localhost"*/;
+		
 	}
 
 	public static class NameNode {
-		public static String nameNodeRegistryIP = "128.237.222.59"/*"localhost"*/;
 		public static int nameNodeRegistryPort = 1099;
 		
 	}

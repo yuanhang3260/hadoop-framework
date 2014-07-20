@@ -85,7 +85,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	}
 	
 	public void writeToHDFS(String filename) throws NotBoundException, IOException {
-		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeS.create(filename);
 		HDFSOutputStream out = file.getOutputStream();

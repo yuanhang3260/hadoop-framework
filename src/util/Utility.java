@@ -66,7 +66,7 @@ public class Utility {
 	
 	private static void getFromHDFS(String hdfsFilePath, String localFilePath) {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.open(hdfsFilePath);
@@ -121,7 +121,7 @@ public class Utility {
 		try {
 			FileInputStream in = new FileInputStream(newFile);
 			int c = 0;
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
@@ -151,7 +151,7 @@ public class Utility {
 	
 	private static void removeFromHDFS(String path) {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 			nameNodeStub.delete(path);
 		} catch (RemoteException e){
@@ -168,7 +168,7 @@ public class Utility {
 	
 	private static void listFiles() {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 			ArrayList<String> rst = nameNodeStub.listFiles();
 			int i = 1;

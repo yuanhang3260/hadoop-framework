@@ -95,7 +95,7 @@ public class JobClient {
 	
 	public static List<Split> splitFile(String inputFile) throws Exception {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
 			HDFSFile file = nameNodeStub.open(inputFile);
 			if (file == null) {
