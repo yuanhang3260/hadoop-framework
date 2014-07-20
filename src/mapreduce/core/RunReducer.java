@@ -1,6 +1,8 @@
 package mapreduce.core;
 
 import global.MapReduce;
+import global.Parser;
+import global.Parser.ConfOpt;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -36,6 +38,20 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 		RunReducer<Writable, Writable, Writable, Writable> rr = new RunReducer<Writable, Writable, Writable, Writable>();
 		boolean toFail = false;
+		
+		try {
+			Parser.hdfsCoreConf();
+			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			System.err.println("The Reducer task cannot read configuration info.\n"
+					+ "Please confirm the hdfs.xml is placed as ./conf/hdfs.xml.\n"
+					+ "The  Reducer task cannot is shutting down...");
+			
+			System.exit(1);
+		}
+		
 		try {
 			
 			/*----- Retrieve task --------*/
@@ -76,7 +92,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
 			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
-			Constructor<Reducer<Writable, Writable, Writable, Writable>> constr = (Constructor<Reducer<Writable, Writable, Writable, Writable>>) rr.task.getTask().getConstructors()[0];
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();

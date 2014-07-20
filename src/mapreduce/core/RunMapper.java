@@ -1,6 +1,8 @@
 package mapreduce.core;
 
 import global.MapReduce;
+import global.Parser;
+import global.Parser.ConfOpt;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -27,9 +29,25 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 	 * @throws RemoteException 
 	 * @throws NotBoundException 
 	 */
+	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
+		
+		try {
+			Parser.hdfsCoreConf();
+			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			System.err.println("The Mapper task cannot read configuration info.\n"
+					+ "Please confirm the hdfs.xml is placed as ./conf/hdfs.xml.\n"
+					+ "The  Mapper task cannot is shutting down...");
+			
+			System.exit(1);
+		}
+		
 		RunMapper<Writable, Writable, Writable, Writable> rm = new RunMapper<Writable, Writable, Writable, Writable>();
+		
 		try {
 			
 			/*------------------ Retrieve Task ----------------*/
