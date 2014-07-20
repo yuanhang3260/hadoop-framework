@@ -33,8 +33,8 @@ public class testBufferedOutputStream {
 		
 		FileOutputStream fout = new FileOutputStream(file1);
 		
-		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-		NameNodeRemoteInterface nameNodeI = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
+		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+		NameNodeRemoteInterface nameNodeI = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeI.create("test");
 		HDFSBufferedOutputStream hout = new HDFSBufferedOutputStream(file.getOutputStream());
 		

@@ -1,6 +1,5 @@
 package mapreduce.core;
 
-import example.WordCount.WordCountReducer;
 import global.MapReduce;
 
 import java.io.BufferedInputStream;
@@ -9,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -23,7 +23,6 @@ import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.RecordReconstructor;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
 import mapreduce.tasktracker.TaskTrackerRemoteInterface;
@@ -38,55 +37,46 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		RunReducer<Writable, Writable, Writable, Writable> rr = new RunReducer<Writable, Writable, Writable, Writable>();
 		boolean toFail = false;
 		try {
-			//Configure task
-			if (MapReduce.UNITEST) {
-				ReducerTask task = new ReducerTask("job001", "task002", 0, WordCountReducer.class, null, "output");
-				rr.task = task;	
-			} else {
-				Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
-				TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
-						.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
-				rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
-				toFail = taskTrackerS.toFail();
-			}
+			
+			/*----- Retrieve task --------*/
+			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
+			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
+					.lookup(MapReduce.TaskTracker.Common.TASK_TRACKER_SERVICE_NAME);
+			rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
+			toFail = taskTrackerS.toFail();
+
 			
 			RecordReconstructor<Writable, Writable> recordReconstructor = 
 					new RecordReconstructor<Writable, Writable>();
 			
 			
-			if (MapReduce.TaskTracker.REDUCER_FAULT_TEST && toFail) {
+			if (MapReduce.TaskTracker.Common.REDUCER_FAULT_TEST && toFail) {
 				System.exit(134);
 			}
 			
-			//Collect Partition
-			if (MapReduce.UNITEST) {
-				for (int i = 0; i < 2; i++) {
-					String tmpName = "tmp/TaskTracker-001/Mapper/job001-task001-" + i;
-					recordReconstructor.reconstruct(tmpName);
-				}
-			} else {
-				rr.collectPartition(recordReconstructor);
-			}
-			
+			/*------ Collect partitions -----*/
+			rr.collectPartition(recordReconstructor);
+
 			
 			/*------ Sort -----*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Start to sort");
 			}
 			recordReconstructor.sort();
 			
 			/*------- Merge the value with the same key -------*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
 			}
 			recordReconstructor.merge();
 			
 			
 			/*---------- Reduce ------------*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
 			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
+			Constructor<Reducer<Writable, Writable, Writable, Writable>> constr = (Constructor<Reducer<Writable, Writable, Writable, Writable>>) rr.task.getTask().getConstructors()[0];
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
@@ -94,70 +84,65 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			}
 			
 			/*----------- Sort Output by key -----------*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish reducing and start to sort output");
 			}
 			output.sort(); //TODO: check the necessity of sort again
 			
 			/*------------ Write to HDFS ---------------*/
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish sorting and start write to HDFS");
 			}
 			output.writeToHDFS(rr.task.getOutputPath());
 			
 		} catch (RemoteException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.out.println("RemoteException caught");
 			System.exit(1);
 		} catch (FileNotFoundException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(2);
 		} catch (IOException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(3);
-		} catch (ClassNotFoundException e) {
-			if (MapReduce.DEBUG) {
-				e.printStackTrace();
-			}
-			System.exit(4);
 		} catch (InterruptedException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(5);
 		} catch (IllegalArgumentException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(6);
 		} catch (SecurityException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(7);
 		} catch (InstantiationException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(8);
 		} catch (IllegalAccessException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(9);
 		} catch (InvocationTargetException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(10);
 		} catch (NotBoundException e) {
-			if (MapReduce.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(11);

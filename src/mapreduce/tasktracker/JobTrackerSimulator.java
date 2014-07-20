@@ -44,9 +44,9 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		JobTrackerSimulator jt = new JobTrackerSimulator();
 		
-		Registry registry = LocateRegistry.createRegistry(MapReduce.JobTracker.jobTrackerRegistryPort);
+		Registry registry = LocateRegistry.createRegistry(MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
 		JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) UnicastRemoteObject.exportObject(jt, 0);
-		registry.bind(MapReduce.JobTracker.jobTrackerServiceName, jtStub);
+		registry.bind(MapReduce.Core.JOB_TRACKER_SERVICE_NAME, jtStub);
 		
 		int chunksNum = 8;
 		int reducerNum = 1;
@@ -58,8 +58,8 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		int taskCounter = 1;
 		
 		/* Open file */
-		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
+		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file1 = nameNodeS.open("hello");
 		
 		Thread.sleep(1000 * 3);
@@ -74,7 +74,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		for (int reducerSEQ = 0; reducerSEQ < reducerNum; reducerSEQ++) {
 			PartitionEntry[] partitionEntry = new PartitionEntry[chunksNum];
 			for (int i = 0; i < chunksNum; i++) {
-				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker1.taskTrackerServerPort);
+				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT);
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
 			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, WordCountReducer.class, partitionEntry, "output-part" + reducerSEQ));
@@ -94,7 +94,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		this.taskTrackerIp = ip;
 		this.taskTrackerRegistryPort = port;
-		this.taskTrackerServerPort = MapReduce.TaskTracker1.taskTrackerServerPort; //TODO: change to join argument
+		this.taskTrackerServerPort = MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT; //TODO: change to join argument
 		System.out.println("Target task tracker joins.");
 		
 		return "TaskTracker-001";

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<hdfs>
+	<core>		
+		<replica-factor> 2 </replica-factor>
+		
+		<chunk-size unit="KB">64</chunk-size>
+		
+		<read-buff-size unit="KB">8</read-buff-size>
+		<write-buff-size unit="KB">8</write-buff-size>
+		
+		<partition-tolerance unit="sec">120</partition-tolerance>
+		
+		<ip>128.237.222.59</ip>
+		<port>1099</port>
+	</core>
+
+	<datanode>
+		<port>1150</port>
+	</datanode>
+
+	<datanode>
+		<port>1151</port>
+	</datanode>
+</hdfs>

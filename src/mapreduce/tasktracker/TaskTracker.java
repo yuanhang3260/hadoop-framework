@@ -51,6 +51,8 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	String taskTrackerMapperFolderName;
 	String taskTrackerReducerFolderName;
 	
+	public static final int BUFF_SIZE = 1024 * 1024;
+	
 	
 	/*------------------ FOR DEBUGGING ----------------*/
 	//TODO: REMOVE THE NEXT LINE
@@ -94,11 +96,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		/* Export and bind TaskTracker */
 		Registry registry = LocateRegistry.createRegistry(this.registryPort);
 		TaskTrackerRemoteInterface stub = (TaskTrackerRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
-		registry.rebind(MapReduce.TaskTracker.taskTrackerServiceName, stub);
+		registry.rebind(MapReduce.TaskTracker.Common.TASK_TRACKER_SERVICE_NAME, stub);
 		
 		/* Locate JobTracker */
 		Registry jobTrackerR = LocateRegistry.getRegistry(this.jobTrackerIp, this.jobTrackerPort);
-		this.jobTrackerStub = (JobTrackerRemoteInterface)jobTrackerR.lookup(MapReduce.JobTracker.jobTrackerServiceName);
+		this.jobTrackerStub = (JobTrackerRemoteInterface)jobTrackerR.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
 		
 		/* Join the MapReduce cluster */
 		this.taskTrackerIp = Inet4Address.getLocalHost().getHostAddress();
@@ -156,7 +158,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		Thread serverTh = new Thread(sv);
 		serverTh.start();
 		
-		if (MapReduce.DEBUG) {
+		if (MapReduce.Core.DEBUG) {
 			System.out.println("DEBUG TaskTracker.init(): TaskTracker Initialization succeeds.");
 		}
 	}
@@ -171,7 +173,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			for (Task task : this.syncTaskList) {
 				if ((task.getJobId() + task.getTaskId()).equals(id)) {
 					this.syncTaskList.remove(task);
-					if (MapReduce.DEBUG) {
+					if (MapReduce.Core.DEBUG) {
 						System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
 								task.getJobId(), task.getTaskId());
 					}
@@ -198,7 +200,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	@Override
 	public boolean toFail()  {
-		return (failureTimes++ < MapReduce.TaskTracker.REDUCER_FAILURE_TIMES);
+		return (failureTimes++ < MapReduce.TaskTracker.Common.REDUCER_FAILURE_TIMES);
 	}
 	
 	
@@ -209,7 +211,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 			try {
-				Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
+				Thread.sleep(MapReduce.TaskTracker.Common.HEART_BEAT_FREQ);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -226,9 +228,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 					// wait for next heart beat;
 					try {//TODO if JobTracker doesn't respond me for XXXX seconds, pull off the TaskTracker
-						Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
+						Thread.sleep(MapReduce.TaskTracker.Common.HEART_BEAT_FREQ);
 					} catch (InterruptedException e) { //Do nothing
-						if (MapReduce.DEBUG) {
+						if (MapReduce.Core.DEBUG) {
 							e.printStackTrace();
 						}
 					}
@@ -277,9 +279,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					startTaskTh.start();
 				}
 				try {
-					Thread.sleep(MapReduce.TaskTracker.HEART_BEAT_FREQ);
+					Thread.sleep(MapReduce.TaskTracker.Common.HEART_BEAT_FREQ);
 				} catch (InterruptedException e) { //Do nothing
-					if (MapReduce.DEBUG) {
+					if (MapReduce.Core.DEBUG) {
 						e.printStackTrace();
 					}
 				}
@@ -308,7 +310,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			
 			/* Create report for JobTracker */
 			TaskTrackerReport report = new TaskTrackerReport(TaskTracker.this.taskTrackerIp, 
-					MapReduce.TaskTracker1.CORE_NUM - runningCounter, taskStatusList);
+					MapReduce.TaskTracker.Individual.CORE_NUM - runningCounter, taskStatusList);
 			
 			return report;
 		}
@@ -337,7 +339,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								
 								if (exitVal == 0) {
 									task.commitTask();
-									if (MapReduce.DEBUG) {
+									if (MapReduce.Core.DEBUG) {
 										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
 										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
 											+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
@@ -345,7 +347,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 									}
 								} else {
 									task.failedTask();
-									if (MapReduce.DEBUG) {
+									if (MapReduce.Core.DEBUG) {
 										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
 										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
 											+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
@@ -365,7 +367,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 								}
 							} catch (IllegalThreadStateException e) {
-								if (Hdfs.Common.DEBUG || MapReduce.DEBUG) {
+								if (Hdfs.Core.DEBUG || MapReduce.Core.DEBUG) {
 									if (task instanceof ReducerTask) {
 										
 										InputStream tmpInputStream = task.getInputStream();
@@ -504,7 +506,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				File file = new File(TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
 				System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t OPENNING " + TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
 				fin = new FileInputStream(file);
-				byte[] buff = new byte[MapReduce.TaskTracker.BUFF_SIZE];
+				byte[] buff = new byte[BUFF_SIZE];
 				int readBytes = 0;
 				while((readBytes = fin.read(buff)) != -1) {
 					out.write(buff, 0, readBytes);

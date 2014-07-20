@@ -17,7 +17,7 @@ public class testReadFile {
 	public static void main(String[] args) throws NotBoundException, IOException {
 		String fileName = "test-file-1";
 		String nameNodeRegistryIP = "localhost";
-		int nameNodeRegistryPort = Hdfs.NameNode.nameNodeRegistryPort;
+		int nameNodeRegistryPort = Hdfs.Core.NAME_NODE_REGISTRY_PORT;
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		HDFSFile file = nameNodeStub.create(fileName);
@@ -55,7 +55,7 @@ public class testReadFile {
 		int k = 0;
 		int total = 0;
 		while ((k = in.read(b)) != 0) {
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.out.println("DEBUG testReadFile.main(): read "+ k + " bytes");
 			}
 			total += k;

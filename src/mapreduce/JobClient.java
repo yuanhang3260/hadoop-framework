@@ -2,6 +2,7 @@ package mapreduce;
 
 import global.Hdfs;
 import global.MapReduce;
+import global.Parser;
 import hdfs.DataStructure.HDFSChunk;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
@@ -22,17 +23,29 @@ import mapreduce.jobtracker.WorkStatus;
 
 public class JobClient {
 	public static String runJob(JobConf conf) {
+		
+		try {
+			Parser.hdfsCoreConf();
+			Parser.mapreduceCoreConf();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("The JobClient cannot read configuration info.\n"
+					+ "Please confirm the mapreduce.xml is placed as ./conf/mapreduce.xml.\n"
+					+ "The JobClient is shutting down...");
+			System.exit(1);
+		}
+		
 		String jobId = null;
 		try {
-			Registry jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.JobTracker.jobTrackerRegistryIp, MapReduce.JobTracker.jobTrackerRegistryPort);	
-			JobTrackerRemoteInterface jobTrackerStub = (JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.JobTracker.jobTrackerServiceName);
+			Registry jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);	
+			JobTrackerRemoteInterface jobTrackerStub = (JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
 			
 			Job jobToSubmit = new Job(conf);
 			List<Split> splits = splitFile(conf.getInputPath());
 			jobToSubmit.setSplit(splits);
 			jobId = jobTrackerStub.submitJob(jobToSubmit);
 			
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.out.println("DEBUG JobClient.runJob(): Job already submitted, job Id = " + jobId);
 			}
 			
@@ -95,8 +108,8 @@ public class JobClient {
 	
 	public static List<Split> splitFile(String inputFile) throws Exception {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.NameNode.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 			HDFSFile file = nameNodeStub.open(inputFile);
 			if (file == null) {
 				throw new Exception("Input file " + inputFile + " doesn't exist in HDFS");

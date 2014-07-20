@@ -13,6 +13,10 @@ public class TaskTrackerInfo {
 	
 	private int registryPort;
 	
+	private int serverPort;
+	
+	private int numSlots;
+	
 	private long latestHeartBeat;
 	
 	private Status status;
@@ -22,12 +26,22 @@ public class TaskTrackerInfo {
 	 * 2. tasks completed on this TaskTracker */
 	private Set<String> relateTasks;
 	
-	public TaskTrackerInfo(String ip, int port/*, int mapSlots, int reduceSlots*/) {
+	public TaskTrackerInfo(String ip, int registryPort, int serverPort, int numSlots) {
 		this.registryIp = ip;
-		this.registryPort = port;
+		this.registryPort = registryPort;
+		this.serverPort = serverPort;
+		this.numSlots = numSlots;
 		this.latestHeartBeat = System.currentTimeMillis();
 		this.status = Status.RUNNING;
 		this.relateTasks = new HashSet<String>();
+	}
+	
+	public int getServerPort() {
+		return this.serverPort;
+	}
+	
+	public int getNumSlots() {
+		return this.numSlots;
 	}
 	
 	public void addTask(List<Task> tasks) {

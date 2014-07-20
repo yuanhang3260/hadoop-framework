@@ -3,35 +3,31 @@ package global;
 /* port range: 1099 - 1148*/
 public class Hdfs {
 	
-	public static class Common {
+	public static class Core {
 		
-		public static boolean DEBUG = true;
+		public static boolean DEBUG = true; //non-configurable
 
-		public static int REPLICA_FACTOR = 2;
+		public static int REPLICA_FACTOR;
 		
-		public static int CHUNK_SIZE = 1024 * 8;
+		public static int CHUNK_SIZE;
 		
-		public static int WRITE_BUFF_SIZE = 512;
-		public static int READ_BUFF_SIZE = 1024 * 1024;
+		public static int WRITE_BUFF_SIZE;
+		public static int READ_BUFF_SIZE;
 		
-		public static int PARTITION_TOLERANCE = 1000 * 60 * 2;
+		public static int PARTITION_TOLERANCE;
 		
-		public static String NAME_NODE_SERVICE_NAME = "NameNode"; //Unconfigurable
+		public static String NAME_NODE_SERVICE_NAME = "NameNode"; //non-configurable
 		
-		public static String DATA_NODE_SERVICE_NAME = "DataNode"; //Unconfigurable
+		public static String DATA_NODE_SERVICE_NAME = "DataNode"; //non-configurable
 		
-		public static int DATA_NODE_NUM = 3;
+		public static String NAME_NODE_IP;
 		
-	}
-
-	public static class NameNode {
-		public static String nameNodeRegistryIP = /*"128.237.222.59"*/"localhost";
-		public static int nameNodeRegistryPort = 1099;
+		public static int NAME_NODE_REGISTRY_PORT;
 		
 	}
 	
 	public static class DataNode {
-		public static int dataNodeRegistryPort = 1100;
+		public static int DATA_NODE_REGISTRY_PORT;
 	}
 
 }

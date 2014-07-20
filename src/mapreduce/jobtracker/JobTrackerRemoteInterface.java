@@ -23,7 +23,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @return String the name of the Task Tracker upon success, the name is 
 	 * 				  currently formed by ip : port
 	 */
-	public String join(String ip, int port, int numSlots) throws RemoteException;
+	public String join(String ip, int port, int serverPort, int numSlots) throws RemoteException;
 	
 	/**
 	 * Periodically heatBeat and get tasks assignment from job tracker

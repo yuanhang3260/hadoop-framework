@@ -12,7 +12,7 @@ public class PartitionEntry implements Serializable {
 	private String tid;
 	
 	private String host;
-	private int port;
+	private int serverPort;
 	
 	/**
 	 * 
@@ -20,12 +20,12 @@ public class PartitionEntry implements Serializable {
 	 * @param host The TaskTracker's IP on which the mapper runs
 	 * @param port The TaskTracker's Server port
 	 */
-	public PartitionEntry(String tid, String host, int port) {
+	public PartitionEntry(String tid, String host, int serverPort) {
 
 		this.tid = tid;
 		
 		this.host = host;
-		this.port = port;
+		this.serverPort = serverPort;
 	}
 
 	
@@ -38,6 +38,6 @@ public class PartitionEntry implements Serializable {
 	}
 	
 	public int getPort() {
-		return this.port;
+		return this.serverPort;
 	}
 }
