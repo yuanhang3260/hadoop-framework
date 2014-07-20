@@ -296,7 +296,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							/* job success */
 							jobStatus.status = WorkStatus.SUCCESS;
 							//TODO: CLEAN UP ALL THE INTERMEDIATE FILES
-							cleanUp(jobStatus.jobId);
+							//cleanUp(jobStatus.jobId);
 						}
 						
 					}
@@ -668,6 +668,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						for (String taskId : taskIds) {
 							Task taskToSchedule = JobTracker.this.taskTbl.get(taskId);
 							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(taskToSchedule.getJobId());
+							if (jobStatus.status != WorkStatus.RUNNING) {
+								continue;
+							}
 							if (taskToSchedule instanceof MapperTask) {
 								if (jobStatus.mapperStatusTbl.get(taskId).status
 										== WorkStatus.SUCCESS) {
