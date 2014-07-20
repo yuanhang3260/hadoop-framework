@@ -8,12 +8,15 @@ import java.util.Set;
 import mapreduce.task.Task;
 
 public class TaskTrackerInfo {
+	
 	private String registryIp;
+	
 	private int registryPort;
-	//private int emptyMapSlots;
-	//private int emptyReduceSlots;
+	
 	private long latestHeartBeat;
+	
 	private Status status;
+	
 	/* tasks defined related with this TaskTracker are:
 	 * 1. tasks currently running on this TaskTracker
 	 * 2. tasks completed on this TaskTracker */
@@ -22,14 +25,13 @@ public class TaskTrackerInfo {
 	public TaskTrackerInfo(String ip, int port/*, int mapSlots, int reduceSlots*/) {
 		this.registryIp = ip;
 		this.registryPort = port;
-		//this.emptyMapSlots = mapSlots;
-		//this.emptyReduceSlots = reduceSlots;
 		this.latestHeartBeat = System.currentTimeMillis();
 		this.status = Status.RUNNING;
 		this.relateTasks = new HashSet<String>();
 	}
 	
 	public void addTask(List<Task> tasks) {
+		
 		for (Task task : tasks) {
 			String taskId = task.getTaskId();
 			if (taskId == null) {
@@ -58,14 +60,6 @@ public class TaskTrackerInfo {
 	public int getPort() {
 		return this.registryPort;
 	}
-	
-//	public int getMapSlot() {
-//		return this.emptyMapSlots;
-//	}
-//	
-//	public int getReduceSlot() {
-//		return this.emptyReduceSlots;
-//	}
 	
 	public long getTimeStamp() {
 		return this.latestHeartBeat;

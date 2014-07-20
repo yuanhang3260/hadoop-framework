@@ -6,11 +6,11 @@ import global.Parser;
 public class runDataNode {
 	public static void main(String[] args) throws InterruptedException {
 		
-		if (args.length < 1) {
-			System.out.println("Usage:\t<DatNode Sequential>");
-		}
+//		if (args.length < 1) {
+//			System.out.println("Usage:\t<DatNode Sequential>");
+//		}
 		
-		int dataNodeSEQ = Integer.parseInt(args[0]);
+		int dataNodeSEQ = 0/*Integer.parseInt(args[0])*/;
 		
 		try {
 			Parser.dataNodeConf(dataNodeSEQ);

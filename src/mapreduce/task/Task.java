@@ -13,12 +13,14 @@ public class Task implements Serializable {
 	private static final long serialVersionUID = -6752330217052972746L;
 	private String jobId;
 	private String tid;
+	transient int priorityLevel;
+	
 	private transient Process procRef;
 	private transient InputStream ErrorInputStream;
 	private transient InputStream inputStream;
 	private int bindProcTimes = 0;
 	private String filePrefix;
-	transient int priorityLevel;
+	
 	/* indicate the number of times that this task has been re-scheduled after failure */
 	transient int rescheduleNum;
 	WorkStatus status;

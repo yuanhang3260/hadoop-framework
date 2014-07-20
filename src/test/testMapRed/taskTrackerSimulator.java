@@ -23,8 +23,8 @@ import mapreduce.task.Task;
 
 public class taskTrackerSimulator {
 	
-	public static boolean randomStatusGen = false;
-	public static int taskSuccessRate = 20; //x %
+	public static boolean randomStatusGen = true;
+	public static int taskSuccessRate = 101; //x %
 	public static int NUM_OF_HEART_BEAT = 7;
 	
 	public static void main(String[] args) {
@@ -33,7 +33,7 @@ public class taskTrackerSimulator {
 			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) jtRegistry.lookup(MapReduce.JobTracker.jobTrackerServiceName);
 			jtStub.join("128.237.213.225", 1500, 2);
 			Thread.sleep(1000 * 10);
-			TaskTrackerReport report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, null);
+			TaskTrackerReport report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 5, null);
 			JobTrackerACK ack = jtStub.heartBeat(report);
 			List<TaskStatus> allStatus;
 			
@@ -63,13 +63,13 @@ public class taskTrackerSimulator {
 					
 					allStatus.add(status);
 				}
-				if (ack.newAddedTasks.size() > 0) {
-					Thread.sleep(1000 * 60);//make it unavailable
-				}
+//				if (ack.newAddedTasks.size() > 0) {
+//					Thread.sleep(1000 * 60);//make it unavailable
+//				}
 				
-				Thread.sleep(1000 * 5);
-				//report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
-				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, new ArrayList<TaskStatus>());
+				Thread.sleep(1000 * 3);
+				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
+				//report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, new ArrayList<TaskStatus>());
 				ack = jtStub.heartBeat(report);
 			}
 			

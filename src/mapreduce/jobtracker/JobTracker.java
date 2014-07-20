@@ -12,7 +12,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import mapreduce.Job;
 import mapreduce.io.Split;
+import mapreduce.task.CleanerTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
@@ -46,6 +49,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private ConcurrentHashMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
 	
+	public static void main(String[] args) {
+		JobTracker jt = new JobTracker();
+		jt.init();
+		if (Hdfs.Common.DEBUG) {
+			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
+		}
+	}
 	
 	public void init() {
 		jobScheduler = new JobScheduler();
@@ -65,11 +75,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	@Override
 	public String join(String ip, int port, int numSlots) {
 		String taskTrackerName = ip + ":" + port;
+		
 		if (!taskTrackerTbl.containsKey(ip)) {
 			TaskTrackerInfo stat = new TaskTrackerInfo(ip, port/*, mapSlots, reduceSlots*/);
 			taskTrackerTbl.put(ip, stat);
 			this.jobScheduler.taskScheduleTbl.put(ip, new PriorityBlockingQueue<Task>(MAX_NUM_MAP_TASK, new SchedulerComparator()));
 		}
+		
 		if (Hdfs.Common.DEBUG) {
 			System.out.println("DEBUG JobTracker.join(): TaskTracker " + taskTrackerName + " join cluster");
 		}
@@ -161,14 +173,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (Hdfs.Common.DEBUG) {
 			System.out.println("DEBUG JobTracker.initReduceTasks() numReduceTasks = " + numOfReducer);
 		}
-		ConcurrentHashMap<String, TaskStatus> tbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
-		Set<String> hosts = new HashSet<String>();
-		Set<String> set = tbl.keySet();	
+		ConcurrentHashMap<String, TaskStatus> mapperStatustbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
+		Set<String> mapIdSet = mapperStatustbl.keySet();	
+		
 		/* create partition entry array */
-		PartitionEntry[] entries = new PartitionEntry[set.size()];
+		PartitionEntry[] entries = new PartitionEntry[mapIdSet.size()];
 		int i = 0;
-		for (String taskId : set) {
-			entries[i++] = new PartitionEntry(taskId, tbl.get(taskId).taskTrackerIp, MapReduce.TaskTracker1.taskTrackerServerPort);
+		
+		for (String mapTaskId : mapIdSet) {
+			entries[i++] = new PartitionEntry(mapTaskId, mapperStatustbl.get(mapTaskId).taskTrackerIp, MapReduce.TaskTracker1.taskTrackerServerPort);
 		}
 		
 		/* create reducer tasks */
@@ -281,6 +294,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							/* job success */
 							jobStatus.status = WorkStatus.SUCCESS;
 							//TODO: CLEAN UP ALL THE INTERMEDIATE FILES
+							cleanUp(jobStatus.jobId);
 						}
 						
 					}
@@ -391,8 +405,95 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		this.jobStatusTbl.get(jobId).status = WorkStatus.TERMINATED;
 	}
 	
-	private void cleanUp() {
+	private void cleanUp(String jobId) {
 		
+		/* init mappers' inermediate files' prefix */
+		HashMap<String, List<String>> mapClean = 
+				new HashMap<String, List<String>>();
+		
+		ConcurrentHashMap<String, TaskStatus> mapperStatusTbl = 
+				this.jobStatusTbl.get(jobId).mapperStatusTbl;
+		
+		Set<String> mapTaskIds = mapperStatusTbl.keySet();
+		for (String mapTaskId : mapTaskIds) {
+			
+			String taskTrackerIp = mapperStatusTbl.get(mapTaskId).taskTrackerIp;
+			
+			List<String> ids = mapClean.get(taskTrackerIp);
+			
+			String mapFilePrefix = jobId + "-" + mapTaskId;
+			
+			if (ids == null) {
+				List<String> prefixList = new LinkedList<String>();
+				prefixList.add(mapFilePrefix);
+				mapClean.put(taskTrackerIp, prefixList);
+				
+			} else {
+				ids.add(mapFilePrefix);
+			}
+		}
+		
+		/* init reducers' intermediate files' prefix */
+		HashMap<String, List<String>> reduceClean = 
+				new HashMap<String, List<String>>();
+		
+		ConcurrentHashMap<String, TaskStatus> reducerStatusTbl =
+				this.jobStatusTbl.get(jobId).reducerStatusTbl;
+		
+		Set<String> reduceTaskIds = reducerStatusTbl.keySet();
+		for (String reduceTaskId : reduceTaskIds) {
+			ReducerTask reducerTask = (ReducerTask) this.taskTbl.get(reduceTaskId);
+			PartitionEntry[] entries = reducerTask.getEntries();
+			
+			for (PartitionEntry entry : entries) {
+				/* reducer's intermediate file: jid-tid-mapTaskId */
+				String reduceFileName = jobId + "-" + reduceTaskId + "-" + entry.getTID();
+				
+				if (!reduceClean.containsKey(entry.getHost())) {
+					List<String> fileNames = new LinkedList<String>();
+					fileNames.add(reduceFileName);
+					reduceClean.put(entry.getHost(), fileNames);
+				} else {
+					reduceClean.get(entry.getHost()).add(reduceFileName);
+				}
+			}
+			
+		}
+		
+		/* init all cleaner tasks */
+		HashMap<String, CleanerTask> cleanTaskTbl = new HashMap<String, CleanerTask>();
+		
+		Set<String> hostIps = mapClean.keySet();
+		for (String hostIp : hostIps) {
+			CleanerTask cleanerTask = new CleanerTask(hostIp, jobId, reduceTaskIds.size());
+			cleanerTask.addMapperFile(mapClean.get(hostIp));
+			cleanTaskTbl.put(hostIp, cleanerTask);
+		}
+		
+		hostIps = reduceClean.keySet();
+		for (String hostIp : hostIps) {
+			if (!cleanTaskTbl.containsKey(hostIp)) {
+				CleanerTask cleanerTask = new CleanerTask(hostIp, jobId, reduceTaskIds.size());
+				cleanerTask.addReducerFile(reduceClean.get(hostIp));
+				cleanTaskTbl.put(hostIp, cleanerTask);
+			} else {
+				cleanTaskTbl.get(hostIp).addReducerFile(reduceClean.get(hostIp));
+			}
+		}
+		
+		/* print out to check */
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		Set<String> hosts = cleanTaskTbl.keySet();
+		for (String host : hosts) {
+			System.out.println("CleanerTask for TaskTracker " + host);
+			CleanerTask task = cleanTaskTbl.get(host);
+			/* add tasks to the specific TaskTracker's queue */
+			this.jobScheduler.addCleanTask(task);
+			System.out.println("Job id = " + task.getJobId() + " partitionNum = " + task.getPartitionNum());
+			System.out.println("MapperFileName: " + Arrays.toString(task.getMapperFile().toArray()));
+			System.out.println("ReducerFileName: " + Arrays.toString(task.getReducerFile().toArray()));
+		}
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	}
 	
 	@Override
@@ -491,6 +592,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			taskScheduleTbl.get(bestIp).add(task); 
 		}
 		
+		/**
+		 * Assign clean tasks after a job SUCCESS
+		 * @param task
+		 */
+		public void addCleanTask(CleanerTask task) {
+			String taskTrackerIp = task.getTaskTrackerIp();
+			taskScheduleTbl.get(taskTrackerIp).add(task);
+		}
+		
 		private void printScheduleTbl() {
 			Set<String> taskTrackers = this.taskScheduleTbl.keySet();
 			for (String each : taskTrackers) {
@@ -515,14 +625,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 //				}
 				Set<String> taskTrackers = JobTracker.this.taskTrackerTbl.keySet();
 				for (String taskTrackerIp : taskTrackers) {
-					long lastHeartBeat = JobTracker.this.taskTrackerTbl.get(taskTrackerIp).getTimeStamp();
-					if (System.currentTimeMillis() - lastHeartBeat >= MapReduce.JobTracker.TASK_TRACKER_EXPIRATION) {
+					TaskTrackerInfo taskTrackerInfo = JobTracker.this.taskTrackerTbl.get(taskTrackerIp);
+					long lastHeartBeat = taskTrackerInfo.getTimeStamp();
+					if (taskTrackerInfo.getStatus() == TaskTrackerInfo.Status.RUNNING 
+							&& System.currentTimeMillis() - lastHeartBeat >= MapReduce.JobTracker.TASK_TRACKER_EXPIRATION) {
 						if (Hdfs.Common.DEBUG) {
 							System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTracker " + taskTrackerIp + " not available now, reschedule all relate tasks");
 						}
 						/* mark the TaskTracker as unavailable so that further tasks
 						 * will not be scheduled into its task queue */
-						TaskTrackerInfo taskTrackerInfo = JobTracker.this.taskTrackerTbl.get(taskTrackerIp);
 						synchronized(taskTrackerInfo) {
 							taskTrackerInfo.disable();
 						}

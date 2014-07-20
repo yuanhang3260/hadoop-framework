@@ -4,9 +4,6 @@ import mapreduce.io.Split;
 
 public class MapperTask extends Task{
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4448997561951975942L;
 	public Split split;
 	public Class<?> mapperClass;
