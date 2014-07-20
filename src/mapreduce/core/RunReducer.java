@@ -41,7 +41,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			/*----- Retrieve task --------*/
 			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
 			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
-					.lookup(MapReduce.TaskTracker.taskTrackerServiceName);
+					.lookup(MapReduce.TaskTracker.Common.TASK_TRACKER_SERVICE_NAME);
 			rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
 			toFail = taskTrackerS.toFail();
 
@@ -50,7 +50,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 					new RecordReconstructor<Writable, Writable>();
 			
 			
-			if (MapReduce.TaskTracker.REDUCER_FAULT_TEST && toFail) {
+			if (MapReduce.TaskTracker.Common.REDUCER_FAULT_TEST && toFail) {
 				System.exit(134);
 			}
 			
@@ -59,20 +59,20 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 
 			
 			/*------ Sort -----*/
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Start to sort");
 			}
 			recordReconstructor.sort();
 			
 			/*------- Merge the value with the same key -------*/
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
 			}
 			recordReconstructor.merge();
 			
 			
 			/*---------- Reduce ------------*/
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
 			}
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
@@ -84,65 +84,65 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			}
 			
 			/*----------- Sort Output by key -----------*/
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish reducing and start to sort output");
 			}
 			output.sort(); //TODO: check the necessity of sort again
 			
 			/*------------ Write to HDFS ---------------*/
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish sorting and start write to HDFS");
 			}
 			output.writeToHDFS(rr.task.getOutputPath());
 			
 		} catch (RemoteException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.out.println("RemoteException caught");
 			System.exit(1);
 		} catch (FileNotFoundException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(2);
 		} catch (IOException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(3);
 		} catch (InterruptedException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(5);
 		} catch (IllegalArgumentException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(6);
 		} catch (SecurityException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(7);
 		} catch (InstantiationException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(8);
 		} catch (IllegalAccessException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(9);
 		} catch (InvocationTargetException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(10);
 		} catch (NotBoundException e) {
-			if (MapReduce.Common.DEBUG) {
+			if (MapReduce.Core.DEBUG) {
 				e.printStackTrace();
 			}
 			System.exit(11);

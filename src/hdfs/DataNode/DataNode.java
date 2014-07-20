@@ -58,7 +58,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			
 			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
 			List<String> chunkList = formChunkReport(true);
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 			}
 			
@@ -69,7 +69,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			while (true) {
 				if (counter % this.chunkBlockPeriod ==  0) {
 					chunkList = formChunkReport(false);
-					if (Hdfs.Common.DEBUG) {
+					if (Hdfs.Core.DEBUG) {
 						System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 					}
 					nameNode.chunkReport(dataNodeName, chunkList);
@@ -168,8 +168,8 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			e.printStackTrace();
 		}
 		
-		if (offSet + Hdfs.Common.READ_BUFF_SIZE <= chunkSize) {
-			readBuf = new byte[Hdfs.Common.READ_BUFF_SIZE];
+		if (offSet + Hdfs.Core.READ_BUFF_SIZE <= chunkSize) {
+			readBuf = new byte[Hdfs.Core.READ_BUFF_SIZE];
 		} else {
 			/* offSet + readBufSize > chunkSize */
 			readBuf = new byte[(int) (chunkSize - offSet)];
@@ -197,7 +197,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	
 	@Override
 	public void commitChunk(String globalChunkName) throws RemoteException {
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Core.DEBUG) {
 			System.out.format("DEBUG DataNode.commitChunk(): To find chunk(%s) on Node(%s).\n",tmpFileWrapper(chunkNameWrapper(globalChunkName)), this.dataNodeName);
 		}
 		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));

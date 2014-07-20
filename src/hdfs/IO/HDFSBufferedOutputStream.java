@@ -20,7 +20,7 @@ public class HDFSBufferedOutputStream implements Serializable {
 	public HDFSBufferedOutputStream (HDFSOutputStream outputStream) {
 		this.outputStream = outputStream;
 		this.buffOffset = 0;
-		this.buff = new byte[Hdfs.Common.WRITE_BUFF_SIZE];
+		this.buff = new byte[Hdfs.Core.WRITE_BUFF_SIZE];
 	}
 	
 	public void write(byte[] b) throws ArrayIndexOutOfBoundsException, IOException {
@@ -29,7 +29,7 @@ public class HDFSBufferedOutputStream implements Serializable {
 	
 	public void write(byte[] b, int offset, int len) throws ArrayIndexOutOfBoundsException, IOException {
 		
-		if (Hdfs.Common.DEBUG && this.DEBUG) {
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
 			System.out.println("------------------>Objective:" + new String(b, offset, len));
 		}
 		
@@ -61,27 +61,27 @@ public class HDFSBufferedOutputStream implements Serializable {
 				} else {
 					this.outputStream.write(buff);
 					
-					if (Hdfs.Common.DEBUG && this.DEBUG) {
+					if (Hdfs.Core.DEBUG && this.DEBUG) {
 						System.out.print("Flush:" + new String(this.buff));
 					}
 					
 					/* Reset the inner buffer offset */
 					this.buffOffset = 0;
-					if (Hdfs.Common.DEBUG && this.DEBUG) {
+					if (Hdfs.Core.DEBUG && this.DEBUG) {
 						System.out.println("\twritten=" + written + "\tpointer=" + (offset + written) + "\tbuffOffset=" + this.buffOffset);
 					}
 				}
 			}
 		}
 		
-		if (Hdfs.Common.DEBUG && this.DEBUG) {
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
 			System.out.format("<------------------status:buff offset=%d\n\n\n",this.buffOffset);
 		}
 	}
 	
 	public void close() throws IOException {
 		if (this.buffOffset != 0) {
-			if (Hdfs.Common.DEBUG && this.DEBUG) {
+			if (Hdfs.Core.DEBUG && this.DEBUG) {
 				System.out.format("DEBUG HDFSBufferedOutputStream.close():\t[status:%d, buff:%s]\n"
 						, this.buffOffset, new String(this.buff, 0, this.buffOffset));
 			}

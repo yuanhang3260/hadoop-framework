@@ -66,7 +66,7 @@ public class Utility {
 	
 	private static void getFromHDFS(String hdfsFilePath, String localFilePath) {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.open(hdfsFilePath);
@@ -76,7 +76,7 @@ public class Utility {
 			}
 			HDFSInputStream in = file.getInputStream();
 			int c = 0;
-			int buff_len = Hdfs.Common.READ_BUFF_SIZE;
+			int buff_len = Hdfs.Core.READ_BUFF_SIZE;
 			byte[] buff = new byte[buff_len];
 			File newFile = new File(localFilePath);
 			FileOutputStream out = null;
@@ -117,25 +117,16 @@ public class Utility {
 			System.exit(-1);
 		}
 		
-		byte[] buff = new byte[Hdfs.Common.WRITE_BUFF_SIZE];
+		byte[] buff = new byte[Hdfs.Core.WRITE_BUFF_SIZE];
 		try {
 			FileInputStream in = new FileInputStream(newFile);
 			int c = 0;
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
 			HDFSOutputStream out = file.getOutputStream();
 			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
-			
-//			while ((c = in.read(buff)) != -1) {
-//				if (c == 1024) {
-//					out.write(buff);
-//				} else {
-//					byte[] tmp_buff = Arrays.copyOfRange(buff, 0, c);
-//					out.write(tmp_buff);
-//				}
-//			}
 			
 			while ((c = in.read(buff)) != -1) {
 				bout.write(buff, 0, c);
@@ -151,8 +142,8 @@ public class Utility {
 	
 	private static void removeFromHDFS(String path) {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 			nameNodeStub.delete(path);
 		} catch (RemoteException e){
 			System.out.println("Remove operation may failed");
@@ -168,8 +159,8 @@ public class Utility {
 	
 	private static void listFiles() {
 		try {
-			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Common.nameNodeRegistryIP, Hdfs.NameNode.nameNodeRegistryPort);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Common.NAME_NODE_SERVICE_NAME);
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 			ArrayList<String> rst = nameNodeStub.listFiles();
 			int i = 1;
 			for (String fileName : rst) {

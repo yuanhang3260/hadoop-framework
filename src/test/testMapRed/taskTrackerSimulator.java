@@ -29,8 +29,8 @@ public class taskTrackerSimulator {
 	
 	public static void main(String[] args) {
 		try {
-			Registry jtRegistry = LocateRegistry.getRegistry(MapReduce.JobTracker.jobTrackerRegistryIp, MapReduce.JobTracker.jobTrackerRegistryPort);
-			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) jtRegistry.lookup(MapReduce.JobTracker.jobTrackerServiceName);
+			Registry jtRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) jtRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
 			jtStub.join("128.237.213.225", 1500, 2);
 			Thread.sleep(1000 * 10);
 			TaskTrackerReport report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, null);

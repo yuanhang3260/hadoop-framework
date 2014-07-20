@@ -84,12 +84,12 @@ public class NameNode implements NameNodeRemoteInterface{
 		DataNodeAbstract dataNodeInfo = new DataNodeAbstract(ip, port, dataNodeName);
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(ip, port);
 		try {
-			DataNodeRemoteInterface dataNodeStub= (DataNodeRemoteInterface)dataNodeRegistry.lookup(Hdfs.Common.DATA_NODE_SERVICE_NAME);
+			DataNodeRemoteInterface dataNodeStub= (DataNodeRemoteInterface)dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
 			this.dataNodeStubTbl.put(dataNodeName, dataNodeStub);
 			dataNodeTbl.put(dataNodeName, dataNodeInfo);
 			selector.offer(dataNodeInfo);
 			dataNodeInfo.chunkList = chunkNameList;
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.out.format("DEBUG NameNode.join(): %s joins cluster.\n", dataNodeName);
 			}
 			SystemCheck oneTimeCheck = new SystemCheck(false);
@@ -111,12 +111,12 @@ public class NameNode implements NameNodeRemoteInterface{
 	@Override
 	public synchronized HDFSFile create(String filePath) throws RemoteException, IOException {
 		if (this.fileTbl.containsKey(filePath)) {
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.err.format("File(%s) is duplicated", filePath);
 			}
 			throw new IOException(String.format("File(%s) is duplicated", filePath));
 		} 
-		HDFSFile newFile = new HDFSFile(filePath, Hdfs.Common.REPLICA_FACTOR, this.nameNodeStub);
+		HDFSFile newFile = new HDFSFile(filePath, Hdfs.Core.REPLICA_FACTOR, this.nameNodeStub);
 		this.fileTbl.put(filePath, newFile);
 		return newFile;
 	}
@@ -183,7 +183,7 @@ public class NameNode implements NameNodeRemoteInterface{
 			this.selector.offer(chosenDataNode);
 		}
 		
-		if (Hdfs.Common.DEBUG) {
+		if (Hdfs.Core.DEBUG) {
 			ArrayList<String> list = new ArrayList<String>();
 			
 			for (DataNodeEntry dn : rst) {
@@ -203,17 +203,17 @@ public class NameNode implements NameNodeRemoteInterface{
 			
 			this.fileTbl.put(file.getName(), file);
 			List<HDFSChunk> chunkList = file.getChunkList();
-			if (Hdfs.Common.DEBUG) {
+			if (Hdfs.Core.DEBUG) {
 				System.out.format("DEBUG NameNode.commitFile(): chunkList length=%d\n", chunkList.size());
 			}
 			
 			for (HDFSChunk chunk : chunkList) {
 
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Core.DEBUG) {
 					System.out.format("DEBUG NameNode.commitFile(): location size=%d\n", chunk.getAllLocations().size());
 				}
 				for (DataNodeEntry dn : chunk.getAllLocations()) {
-					if (Hdfs.Common.DEBUG) {
+					if (Hdfs.Core.DEBUG) {
 						System.out.format("DEBUG NameNode.commitFile(): locations:%s\n", dn.getNodeName());
 					}
 					this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
@@ -313,7 +313,7 @@ public class NameNode implements NameNodeRemoteInterface{
 						= new HashMap<String, ChunkStatisticsForNameNode>();
 					Set<String> toDeleteFilesName = new HashSet<String>();
 					
-					if (Hdfs.Common.DEBUG) {
+					if (Hdfs.Core.DEBUG) {
 						System.out.println("DEBUG NameNode.SystemCheck.run(): Start SystemCheck.");
 					}
 					
@@ -321,7 +321,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					Date now = new Date();
 					for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
 						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
-						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.Common.PARTITION_TOLERANCE) {
+						if ( (now.getTime() - dataNodeInfo.latestHeartBeat.getTime()) >= Hdfs.Core.PARTITION_TOLERANCE) {
 							dataNodeInfo.disableDataNode();
 						} else {
 							if (!dataNodeInfo.isAvailable()) {
@@ -364,12 +364,12 @@ public class NameNode implements NameNodeRemoteInterface{
 					
 					/* Delete orphan chunks */
 					Set<String> chunksOnDataNode = chunkAbstractFromDataNode.keySet();
-					if (Hdfs.Common.DEBUG) {
+					if (Hdfs.Core.DEBUG) {
 						System.out.println("DEBUG NameNode.SystemCheck.run(): chunks collected from data node: " + chunksOnDataNode.toString());
 					}
 					for (String chunkOnDataNode : chunksOnDataNode) {
 						if (!chunkAbstractFromNameNode.containsKey(chunkOnDataNode)) {
-							if (Hdfs.Common.DEBUG) {
+							if (Hdfs.Core.DEBUG) {
 								System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnDataNode + ") is orphan.");
 							}
 							ChunkStatisticsForDataNode chunkStat = chunkAbstractFromDataNode.get(chunkOnDataNode);
@@ -378,11 +378,11 @@ public class NameNode implements NameNodeRemoteInterface{
 								try {
 									dataNodeStub.deleteChunk(chunkOnDataNode);
 								} catch (RemoteException e) {
-									if (Hdfs.Common.DEBUG) {
+									if (Hdfs.Core.DEBUG) {
 										e.printStackTrace();
 									}
 								} catch (IOException e) {
-									if (Hdfs.Common.DEBUG) {
+									if (Hdfs.Core.DEBUG) {
 										e.printStackTrace();
 									}
 								}
@@ -407,12 +407,12 @@ public class NameNode implements NameNodeRemoteInterface{
 						
 						int replicaFac = chunkAbstractFromNameNode.get(chunkOnNameNode).replicaFactor;
 						if (chunkStat.replicaNum == replicaFac) {
-							if (Hdfs.Common.DEBUG) {
+							if (Hdfs.Core.DEBUG) {
 								System.out.println("DEBUG NameNode.SystemCheck.run(): chunk(" + chunkOnNameNode + ") is OKAY");
 							}
 						} else if (chunkStat.replicaNum < replicaFac) {
 							
-							if (Hdfs.Common.DEBUG) {
+							if (Hdfs.Core.DEBUG) {
 								String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is LESS THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
 								System.out.println(debugInfo);
 							}
@@ -422,7 +422,7 @@ public class NameNode implements NameNodeRemoteInterface{
 							List<DataNodeEntry> dstDataNodes = NameNode.this.select(replicaFac - chunkStat.replicaNum);
 							copyChunk(chunkOnNameNode, srcDataNodeStub, dstDataNodes);
 						} else {
-							if (Hdfs.Common.DEBUG) {
+							if (Hdfs.Core.DEBUG) {
 								String debugInfo = String.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is MORE THAN RF. STAT: num=%d, rf=%d", chunkOnNameNode, chunkStat.replicaNum, replicaFac);
 								System.out.println(debugInfo);
 							}
@@ -440,13 +440,13 @@ public class NameNode implements NameNodeRemoteInterface{
 				
 				
 
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Core.DEBUG) {
 					System.out.println("DEBUG NameNode.SystemCheck.run(): Finish SystemCheck.");
 				}
 				try {
 					Thread.sleep(1000 * 60);
 				} catch (InterruptedException e) {
-					if (Hdfs.Common.DEBUG) {
+					if (Hdfs.Core.DEBUG) {
 						e.printStackTrace();
 					}
 				}
@@ -491,7 +491,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).commitChunk(chunkName);
 				}
 			} catch (IOException e) {
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Core.DEBUG) {
 					e.printStackTrace();
 				}
 			}
@@ -499,12 +499,12 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 		private void deleteChunk(String chunkName, DataNodeRemoteInterface dataNodeStub) {
 			try {
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Core.DEBUG) {
 					System.out.format("DEBUG NameNode.SystemCheck.run(): Delete file(%s)\n", chunkName);
 				}
 				dataNodeStub.deleteChunk(chunkName);
 			} catch (IOException e) {
-				if (Hdfs.Common.DEBUG) {
+				if (Hdfs.Core.DEBUG) {
 					e.printStackTrace();
 				}
 			}
