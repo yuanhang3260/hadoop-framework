@@ -148,7 +148,7 @@ public class Parser {
 		
 		hdfsCoreConf();
 		
-		File fXmlFile = new File("./conf/hdfs-core.xml");
+		File fXmlFile = new File("./conf/hdfs.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(fXmlFile);
