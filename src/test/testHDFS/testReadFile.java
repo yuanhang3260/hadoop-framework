@@ -21,7 +21,7 @@ public class testReadFile {
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		HDFSFile file = nameNodeStub.create(fileName);
-		HDFSOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getOutputStream();
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);

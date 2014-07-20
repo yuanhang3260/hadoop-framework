@@ -25,7 +25,7 @@ public class testPutToHDFS {
 		
 		
 		HDFSFile file = nameNodeStub.create("largefile");
-		HDFSOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getOutputStream();
 		while ((readBytes = in.read(buff)) != -1) {
 			if (readBytes == 1024) {
 				out.write(buff);

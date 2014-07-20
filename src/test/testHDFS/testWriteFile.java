@@ -16,7 +16,7 @@ public class testWriteFile {
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		HDFSFile file = nameNodeStub.create("test-file-1");
-		HDFSOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getOutputStream();
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);

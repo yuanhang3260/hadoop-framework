@@ -25,7 +25,7 @@ public class testNewOutputStream {
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		
 		HDFSFile file = nameNodeStub.create("test-file-1");
-		HDFSOutputStream newout = file.getNewOutputStream();
+		HDFSOutputStream newout = file.getOutputStream();
 		
 		String str1 = "abcde123\n\n";
 		String str2 = "fghij\n67890";

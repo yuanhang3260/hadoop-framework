@@ -33,14 +33,13 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 		this.file = file;
 		this.nameNodeStub = nameNodeStub;
 		this.chunk_size = Hdfs.Core.CHUNK_SIZE;
-		System.out.println("CHUNK-SIZE = " + this.chunk_size);
 		this.file.addChunk();
 	}
 	
 	@Override
 	public void write(int arg0) throws IOException {
 		if (this.chunk_offset < this.chunk_size) {
-			if (Hdfs.Core.DEBUG) {
+			if (Hdfs.Core.DEBUG && this.DEBUG) {
 				System.out.format("[continue %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
 			}
 			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
@@ -50,7 +49,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 		} else {
 			this.file.addChunk();
 			this.chunk_offset = (this.chunk_offset++) % this.chunk_size;
-			if (Hdfs.Core.DEBUG) {
+			if (Hdfs.Core.DEBUG && this.DEBUG) {
 				System.out.format("[new chunk %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
 			}
 			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
@@ -68,7 +67,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 	@Override
 	public void write(byte[] b, int offset, int len) throws IOException {
 		
-		if (offset < 0) {
+		if (offset < 0 || offset > b.length) {
 			throw new IOException("Arrays out of bound:" + offset);
 		}
 		
@@ -85,7 +84,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 				this.file.addChunk();
 				this.chunk_offset = this.chunk_offset % this.chunk_size;
 				
-				if (Hdfs.Core.DEBUG) {
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
 					System.out.format("[apply    %s]: buffer <offset = %d>;  "
 							+ "chunk<offset = %d>\n", getCurrentChunk().getChunkName(), 
 							offset + written, this.chunk_offset);
@@ -97,7 +96,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 				
 				int towrite = len - written;
 				
-				if (Hdfs.Core.DEBUG) {
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
 					System.out.format("[continue %s]: buffer <from %d to  %d>;  "
 							+ "chunk<from %d to %d>\n", getCurrentChunk().getChunkName(), 
 							offset + written, offset + written + towrite, 
@@ -116,7 +115,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 				
 				int towrite = this.chunk_size - this.chunk_offset;
 				
-				if (Hdfs.Core.DEBUG) {
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
 					System.out.format("[fill out %s]: buffer <from %d to  %d>;  "
 							+ "chunk<from %d to %d>\n", getCurrentChunk().getChunkName(), 
 							offset + written, offset + written + towrite, 
@@ -134,7 +133,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 			
 		}
 		
-		if (Hdfs.Core.DEBUG) {
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
 			System.out.format("[before return] status: Chunk<total chunks = %d, offset = %d, size = %d>, buff<offset = %d, from = %d, to = %d>\n",
 					this.file.getChunkList().size(), this.chunk_offset, this.chunk_size, offset + written, offset, len);
 		}
@@ -160,19 +159,24 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 	
 	public void close() throws IOException {
 		
-		System.out.println("DEBUG HDFSNewOutputStream.close():\tBefore sort firstlines, current chunks are:");
-		for (HDFSChunk chunk : this.file.getChunkList()) {
-			System.out.print("\t" + chunk.getChunkName());
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
+			System.out.println("DEBUG HDFSNewOutputStream.close():\tBefore sort firstlines, current chunks are:");
+			for (HDFSChunk chunk : this.file.getChunkList()) {
+				System.out.print("\t" + chunk.getChunkName());
+			}
 		}
 		
 		this.file.backupChunkList();
 		
 		rearrangeChunks();
-		System.out.println("\n\nDEBUG HDFSNewOutputStream.close():\tAfter sort firstlines, current chunks are:");
-		for (HDFSChunk leftChunk : this.file.getChunkList()) {
-			System.out.print("\t" + leftChunk.getChunkName());
+		
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
+			System.out.println("\n\nDEBUG HDFSNewOutputStream.close():\tAfter sort firstlines, current chunks are:");
+			for (HDFSChunk leftChunk : this.file.getChunkList()) {
+				System.out.print("\t" + leftChunk.getChunkName());
+			}
 		}
-//		
+		
 		cleanupChunks();
 		this.nameNodeStub.commitFile(file);
 	}

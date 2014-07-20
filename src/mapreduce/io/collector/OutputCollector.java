@@ -90,7 +90,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		System.err.println("dst ip:" + Hdfs.Core.NAME_NODE_IP + "\t dst port:" + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeS.create(filename);
-		HDFSOutputStream out = file.getNewOutputStream();
+		HDFSOutputStream out = file.getOutputStream();
 		HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 		
 		for (KeyValue<K, V> pair : this.keyvalueList) {

@@ -139,7 +139,7 @@ public class Utility {
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
-			HDFSOutputStream out = file.getNewOutputStream();
+			HDFSOutputStream out = file.getOutputStream();
 			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 			
 			while ((c = in.read(buff)) != -1) {

@@ -33,9 +33,14 @@ public class HDFSBufferedOutputStream implements Serializable {
 			System.out.println("------------------>Objective:" + new String(b, offset, len));
 		}
 		
-		if (offset + len > b.length) {
-			throw new ArrayIndexOutOfBoundsException("" + offset + len);
+		if (offset < 0 || offset > b.length) {
+			new IOException("Out of array index.", new ArrayIndexOutOfBoundsException("" + offset));
 		}
+		
+		if (offset + len > b.length || offset + len < 0) {
+			new IOException("Out of array index.", new ArrayIndexOutOfBoundsException("" + offset + len));
+		}
+
 		
 		if ((this.buff.length - this.buffOffset) >= len) {
 			System.arraycopy(b, offset, this.buff, this.buffOffset, len);
@@ -85,7 +90,8 @@ public class HDFSBufferedOutputStream implements Serializable {
 				System.out.format("DEBUG HDFSBufferedOutputStream.close():\t[status:%d, buff:%s]\n"
 						, this.buffOffset, new String(this.buff, 0, this.buffOffset));
 			}
-			this.outputStream.write(Arrays.copyOfRange(this.buff, 0, this.buffOffset));
+			
+			this.outputStream.write(this.buff, 0, this.buffOffset);
 		}
 		this.outputStream.close();
 	}
