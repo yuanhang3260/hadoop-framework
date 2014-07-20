@@ -3,7 +3,7 @@ package test.testHDFS;
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSOutputStream;
+import hdfs.IO.HDFSNewOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public class testReadFile {
  		Registry nameNodeRegistry = LocateRegistry.getRegistry(nameNodeRegistryIP, nameNodeRegistryPort);
 		NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 		HDFSFile file = nameNodeStub.create(fileName);
-		HDFSOutputStream out = file.getOutputStream();
+		HDFSNewOutputStream out = file.getNewOutputStream();
 		if (out == null) {
 			System.err.println("null out");
 			System.exit(-1);

@@ -2,7 +2,7 @@ package test.testHDFS;
 
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSOutputStream;
+import hdfs.IO.HDFSNewOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -25,7 +25,7 @@ public class testPutToHDFS {
 		
 		
 		HDFSFile file = nameNodeStub.create("largefile");
-		HDFSOutputStream out = file.getOutputStream();
+		HDFSNewOutputStream out = file.getNewOutputStream();
 		while ((readBytes = in.read(buff)) != -1) {
 			if (readBytes == 1024) {
 				out.write(buff);

@@ -15,9 +15,9 @@ public class HDFSBufferedOutputStream implements Serializable {
 	private boolean DEBUG = false;
 	private int buffOffset;
 	private byte[] buff;
-	private HDFSOutputStream outputStream;
+	private HDFSNewOutputStream outputStream;
 	
-	public HDFSBufferedOutputStream (HDFSOutputStream outputStream) {
+	public HDFSBufferedOutputStream (HDFSNewOutputStream outputStream) {
 		this.outputStream = outputStream;
 		this.buffOffset = 0;
 		this.buff = new byte[Hdfs.Core.WRITE_BUFF_SIZE];

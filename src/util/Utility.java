@@ -2,11 +2,10 @@ package util;
 
 import global.Hdfs;
 import global.Parser;
-import global.Parser.ConfFormatException;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSOutputStream;
+import hdfs.IO.HDFSNewOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -19,10 +18,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 public class Utility {
 	
@@ -144,7 +139,7 @@ public class Utility {
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
-			HDFSOutputStream out = file.getOutputStream();
+			HDFSNewOutputStream out = file.getNewOutputStream();
 			HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
 			
 			while ((c = in.read(buff)) != -1) {
