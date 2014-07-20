@@ -2,6 +2,7 @@ package hdfs.DataStructure;
 
 import global.Hdfs;
 import hdfs.IO.HDFSInputStream;
+import hdfs.IO.HDFSNewOutputStream;
 import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -16,9 +17,11 @@ public class HDFSFile implements Serializable {
 	private static final long serialVersionUID = -6302186159396021997L;
 	private String name;
 	private List<HDFSChunk> chunkList; //Indicate chunk order
+	private List<HDFSChunk> totalChunkList; //Contains all chunks. Some chunks may be excluded after rearrange.
 	private int replicaFactor; 
 	private boolean available; //TODO: define the semantics
 	private HDFSOutputStream outputStream = null;
+	private HDFSNewOutputStream newOutputStream = null;
 	private NameNodeRemoteInterface nameNodeStub;
 
 	
@@ -52,6 +55,10 @@ public class HDFSFile implements Serializable {
 		}
 		HDFSChunk newChunk = new HDFSChunk(chunkName, locations);
 		this.chunkList.add(newChunk);
+	}
+	
+	public void removeChunk(int index) {
+		this.chunkList.remove(index);
 	}
 	
 	public void disableFile () {
@@ -88,12 +95,26 @@ public class HDFSFile implements Serializable {
 		return this.outputStream;
 	}
 	
+	public HDFSNewOutputStream getNewOutputStream() {
+		this.newOutputStream = new HDFSNewOutputStream(this, this.nameNodeStub);
+		return this.newOutputStream;
+	}
+	
 	public String getName() {
 		return this.name;
 	}
 	
 	public HDFSInputStream getInputStream() {
 		return new HDFSInputStream(this.getChunkList());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void backupChunkList() {
+		this.totalChunkList = (List<HDFSChunk>) ((ArrayList<HDFSChunk>) this.chunkList).clone();
+	}
+	
+	public List<HDFSChunk> getTotalChunkList() {
+		return this.totalChunkList;
 	}
 }
 

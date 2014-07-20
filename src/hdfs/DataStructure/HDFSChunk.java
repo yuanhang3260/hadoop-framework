@@ -1,5 +1,7 @@
 package hdfs.DataStructure;
 
+import global.Hdfs;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,12 +12,14 @@ public class HDFSChunk implements Serializable {
 	private String fileName;
 	private List<DataNodeEntry> locations;
 	private int replicaFactor;
+	private int chunk_size;
 	
 
 	
 	public HDFSChunk(String chunkName, List<DataNodeEntry> list) {
 		locations = list;
 		this.chunkName = chunkName;
+		this.chunk_size= Hdfs.Core.CHUNK_SIZE;
 	}
 	
 	public void addDataNode(String ip, int port, String name) {
@@ -39,6 +43,14 @@ public class HDFSChunk implements Serializable {
 	
 	public List<DataNodeEntry> getAllLocations() {
 		return this.locations;
+	}
+	
+	public void updateChunkSize(int len) {
+		this.chunk_size += len;
+	}
+	
+	public int getChunkSize() {
+		return this.chunk_size;
 	}
 	
 }
