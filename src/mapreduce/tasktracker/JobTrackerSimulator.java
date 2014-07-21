@@ -56,7 +56,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceJobTrackerConf();
-			Parser.mapreduceTaskTrackerIndividualConf(0);
+			Parser.mapreduceTaskTrackerIndividualConf();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

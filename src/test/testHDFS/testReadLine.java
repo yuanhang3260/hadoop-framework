@@ -14,7 +14,7 @@ public class testReadLine {
 		
 		try {
 			Parser.hdfsCoreConf();
-			Parser.dataNodeConf(0);
+			Parser.dataNodeConf();
 			
 			String chunkName = "1405889958420";
 			

@@ -49,7 +49,7 @@ public class Utility {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
-			Parser.mapreduceTaskTrackerIndividualConf(1);
+			Parser.mapreduceTaskTrackerIndividualConf();
 		} catch (Exception e) {
 			
 			e.printStackTrace();

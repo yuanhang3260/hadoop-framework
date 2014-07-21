@@ -19,13 +19,12 @@ public class runTaskTracker {
 			System.exit(1);
 		}
 		
-		tasktrackerSEQ = Integer.parseInt(args[0]);
 		
 		try {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
-			Parser.mapreduceTaskTrackerIndividualConf(tasktrackerSEQ);
+			Parser.mapreduceTaskTrackerIndividualConf();
 			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.MAPREDCORE, ConfOpt.TASKTRACKERCOMMON, ConfOpt.TASKTRACKERINDIVIDUAL});
 		} catch (Exception e) {
 			e.printStackTrace();

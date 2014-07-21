@@ -15,7 +15,7 @@ public class runDataNode {
 		int dataNodeSEQ = Integer.parseInt(args[0]);
 		
 		try {
-			Parser.dataNodeConf(dataNodeSEQ);
+			Parser.dataNodeConf();
 			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
 		} catch (Exception e) {
 			e.printStackTrace();

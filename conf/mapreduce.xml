@@ -22,11 +22,5 @@
 			<core-num>1</core-num>
 		</individual>
 
-		<individual>
-			<registry-port>1201</registry-port>
-			<server-port>8001</server-port>
-			<core-num>1</core-num>
-		</individual>
-
 	</tasktracker>
 </mapreduce>

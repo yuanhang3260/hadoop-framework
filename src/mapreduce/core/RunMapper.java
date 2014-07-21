@@ -79,7 +79,8 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			/*------------------ Prepare input records ----------------*/
 			
 			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunMapper.main(): RunMapper retrived task and start to prepare records");
+				System.out.println("DEBUG RunMapper.main(): "
+						+ "RunMapper retrived task and start to prepare records");
 			}
 			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);
 			recordReader.parseRecords();
@@ -88,7 +89,8 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			/*------------------ Map Phase ----------------*/
 			
 			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunMapper.main(): All input records are ready and now move to map phase.");
+				System.out.println("DEBUG RunMapper.main(): "
+						+ "All input records are ready and now move to map phase.");
 			}
 			
 			//STEP 1: Load mapper class
