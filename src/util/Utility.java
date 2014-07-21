@@ -326,29 +326,12 @@ public class Utility {
 			printSubmitUsage();
 			return;
 		}
-		String mapperClassName = null;
-		String reducerClassName = null;
-//		try {
-//			mapperClass = Class.forName(mapperClassName);
-//		} catch (ClassNotFoundException e) {
-//			System.out.println("Exception: Mapper class not found");
-//			printSubmitUsage();
-//			return;
-//		}
-//		
-//		try {
-//			reducerClass = Class.forName(reducerClassName);
-//		} catch (ClassNotFoundException e) {
-//			System.out.println("Exception: Reducer class not found");
-//			printSubmitUsage();
-//			return;
-//		}
 		
 		JobConf conf = new JobConf();
 		conf.setJobName(jobName);
 		//conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
-		conf.setMapperClassName(mapperClass);
-		conf.setReducerClassName(reducerClass);
+		conf.setMapperClassName(mapperClassName);
+		conf.setReducerClassName(reducerClassName);
 		conf.setInputPath(fileIn);
 		conf.setOutputPath(fileOut);
 		conf.setNumReduceTasks(partitionNum);
