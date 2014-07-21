@@ -788,10 +788,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							Task taskToSchedule = JobTracker.this.taskTbl.get(taskId);
 							String jobId = taskToSchedule.getJobId();
 							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(jobId);
-							if (jobStatus.status != WorkStatus.RUNNING) {
-								continue;
-							}
+
 							if (taskToSchedule instanceof MapperTask) {
+								if (jobStatus.status != WorkStatus.RUNNING) {
+									continue;
+								}
 								if (jobStatus.mapperStatusTbl.get(taskId).status
 										== WorkStatus.SUCCESS) {
 									jobStatus.mapTaskLeft++;
@@ -807,12 +808,18 @@ public class JobTracker implements JobTrackerRemoteInterface {
 								jobStatus.reducerStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
 								jobIds.add(jobStatus.jobId);
 							} else if (taskToSchedule instanceof ReducerTask) {
+								if (jobStatus.status != WorkStatus.RUNNING) {
+									continue;
+								}
 								/* if a mapper task of the same job has been re-scheduled, this reducer
 								 * does not need to re-schedule, it will be upon all mappers finished */
 								reducerTaskIds.add(taskToSchedule.getTaskId());
 							} else if (taskToSchedule instanceof CleanerTask) {
 								JobTracker.this.jobScheduler.addCleanTask((CleanerTask) taskToSchedule);
 							} else if (taskToSchedule instanceof KillerTask) {
+								if (jobStatus.status != WorkStatus.RUNNING) {
+									continue;
+								}
 								JobTracker.this.jobScheduler.addKillerTask((KillerTask) taskToSchedule);
 							}
 						}

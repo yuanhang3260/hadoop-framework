@@ -70,6 +70,9 @@ public class JobClient {
 				if (jobStatus.status == WorkStatus.FAILED) {
 					System.out.println(String.format("INFO: Job (Id = %S) failed, existed from execution!", jobId));
 					break;
+				} else if (jobStatus.status == WorkStatus.TERMINATED) {
+					System.out.println(String.format("INFO: Job (Id = %S) terminated", jobId));
+					break;
 				}
 				
 				if (jobStatus.rescheduleNum != prevRescheduleNum) {

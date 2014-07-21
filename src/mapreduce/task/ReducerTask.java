@@ -1,7 +1,5 @@
 package mapreduce.task;
 
-
-
 public class ReducerTask extends Task {
 	
 	/**
