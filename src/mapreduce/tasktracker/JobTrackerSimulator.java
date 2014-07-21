@@ -13,6 +13,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -142,6 +143,13 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 
 	@Override
 	public JobStatus getJobStatus(String jobId) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AbstractMap<String, JobStatus> getAllJobStatus()
+			throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;
 	}
