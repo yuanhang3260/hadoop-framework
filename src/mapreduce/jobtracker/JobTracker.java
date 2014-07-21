@@ -121,7 +121,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 										 
 										 job.getJobConf().getNumReduceTasks(), 
 										 
-										 job.getJobConf().getJarFileEntry());
+										 job.getJarFileEntry());
 		
 		this.taskTbl.put(taskId, task);
 		
@@ -144,7 +144,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 										   
 										   job.getJobConf().getOutputPath() + "-" + "part" + "-" + reducerSEQ, 
 										   
-										   job.getJobConf().getJarFileEntry());
+										   job.getJarFileEntry());
 		
 		this.taskTbl.put(taskId, task);
 		

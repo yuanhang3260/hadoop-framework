@@ -22,6 +22,7 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.WorkStatus;
 
 public class JobClient {
+	public static String jarPath;
 	public static String runJob(JobConf conf) {
 		
 		try {
@@ -43,6 +44,7 @@ public class JobClient {
 			Job jobToSubmit = new Job(conf);
 			List<Split> splits = splitFile(conf.getInputPath());
 			jobToSubmit.setSplit(splits);
+			jobToSubmit.setJarFileEntry(jarPath);
 			jobId = jobTrackerStub.submitJob(jobToSubmit);
 			
 			if (Hdfs.Core.DEBUG) {

@@ -163,7 +163,7 @@ public class Utility {
 			FileInputStream in = new FileInputStream(newFile);
 			int c = 0;
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
-			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup("NameNode");
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 			
 			HDFSFile file = nameNodeStub.create(hdfsFilePath);
 			HDFSOutputStream out = file.getOutputStream();
@@ -247,7 +247,7 @@ public class Utility {
 			/* list status of all jobs submitted */
 			lsjob();
 		} else if (args[2].equals("submit")) {
-			if (args.length != 11) {
+			if (args.length < 8) {
 				printSubmitUsage();
 				return;
 			}
@@ -324,6 +324,8 @@ public class Utility {
 		String intputPath = args[6];
 		String outoutPath = args[7];
 		
+		JobClient.jarPath = jarPath;
+		
 		JarFile jarFile = new JarFile(jarPath);
 		Enumeration<JarEntry> e = jarFile.entries();
 		
@@ -358,7 +360,7 @@ public class Utility {
 	    }
 	    
 	    String[] newArgs = new String[args.length - 6];
-	    newArgs = Arrays.copyOfRange(args, 6, args.length - 1);
+	    newArgs = Arrays.copyOfRange(args, 6, args.length);
 	    System.out.println("DEBUG Utility.subit(): newArgs = " + Arrays.toString(newArgs));
 	    m.invoke(null, new Object[] { newArgs });
 		
