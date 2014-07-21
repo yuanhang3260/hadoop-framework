@@ -30,7 +30,6 @@ public class Task implements Serializable {
 		this.jobId = jobId;
 		this.priorityLevel = level;
 		this.status = WorkStatus.READY;
-		//this.status = WorkStatus.RUNNING;
 	}
 	
 	public int getRescheduleNum() {

@@ -52,6 +52,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	String taskTrackerTmpFolder;
 	String taskTrackerMapperFolderName;
 	String taskTrackerReducerFolderName;
+	File taskJarFolder;
 	
 	public static final int BUFF_SIZE = 1024 * 1024;
 	
@@ -130,9 +131,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
-		
-		System.out.println("Reducer DIR:" + this.taskTrackerReducerFolderName);
-		
 		File taskTrackerReducerFolder = new File(this.taskTrackerReducerFolderName);
 		if (!taskTrackerReducerFolder.exists()) {
 			taskTrackerReducerFolder.mkdir();
@@ -142,11 +140,14 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
-//		/* Init tmp file folder*/
-//		File tmpFileDirectory = new File(this.taskTrackerTmpFolder);
-//		if (!tmpFileDirectory.exists()) {
-//			tmpFileDirectory.mkdirs();
-//		}
+		this.taskJarFolder = new File(this.taskTrackerTmpFolder + "/" + "Jar");
+		if (!this.taskJarFolder.exists()) {
+			this.taskJarFolder.mkdir();
+		} else {
+			for (File staleFile : this.taskJarFolder.listFiles()) {
+				staleFile.delete();
+			}
+		}
 
 		/* Start Heart beat */
 		HeartBeat hb = new HeartBeat();
@@ -363,61 +364,63 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					if (task == null) {
 						break;
 					}
-					if (task.isRunning()) {
-						if (task.getProcRef() != null) {
-							try{
-								int exitVal = task.getProcRef().exitValue();
-								
-								if (exitVal == 0) {
-									task.commitTask();
-									if (MapReduce.Core.DEBUG) {
-										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-											+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
-											task.getJobId(), task.getTaskId(), type);
-									}
-								} else {
-									task.failedTask();
-									if (MapReduce.Core.DEBUG) {
-										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-											+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
-											task.getJobId(), task.getTaskId(), type, exitVal);
-										
-										byte[] errBuff = new byte[1024];
-										int c = 0;
-										try {
-											while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
-												System.out.print(new String(errBuff, 0 ,c));
-											}
-										} catch (IOException e) {
-											e.printStackTrace();
-										}
-										
-									}
-
+					if (!task.isRunning()) {
+						continue;
+					}
+					
+					if (task.getProcRef() != null) {
+						try{
+							int exitVal = task.getProcRef().exitValue();
+							
+							if (exitVal == 0) {
+								task.commitTask();
+								if (MapReduce.Core.DEBUG) {
+									String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+									System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+										+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
+										task.getJobId(), task.getTaskId(), type);
 								}
-							} catch (IllegalThreadStateException e) {
-								if (Hdfs.Core.DEBUG || MapReduce.Core.DEBUG) {
-									if (task instanceof ReducerTask) {
-										
-										InputStream tmpInputStream = task.getInputStream();
-										byte[] buff = new byte[512];
-										int c = 0;
-										try {
-											System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
-											while ((c = tmpInputStream.read(buff)) != -1) {
-												System.out.print(new String(buff, 0, c));
-											}
-											System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
-										} catch (IOException e1) {
-											e1.printStackTrace();
+							} else {
+								task.failedTask();
+								if (MapReduce.Core.DEBUG) {
+									String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+									System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+										+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
+										task.getJobId(), task.getTaskId(), type, exitVal);
+									
+									byte[] errBuff = new byte[1024];
+									int c = 0;
+									try {
+										while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
+											System.out.print(new String(errBuff, 0 ,c));
 										}
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									
+								}
+
+							}
+						} catch (IllegalThreadStateException e) {
+							if (Hdfs.Core.DEBUG || MapReduce.Core.DEBUG) {
+								if (task instanceof ReducerTask) {
+									
+									InputStream tmpInputStream = task.getInputStream();
+									byte[] buff = new byte[512];
+									int c = 0;
+									try {
+										System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
+										while ((c = tmpInputStream.read(buff)) != -1) {
+											System.out.print(new String(buff, 0, c));
+										}
+										System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
+									} catch (IOException e1) {
+										e1.printStackTrace();
 									}
 								}
 							}
-						} 
-					}
+						}
+					} 
 				}
 
 				try {
@@ -454,6 +457,19 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				for (Task task : taskList) {
 					
 					String taskID = String.format("%s-%s", task.getJobId(), task.getTaskId());
+					
+					/* Check jar file availability */
+					boolean foundJar = false;
+					for (File file : TaskTracker.this.taskJarFolder.listFiles()) {
+						if (file.getName().equals(String.format("%s.jar", task.getJobId()))) {
+							foundJar = true;
+							break;
+						}
+					}
+					
+					if (!foundJar) {
+						Socket soc = new Socket("");
+					}
 					
 					ProcessBuilder pb = null;
 					
@@ -500,7 +516,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			while (true) {
 				try {
 					Socket soc = this.serverSoc.accept();
-					PartitionResponser pr = new PartitionResponser(soc);
+					RequestResponser pr = new RequestResponser(soc);
 					Thread prTh = new Thread(pr);
 					prTh.start();
 				} catch (IOException e) {
@@ -511,11 +527,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		}
 	}
 	
-	private class PartitionResponser implements Runnable {
+	private class RequestResponser implements Runnable {
 		
 		Socket soc;
 		
-		public PartitionResponser (Socket soc) {
+		public RequestResponser (Socket soc) {
 			this.soc = soc;
 		}
 		
@@ -528,23 +544,53 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			try {
 				
 				/* Set up */
-				in =
-				        new BufferedReader(
-				            new InputStreamReader(soc.getInputStream()));
+				in = new BufferedReader(
+						new InputStreamReader(soc.getInputStream()));
 				
-				out =
-				        new BufferedOutputStream(soc.getOutputStream());
+				out = new BufferedOutputStream(soc.getOutputStream());
 				
+				
+				/* Receive request type */
+				String reqType = in.readLine();
 				/* Receive requested file */
 				String fileName = in.readLine();
-				File file = new File(TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
-				System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t OPENNING " + TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
-				fin = new FileInputStream(file);
-				byte[] buff = new byte[BUFF_SIZE];
-				int readBytes = 0;
-				while((readBytes = fin.read(buff)) != -1) {
-					out.write(buff, 0, readBytes);
+				
+				if (reqType.equals("mapper-file")) {
+					
+					String mapperFileFullPath = 
+							TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName;
+					File file = new File(mapperFileFullPath);
+					
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
+								+ "respond file:\\" + mapperFileFullPath);
+					}
+					
+					fin = new FileInputStream(file);
+					byte[] buff = new byte[BUFF_SIZE];
+					int readBytes = 0;
+					while((readBytes = fin.read(buff)) != -1) {
+						out.write(buff, 0, readBytes);
+					}
+				} else if (reqType.equals("jar-file")) {
+					
+					String jarFileFullPath = fileName;
+					
+					File file = new File(jarFileFullPath);
+					
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
+								+ "respond file:\\" + jarFileFullPath);
+					}
+					
+					fin = new FileInputStream(file);
+					byte[] buff = new byte[BUFF_SIZE];
+					int readBytes = 0;
+					while((readBytes = fin.read(buff)) != -1) {
+						out.write(buff, 0, readBytes);
+					}
 				}
+				
 				
 			} catch (IOException e) {
 				e.printStackTrace();
