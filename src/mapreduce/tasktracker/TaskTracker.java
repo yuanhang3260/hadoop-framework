@@ -3,13 +3,16 @@ package mapreduce.tasktracker;
 import global.Hdfs;
 import global.MapReduce;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,6 +32,7 @@ import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.CleanerTask;
+import mapreduce.task.JarFileEntry;
 import mapreduce.task.KillerTask;
 import mapreduce.task.MapRedTask;
 import mapreduce.task.MapperTask;
@@ -470,7 +474,35 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					if (!foundJar) {
 						try {
-							Socket soc = new Socket(((MapRedTask)task).getJarEntry().getTaskTrackerIp(), ((MapRedTask)task).getJarEntry().getServerPort());
+							
+							File localFile = new File(TaskTracker.this.taskJarFolder.getName() + "/" + task.getJobId() + ".jar");
+							FileOutputStream fout = new FileOutputStream(localFile);
+							
+							JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
+							
+							Socket soc = new Socket(jarEntry.getTaskTrackerIp(),
+									jarEntry.getServerPort());
+							
+							PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+							BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
+							
+							
+							String request = String.format("jar-file\n%s\n", );
+							
+							out.write(request.toCharArray());
+							out.flush();
+							
+							byte[] buff = new byte[BUFF_SIZE];
+							int readBytes = 0;
+							
+							while ((readBytes = in.read(buff)) != -1) {
+								fout.write(buff, 0, readBytes);
+							}
+							in.close();
+							out.close();
+							fout.close();
+							soc.close();
+							
 						} catch (UnknownHostException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
