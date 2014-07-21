@@ -2,7 +2,7 @@ package mapreduce.task;
 
 import mapreduce.io.Split;
 
-public class MapperTask extends Task{
+public class MapperTask extends Task implements MapRedTask{
 	
 	private static final long serialVersionUID = -4448997561951975942L;
 	public Split split;

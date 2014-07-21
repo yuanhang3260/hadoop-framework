@@ -30,6 +30,7 @@ import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.CleanerTask;
 import mapreduce.task.KillerTask;
+import mapreduce.task.MapRedTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
@@ -468,7 +469,15 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					}
 					
 					if (!foundJar) {
-						Socket soc = new Socket("");
+						try {
+							Socket soc = new Socket(((MapRedTask)task).getJarEntry().getTaskTrackerIp(), ((MapRedTask)task).getJarEntry().getServerPort());
+						} catch (UnknownHostException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					
 					ProcessBuilder pb = null;
