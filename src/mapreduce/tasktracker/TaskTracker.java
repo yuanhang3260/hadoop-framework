@@ -28,6 +28,7 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
+import mapreduce.task.CleanerTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
@@ -128,11 +129,14 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
+		
+		System.out.println("Reducer DIR:" + this.taskTrackerReducerFolderName);
+		
 		File taskTrackerReducerFolder = new File(this.taskTrackerReducerFolderName);
 		if (!taskTrackerReducerFolder.exists()) {
 			taskTrackerReducerFolder.mkdir();
 		} else {
-			for (File staleFile : taskTrackerMapperFolder.listFiles()) {
+			for (File staleFile : taskTrackerReducerFolder.listFiles()) {
 				staleFile.delete();
 			}
 		}
@@ -258,19 +262,26 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 //						System.exit(190);
 //					}
 					
+					List<Task> cleanTaskList = new ArrayList<Task>();
 					for (Task newTask : ack.newAddedTasks) {
 						if (newTask instanceof MapperTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
+							TaskTracker.this.syncTaskList.add(newTask);
 						
 						} else if (newTask instanceof ReducerTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolderName);
+							TaskTracker.this.syncTaskList.add(newTask);
 							
-						} else {
-							//Unknown task: Do nothing;
-							//ack.newAddedTasks.remove(newTask);
+						} else if (newTask instanceof CleanerTask){
+							cleanTaskList.add(newTask);
+							CleanJob cleanJob =new CleanJob((CleanerTask)newTask);
+							Thread cleanJobTh = new Thread(cleanJob);
+							cleanJobTh.start();
 						}
-						
-						TaskTracker.this.syncTaskList.add(newTask);
+					}
+					
+					for (Task cleanTask : cleanTaskList) {
+						ack.newAddedTasks.remove(cleanTask);
 					}
 					
 					/* Allocate a thread to start new added tasks */
@@ -441,8 +452,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						task.startTask();
 				
  					} catch (IOException e) {
-						e.printStackTrace();
-						task.failedTask();
+ 						if (MapReduce.Core.DEBUG) {
+ 							e.printStackTrace();
+ 							task.failedTask();
+ 						}
+						
 					}
 					
 				}
@@ -551,5 +565,40 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 			
 		}
-	}	
+	}
+	
+	private class CleanJob implements Runnable{
+		
+		private CleanerTask task;
+		
+		public CleanJob(CleanerTask task) {
+			this.task = task;
+		}
+		
+		
+		@Override
+		public void run() {
+
+			for (String mapperFileName : this.task.getMapperFile()) {
+				
+				for (int i = 0; i < task.getPartitionNum(); i++) {
+					File mapperIntermediateFile = new File(TaskTracker.this.taskTrackerMapperFolderName + "/" + mapperFileName + "-" + i);
+					System.out.println("CLEANUP: " +
+							(TaskTracker.this.taskTrackerMapperFolderName + "/" + mapperFileName + "-" + i) + "\t" +
+							mapperIntermediateFile.delete());
+					
+				}
+			}
+			
+			for (String reducerFileName : this.task.getReducerFile()) {
+				File reducerTmpFile = new File (TaskTracker.this.taskTrackerReducerFolderName + "/" + reducerFileName);
+				System.out.println("CLEANUP: " +
+						((TaskTracker.this.taskTrackerReducerFolderName + "/" + reducerFileName)) + "\t" +
+						reducerTmpFile.delete());
+				
+			}
+		}
+		
+	}
+	
 }
