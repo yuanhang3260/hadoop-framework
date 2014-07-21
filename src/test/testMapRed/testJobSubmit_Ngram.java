@@ -14,15 +14,8 @@ public class testJobSubmit_Ngram {
 		conf.setInputPath("hello");
 		conf.setOutputPath("ngram2");
 		
-//		conf.setMapperClass(WordCountMapper.class);
-//		conf.setReducerClass(WordCountReducer.class);
-		
-		conf.setMapperClass(NgramMapper.class);
-		
-		System.out.println(NgramMapper.class.getName());
-		
-		System.exit(1);
-		conf.setReducerClass(NgramReducer.class);
+		conf.setMapperClassName("example.Ngram.NgramMapper");
+		conf.setReducerClassName("example.Ngram.NgramReducer");
 		
 		conf.setNumReduceTasks(2);
 		conf.setPriority(0);

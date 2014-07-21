@@ -456,6 +456,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 	}
 	
+	/**
+	 * Check if all reducer tasks within this table are SUCCESS
+	 * @param reducerStatusTbl
+	 * @return
+	 */
 	private boolean reducerAllSuccess(AbstractMap<String, TaskStatus> reducerStatusTbl) {
 		Set<String> taskId = reducerStatusTbl.keySet();
 		for (String id : taskId) {
@@ -477,6 +482,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		jobStatus.rescheduleNum++;
 		jobStatus.mapTaskLeft = jobStatus.mapTaskTotal;
 		jobStatus.reduceTaskLeft = jobStatus.reduceTaskTotal;
+		
 		/* delete result on HDFS from reducer */
 		try {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
@@ -511,6 +517,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	private void jobFail(String jobId) {
 		this.jobStatusTbl.get(jobId).status = WorkStatus.FAILED;
+		
+		/* do cleaning work for intermediate files */
+		if (Hdfs.Core.DEBUG) {
+			System.out.println("DEBUG JobTracker.jobFail(): about to cleanUp job " + jobId);
+		}
+		cleanUp(jobId);
 	}
 	
 	/**
