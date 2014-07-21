@@ -83,24 +83,24 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		Thread.sleep(1000 * 3);
 		
-		String mapperClassName = null;
-		String reducerClassName = null;
+//		String mapperClassName = null;
+//		String reducerClassName = null;
 		
-		try {
-			mapperClassName = jt.loadMapperClass();
-			reducerClassName = jt.loadReducerClass();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			mapperClassName = jt.loadMapperClass();
+//			reducerClassName = jt.loadReducerClass();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
 			Split split = new Split(file1, mapperSEQ);
 			JarFileEntry jarEntry = new JarFileEntry("128.237.222.59", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
-			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, mapperClassName, reducerNum, jarEntry));
+			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, "WordCount.WordCountMapper", reducerNum, jarEntry));
 		}
 
 		Thread.sleep(1000 * 15);
@@ -112,7 +112,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
 			JarFileEntry jarEntry = new JarFileEntry("localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
-			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, reducerClassName, partitionEntry, "output-part" + reducerSEQ, jarEntry));
+			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, "WordCount.WordCountReducer", partitionEntry, "output-part" + reducerSEQ, jarEntry));
 
 		}	
 
@@ -199,73 +199,73 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 	
 	
-	public String loadMapperClass ()
-			throws IOException, ClassNotFoundException {
-		
-		/* Load Jar file */
-		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
-		JarFile jarFile = new JarFile(jarFilePath);
-		Enumeration<JarEntry> e = jarFile.entries();
-		
-		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
-		ClassLoader cl = URLClassLoader.newInstance(urls);
-		
-		Class<Mapper<Writable, Writable, Writable, Writable>> mapperClass = null;
-		
-		/* Iterate .class files */
-		while (e.hasMoreElements()) {
-            
-			JarEntry je = e.nextElement();
-            
-			if(je.isDirectory() || !je.getName().endsWith(".class")){
-                continue;
-            }
-            
-            String className = je.getName().substring(0, je.getName().length() - 6);
-            className = className.replace('/', '.');
-            if (className.equals(WordCount.WordCountMapper.class.getName())) {
-            	mapperClass = (Class<Mapper<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
-            }
-        }
-		
-		System.out.println("Mapper class:" + mapperClass.getName());
-		
-		return mapperClass.getName();
-	}
-	
-	
-	public String loadReducerClass ()
-			throws IOException, ClassNotFoundException {
-		
-		/* Load Jar file */
-		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
-		JarFile jarFile = new JarFile(jarFilePath);
-		Enumeration<JarEntry> e = jarFile.entries();
-		
-		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
-		ClassLoader cl = URLClassLoader.newInstance(urls);
-		
-		Class<Reducer<Writable, Writable, Writable, Writable>> reducerClass = null;
-		
-		/* Iterate .class files */
-		while (e.hasMoreElements()) {
-            
-			JarEntry je = e.nextElement();
-            
-			if(je.isDirectory() || !je.getName().endsWith(".class")){
-                continue;
-            }
-            
-            String className = je.getName().substring(0, je.getName().length() - 6);
-            className = className.replace('/', '.');
-            if (className.equals(WordCount.WordCountReducer.class.getName())) {
-            	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
-            }
-        }
-
-		
-		return reducerClass.getName();
-		
-	}
+//	public String loadMapperClass ()
+//			throws IOException, ClassNotFoundException {
+//		
+//		/* Load Jar file */
+//		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
+//		JarFile jarFile = new JarFile(jarFilePath);
+//		Enumeration<JarEntry> e = jarFile.entries();
+//		
+//		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
+//		ClassLoader cl = URLClassLoader.newInstance(urls);
+//		
+//		Class<Mapper<Writable, Writable, Writable, Writable>> mapperClass = null;
+//		
+//		/* Iterate .class files */
+//		while (e.hasMoreElements()) {
+//            
+//			JarEntry je = e.nextElement();
+//            
+//			if(je.isDirectory() || !je.getName().endsWith(".class")){
+//                continue;
+//            }
+//            
+//            String className = je.getName().substring(0, je.getName().length() - 6);
+//            className = className.replace('/', '.');
+//            if (className.equals("WordCount.WordCountMapper")) {
+//            	mapperClass = (Class<Mapper<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
+//            }
+//        }
+//		
+//		System.out.println("Mapper class:" + mapperClass.getName());
+//		
+//		return mapperClass.getName();
+//	}
+//	
+//	
+//	public String loadReducerClass ()
+//			throws IOException, ClassNotFoundException {
+//		
+//		/* Load Jar file */
+//		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
+//		JarFile jarFile = new JarFile(jarFilePath);
+//		Enumeration<JarEntry> e = jarFile.entries();
+//		
+//		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
+//		ClassLoader cl = URLClassLoader.newInstance(urls);
+//		
+//		Class<Reducer<Writable, Writable, Writable, Writable>> reducerClass = null;
+//		
+//		/* Iterate .class files */
+//		while (e.hasMoreElements()) {
+//            
+//			JarEntry je = e.nextElement();
+//            
+//			if(je.isDirectory() || !je.getName().endsWith(".class")){
+//                continue;
+//            }
+//            
+//            String className = je.getName().substring(0, je.getName().length() - 6);
+//            className = className.replace('/', '.');
+//            if (className.equals("WordCount.WordCountMapper")) {
+//            	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
+//            }
+//        }
+//
+//		
+//		return reducerClass.getName();
+//		
+//	}
 
 }
