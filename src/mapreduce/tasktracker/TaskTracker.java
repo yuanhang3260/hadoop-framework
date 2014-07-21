@@ -240,8 +240,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				try {
 					ack = TaskTracker.this
-							.jobTrackerStub.heartBeat(report); //ack is local variable
-//					System.out.println("RCV tasks: " + ack.newAddedTasks.size());
+							.jobTrackerStub.heartBeat(report); //ack is local variablec
 				} catch (RemoteException e1) {
 
 					// wait for next heart beat;
@@ -492,6 +491,10 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						}
 					}
 					
+					
+					System.out.println("TaskTracker.StartTask.run(): Before set JarFilePath:" + (TaskTracker.
+							this.taskJarFolder.getAbsolutePath() + "/" + 
+							task.getJobId() + ".jar"));
 					((MapRedTask) task).setTaskTrackerLocalJarPath(TaskTracker.
 							this.taskJarFolder.getAbsolutePath() + "/" + 
 							task.getJobId() + ".jar");
@@ -502,6 +505,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
 					} else if (task instanceof ReducerTask) {
+						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarLocalPath());
 						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
 					}

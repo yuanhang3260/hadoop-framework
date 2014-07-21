@@ -242,6 +242,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 		/* Load Jar file */
 		String jarFilePath = this.task.getJarLocalPath();
+		System.out.println("DEBUG RunReducer.loadClass():\t JarFilePath:" + jarFilePath);
 		JarFile jarFile = new JarFile(jarFilePath);
 		Enumeration<JarEntry> e = jarFile.entries();
 		

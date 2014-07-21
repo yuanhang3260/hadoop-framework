@@ -57,8 +57,7 @@ public class ReducerTask extends Task implements MapRedTask {
 
 	@Override
 	public String getJarLocalPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.jarEntry.getLocalPath();
 	}
 
 }
