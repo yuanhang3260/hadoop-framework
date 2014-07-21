@@ -27,6 +27,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import mapreduce.Job;
 import mapreduce.io.Split;
 import mapreduce.task.CleanerTask;
+import mapreduce.task.JarFileEntry;
 import mapreduce.task.KillerTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
@@ -91,13 +92,20 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return taskTrackerName;
 	}
 	
-	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
-		MapperTask task = new MapperTask(jobId, nameTask(), level, split, theClass, partitionNum);
+	private MapperTask createMapTask(Job job, Split split) {
+		MapperTask task = new MapperTask(job.getJobId(), nameTask(), job.getJobConf().getPriority(), 
+										split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks(), 
+										job.getJobConf().getJarFileEntry());
+		
 		return task;
 	}
 	
-	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + "-" + "part" + "-" + reducerSEQ);
+	private ReducerTask createReduceTask(Job job, int reducerSEQ, PartitionEntry[] partitionEntry) {
+		ReducerTask task = new ReducerTask(job.getJobId(), nameTask(), job.getJobConf().getPriority(), 
+											reducerSEQ, job.getJobConf().getReducerClass(), partitionEntry, 
+											job.getJobConf().getOutputPath() + "-" + "part" + "-" + reducerSEQ, 
+											job.getJobConf().getJarFileEntry());
+		
 		return task;
 	}
 	
@@ -144,8 +152,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	private synchronized void initMapTasks(Job job) {
 		for (Split split : job.getSplit()) {
+			
 			MapperTask task = 
-					createMapTask(job.getJobId(), job.getJobConf().getPriority(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
+					createMapTask(job, split);
 			
 			if (Hdfs.Core.DEBUG) {
 				System.out.println("DEBUG JobTracker.addMapTasks(): now adding task " + task.getTaskId() + " to Task Queue");
@@ -179,9 +188,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* create partition entry array */
 		PartitionEntry[] entries = new PartitionEntry[mapIdSet.size()];
-		int i = 0;
-
 		
+		int i = 0;		
 		for (String mapTaskId : mapIdSet) {
 			String taskTrackerIp = mapperStatusTbl.get(mapTaskId).taskTrackerIp;
 			entries[i++] = new PartitionEntry(mapTaskId, taskTrackerIp, this.taskTrackerTbl.get(taskTrackerIp).getServerPort());
@@ -189,7 +197,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* create reducer tasks */
 		for (int j = 0; j < numOfReducer; j++) {
-			ReducerTask task = createReduceTask(job.getJobId(), job.getJobConf().getPriority(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
+			ReducerTask task = createReduceTask(job, j, entries);
 			this.taskTbl.put(task.getTaskId(), task);
 			this.jobScheduler.addReduceTask(task);
 			
@@ -276,9 +284,15 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * @param taskStatus
 	 */
 	public void updateTaskStatus(TaskStatus taskStatus) {
+		
 		boolean isMapper = this.taskTbl.get(taskStatus.taskId) instanceof MapperTask;
+		
+		boolean isReducer = this.taskTbl.get(taskStatus.taskId) instanceof ReducerTask;
+		
 		JobStatus jobStatus = this.jobStatusTbl.get(taskStatus.jobId);
+		
 		synchronized(jobStatus) {
+			
 			TaskStatus preStatus = isMapper ? jobStatus.mapperStatusTbl.get(taskStatus.taskId) : jobStatus.reducerStatusTbl.get(taskStatus.taskId);
 			
 			if ( preStatus == null || preStatus.status == WorkStatus.SUCCESS) {
@@ -286,10 +300,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				return;
 			}
 			
-			/* previous Status: RUNNING or FAILED */
+			/* update Mapper / Reducer task status */
 			if (isMapper) {
 				jobStatus.mapperStatusTbl.put(taskStatus.taskId, taskStatus);
-			} else {
+			} else if (isReducer) {
 				jobStatus.reducerStatusTbl.put(taskStatus.taskId, taskStatus);
 			}
 			

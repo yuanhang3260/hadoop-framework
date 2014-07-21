@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -233,7 +234,7 @@ public class Utility {
 			/* list status of all jobs submitted */
 			lsjob();
 		} else if (args[2].equals("submit")) {
-			if (args.length != 10) {
+			if (args.length != 11) {
 				printSubmitUsage();
 				return;
 			}
@@ -304,13 +305,14 @@ public class Utility {
 	private static void submit(String[] args) {
 		// TODO Auto-generated method stub
 		String jobName = args[3];
-		String mapperClassName = args[4];
-		String reducerClassName = args[5];
-		String fileIn = args[6];
-		String fileOut = args[7];
+		String jarFilePath = args[4];
+		String mapperClassName = args[5];
+		String reducerClassName = args[6];
+		String fileIn = args[7];
+		String fileOut = args[8];
 		int partitionNum = 1;
 		try {
-			partitionNum = Integer.parseInt(args[8]);
+			partitionNum = Integer.parseInt(args[9]);
 		} catch (NumberFormatException e) {
 			System.out.println("Exception: NumOfReducer should be an integer ");
 			printSubmitUsage();
@@ -318,7 +320,7 @@ public class Utility {
 		}
 		int priority = 0;
 		try {
-			priority = Integer.parseInt(args[9]);
+			priority = Integer.parseInt(args[10]);
 		} catch (NumberFormatException e) {
 			System.out.println("Exception: JobPriority shoud be an interger");
 			printSubmitUsage();
@@ -344,6 +346,7 @@ public class Utility {
 		
 		JobConf conf = new JobConf();
 		conf.setJobName(jobName);
+		conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
 		conf.setMapperClass(mapperClass);
 		conf.setReducerClass(reducerClass);
 		conf.setInputPath(fileIn);
@@ -381,7 +384,7 @@ public class Utility {
 	}
 	
 	private static void printSubmitUsage() {
-		System.out.println("submit:\tSubmit a mapreduce job to JobTracker\nUsage: hadoop mapred submit <JobName> <MapperClassName> <ReducerClassName> <InputFilePath> <OutputFilePath> <NumOfReducer> <JobPriority>");
+		System.out.println("submit:\tSubmit a mapreduce job to JobTracker\nUsage: hadoop mapred submit <JobName> <JarFilePath> <MapperClassName> <ReducerClassName> <InputFilePath> <OutputFilePath> <NumOfReducer> <JobPriority>");
 	}
 	
 	private static void printLsjobUsage() {

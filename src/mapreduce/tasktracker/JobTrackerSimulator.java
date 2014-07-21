@@ -67,7 +67,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
 			Split split = new Split(file1, mapperSEQ);
-			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, WordCountMapper.class, reducerNum));
+			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, WordCountMapper.class, reducerNum, null));
 		}
 
 		Thread.sleep(1000 * 15);
@@ -78,7 +78,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT);
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
-			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, WordCountReducer.class, partitionEntry, "output-part" + reducerSEQ));
+			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, WordCountReducer.class, partitionEntry, "output-part" + reducerSEQ, null));
 		}	
 
 	}

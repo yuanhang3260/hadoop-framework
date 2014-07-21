@@ -20,6 +20,8 @@ public class testJobSubmit_WordCount {
 		conf.setNumReduceTasks(2);
 		conf.setPriority(0);
 		
+		//conf.setJarFileEntry("localhost", port, path);
+		
 		String jobId = JobClient.runJob(conf);
 	}
 }

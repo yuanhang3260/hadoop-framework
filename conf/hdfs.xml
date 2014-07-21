@@ -3,7 +3,7 @@
 	<core>		
 		<replica-factor> 2 </replica-factor>
 		
-		<chunk-size unit="KB">8</chunk-size>
+		<chunk-size unit="KB">256</chunk-size>
 		
 		<read-buff-size unit="KB">8</read-buff-size>
 		<write-buff-size unit="KB">8</write-buff-size>

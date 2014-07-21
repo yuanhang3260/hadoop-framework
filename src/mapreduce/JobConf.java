@@ -2,7 +2,12 @@ package mapreduce;
 
 import java.io.Serializable;
 
+import mapreduce.task.JarFileEntry;
+
 public class JobConf implements Serializable {
+
+	private static final long serialVersionUID = 1437439113195756219L;
+
 	private String jobName;
 	
 	private String inputPath;
@@ -20,6 +25,15 @@ public class JobConf implements Serializable {
 	private int numReduceTasks;
 	
 	private int priorityLevel;
+	private JarFileEntry jarFileEntry;
+	
+	public void setJarFileEntry(String ip, int port, String path) {
+		this.jarFileEntry = new JarFileEntry(ip, port, path);
+	}
+	
+	public JarFileEntry getJarFileEntry() {
+		return this.jarFileEntry;
+	}
 	
 	public void setPriority(int level) {
 		this.priorityLevel = level;

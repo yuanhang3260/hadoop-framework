@@ -487,7 +487,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
 							
 							
-							String request = String.format("jar-file\n%s\n", );
+							String request = String.format("jar-file\n%s\n");
 							
 							out.write(request.toCharArray());
 							out.flush();
