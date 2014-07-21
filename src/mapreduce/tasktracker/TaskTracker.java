@@ -241,7 +241,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				try {
 					ack = TaskTracker.this
 							.jobTrackerStub.heartBeat(report); //ack is local variable
-					System.out.println("RCV tasks: " + ack.newAddedTasks.size());
+//					System.out.println("RCV tasks: " + ack.newAddedTasks.size());
 				} catch (RemoteException e1) {
 
 					// wait for next heart beat;

@@ -272,6 +272,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		for (int j = 0; j < numOfReducer; j++) {
 			ReducerTask task = createReduceTask(job, j, entries);
 			
+			System.out.println("DEBUG JobTracker.initReduceTasks(): ReducerTask " + task.getTaskId() + " in job " + task.getJobId() + " jarPath " + task.getJarEntry().getFullPath());
 			//this.taskTbl.put(task.getTaskId(), task);
 			
 			this.jobScheduler.addReduceTask(task);
