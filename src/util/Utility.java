@@ -14,17 +14,28 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.Inet4Address;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import mapreduce.JobClient;
 import mapreduce.JobConf;
+import mapreduce.core.Mapper;
+import mapreduce.io.writable.Writable;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
@@ -32,11 +43,13 @@ import mapreduce.jobtracker.WorkStatus;
 
 public class Utility {
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IllegalArgumentException, SecurityException, IOException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		
 		try {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
+			Parser.mapreduceTaskTrackerCommonConf();
+			Parser.mapreduceTaskTrackerIndividualConf(1);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -225,7 +238,7 @@ public class Utility {
 	
 	/* -------------------- MapReduce utility area --------------------- */
 	
-	private static void mapredUtility(String[] args) {
+	private static void mapredUtility(String[] args) throws IllegalArgumentException, SecurityException, IOException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		if (args[2].equals("lsjob")) {
 			if (args.length != 3) {
 				printLsjobUsage();
@@ -302,41 +315,52 @@ public class Utility {
 		}
 	}
 	
-	private static void submit(String[] args) {
+	private static void submit(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
 		// TODO Auto-generated method stub
-		String jobName = args[3];
-		String jarFilePath = args[4];
-		String mapperClassName = args[5];
-		String reducerClassName = args[6];
-		String fileIn = args[7];
-		String fileOut = args[8];
-		int partitionNum = 1;
-		try {
-			partitionNum = Integer.parseInt(args[9]);
-		} catch (NumberFormatException e) {
-			System.out.println("Exception: NumOfReducer should be an integer ");
-			printSubmitUsage();
-			return;
-		}
-		int priority = 0;
-		try {
-			priority = Integer.parseInt(args[10]);
-		} catch (NumberFormatException e) {
-			System.out.println("Exception: JobPriority shoud be an interger");
-			printSubmitUsage();
-			return;
-		}
+		//hadoop mapred submit jar /usr/foo.jar package.ClassName inputPath outputPath
+		String type = args[3];
+		String jarPath = args[4];
+		String mainClassName = args[5];
+		String intputPath = args[6];
+		String outoutPath = args[7];
 		
-		JobConf conf = new JobConf();
-		conf.setJobName(jobName);
-		//conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
-		conf.setMapperClassName(mapperClassName);
-		conf.setReducerClassName(reducerClassName);
-		conf.setInputPath(fileIn);
-		conf.setOutputPath(fileOut);
-		conf.setNumReduceTasks(partitionNum);
-		conf.setPriority(priority);
-		JobClient.runJob(conf);
+		JarFile jarFile = new JarFile(jarPath);
+		Enumeration<JarEntry> e = jarFile.entries();
+		
+		URL[] urls = { new URL("jar:file:" + jarPath +"!/") };
+		ClassLoader cl = URLClassLoader.newInstance(urls);
+		
+		Class<?> mainClass = null;
+		
+		while (e.hasMoreElements()) {
+            
+			JarEntry je = e.nextElement();
+            
+			if(je.isDirectory() || !je.getName().endsWith(".class")){
+                continue;
+            }
+            
+            String className = je.getName().substring(0, je.getName().length() - 6);
+            className = className.replace('/', '.');
+            if (className.equals(mainClassName)) {
+            	mainClass =  cl.loadClass(className);
+            }
+        }
+		
+	    Method m = mainClass.getMethod("main", new Class[] {String[].class});
+	    m.setAccessible(true);
+	    
+	    int mods = m.getModifiers();
+	    
+	    if (m.getReturnType() != void.class || !Modifier.isStatic(mods) ||
+	        !Modifier.isPublic(mods)) {
+	        throw new NoSuchMethodException("main");
+	    }
+	    
+	    String[] newArgs = new String[args.length - 6];
+	    newArgs = Arrays.copyOfRange(args, 6, args.length - 1);
+	    System.out.println("DEBUG Utility.subit(): newArgs = " + Arrays.toString(newArgs));
+	    m.invoke(null, new Object[] { newArgs });
 		
 	}
 	
