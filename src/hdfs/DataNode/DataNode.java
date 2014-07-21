@@ -1,6 +1,7 @@
 package hdfs.DataNode;
 
 import global.Hdfs;
+import hdfs.IO.HDFSLineFeedCheck;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -196,17 +197,40 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	}
 	
 	@Override
-	public void commitChunk(String globalChunkName) throws RemoteException {
-		if (Hdfs.Core.DEBUG) {
-			System.out.format("DEBUG DataNode.commitChunk(): To find chunk(%s) on Node(%s).\n",tmpFileWrapper(chunkNameWrapper(globalChunkName)), this.dataNodeName);
+	public void commitChunk(String globalChunkName, boolean valid, boolean forSysCheck) throws RemoteException {
+		
+		if (forSysCheck) {
+			File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
+			if (!chunkFile.exists()) {
+				if (Hdfs.Core.DEBUG) {
+					System.err.println("chunk doesn't exists");
+				}
+				return;
+			}
+			if (Hdfs.Core.DEBUG) {
+				System.out.format("DEBUG DataNode.commitChunk(): Called by NameNode.SysCheck. Commit chunk (%s)\n",chunkNameWrapper(globalChunkName));
+			}
+			chunkFile.setWritable(false, false);
+			chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
+		} else {
+			if (valid) {
+				File chunkFile = new File(backupFileWrapper(chunkNameWrapper(globalChunkName)));
+				if (!chunkFile.exists()) {
+					System.err.println("chunk doesn't exists");
+				}
+				if (Hdfs.Core.DEBUG) {
+					System.out.format("DEBUG DataNode.commitChunk(): Called by NameNode.CommitFile(). Commit chunk (%s)\n",backupFileWrapper(chunkNameWrapper(globalChunkName)));
+				}
+				chunkFile.setWritable(false, false);
+				chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
+			} else {
+				if (Hdfs.Core.DEBUG) {
+					System.out.format("DEBUG DataNode.commitChunk(): Called by NameNode.CommitFile(). Delete chunk (%s)\n",tmpFileWrapper(chunkNameWrapper(globalChunkName)));
+				}
+				File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
+				chunkFile.delete();
+			}
 		}
-		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
-		if (!chunkFile.exists()) {
-			System.err.println("chunk doesn't exists");
-//			System.exit(-1);
-		}
-		chunkFile.setWritable(false, false);
-		chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
 		return;
 	}
 	
@@ -259,6 +283,64 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			}
 		}
 		return chunkList;
+	}
+
+	@Override
+	public HDFSLineFeedCheck readLine(String chunkName) throws RemoteException,
+			IOException {
+		
+		RandomAccessFile in
+			= new RandomAccessFile(tmpFileWrapper(chunkNameWrapper(chunkName)), "rw");
+
+		String line = in.readLine();
+		
+		boolean metFirstLineFeed = (in.length() != line.getBytes().length);
+		
+		in.close();
+		
+		return new HDFSLineFeedCheck(line, metFirstLineFeed);
+	}
+
+	@Override
+	public void deleteFirstLine(String chunkName, boolean firstFile) throws RemoteException,
+			IOException {
+		
+		if (firstFile) {
+			File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(chunkName)));
+			chunkFile.renameTo(new File(backupFileWrapper(chunkNameWrapper(chunkName))));
+		} else {
+		
+			RandomAccessFile in = 
+					new RandomAccessFile(tmpFileWrapper(chunkNameWrapper(chunkName)), "rw");
+			
+			RandomAccessFile backup_out = 
+					new RandomAccessFile(backupFileWrapper(chunkNameWrapper(chunkName)), "rw");
+			
+			
+			String line = in.readLine();
+			in.seek((line).getBytes().length);
+			
+			
+			byte[] buff = new byte[1024];
+	
+			int c = 0;
+			
+			while ((c = in.read(buff)) != -1) {
+				backup_out.write(buff, 0, c);
+			}
+			
+			in.close();
+			backup_out.close();
+			
+			File tmpFile = new File(tmpFileWrapper(chunkNameWrapper(chunkName)));
+			tmpFile.delete();
+			
+		}
+		
+	}
+	
+	private String backupFileWrapper(String fileName) {
+		return fileName + ".backup";
 	}
 	
 }

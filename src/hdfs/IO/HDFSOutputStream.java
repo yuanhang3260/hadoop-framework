@@ -8,145 +8,254 @@ import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
+import java.util.List;
 
-public class HDFSOutputStream implements Serializable {
+public class HDFSOutputStream extends OutputStream implements Serializable {
 
-	private static final long serialVersionUID = -488017724627896978L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7034464668035678312L;
 	private HDFSFile file;
-	private int chunkOffset;
-	private int chunkCounter;
-	private int chunksize;
+	private int chunk_size;
 	private NameNodeRemoteInterface nameNodeStub;
-	private boolean firstWrite = true;
+	
+	private int chunk_offset = 0;
 	private boolean DEBUG = false;
-
 	
-	
-	public HDFSOutputStream (HDFSFile file, int size, NameNodeRemoteInterface stub) {
+	public HDFSOutputStream (HDFSFile file, NameNodeRemoteInterface nameNodeStub) {
 		this.file = file;
-		this.chunksize = size;
-		this.chunkOffset = 0;
-		this.chunkCounter = 1;
-		this.nameNodeStub = stub;
+		this.nameNodeStub = nameNodeStub;
+		this.chunk_size = Hdfs.Core.CHUNK_SIZE;
+		this.file.addChunk();
 	}
-
-	public void write(byte[] content) throws IOException {
-		
-		if (this.chunkOffset == this.chunksize && content.length > 0 || firstWrite) { //Apply for a new chunk
-			file.addChunk();
-			this.chunkOffset = 0;
-		}
-		
-		if (firstWrite) {
-			firstWrite = false;
-		}
-		
-		int availableBytes = this.chunksize - this.chunkOffset;
-		if (Hdfs.Core.DEBUG && this.DEBUG) {
-			System.out.println("DEBUG HDFSOutputStream.write(): availabelBytes = " + availableBytes); 
-		}
-		int bufferOffset = 0;
-
-		
-		while (bufferOffset < content.length) {
-			
-			if (availableBytes + bufferOffset < content.length) { // need to create a new chunk
-				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, bufferOffset + availableBytes);
-				if (Hdfs.Core.DEBUG && this.DEBUG) {
-					System.out.println("write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + (bufferOffset + availableBytes));
-				}
-				bufferOffset += availableBytes;
-				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
-					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
-				}
-				this.chunkOffset += availableBytes;
-				
-				/* Continue writing till new line feed */
-				if (writeToDataNodeBuf[writeToDataNodeBuf.length - 1] != '\n') {
-					int i = 0;
-					while (bufferOffset < content.length && content[bufferOffset] != '\n') {
-						i++;
-						bufferOffset++;
-					}
-					if (bufferOffset < content.length && content[bufferOffset] == '\n') {
-						i++;
-						bufferOffset++;
-					}
-					byte[] actualWrittenBuf = Arrays.copyOfRange(content, bufferOffset - i, bufferOffset);
-					for (int j = 0; j < getCurrentChunk().getReplicaFactor(); j++) {
-						writeToDataNode(actualWrittenBuf, getCurrentChunk().getDataNode(j), getCurrentChunk().getChunkName());
-					}
-				}
-				
-				/* Apply for a new chunk */
-				if (bufferOffset < content.length) {
-					file.addChunk();
-					this.chunkOffset = 0;
-					availableBytes = this.chunksize;
-				} else {
-					break;
-				}
-			} else { // enough to finish write
-				byte[] writeToDataNodeBuf = Arrays.copyOfRange(content, bufferOffset, content.length);
-				if (Hdfs.Core.DEBUG && this.DEBUG) {
-					System.out.println("[last] write to tmp-" + chunkCounter + "\tfrom " + bufferOffset + " to " + content.length);
-				}
-				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
-					writeToDataNode(writeToDataNodeBuf, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
-				}
-				this.chunkOffset += writeToDataNodeBuf.length;
-				break;
+	
+	@Override
+	public void write(int arg0) throws IOException {
+		if (this.chunk_offset < this.chunk_size) {
+			if (Hdfs.Core.DEBUG && this.DEBUG) {
+				System.out.format("[continue %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
 			}
-
-		}
-		if (Hdfs.Core.DEBUG && this.DEBUG) {
-			System.out.println("finish write. [status] chunkCounter=" + this.chunkCounter + " chunkOffset=" + this.chunkOffset);
+			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+				writeToDataNode(new byte[] {(byte) arg0}, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
+			}
+			this.chunk_offset++;
+		} else {
+			this.file.addChunk();
+			this.chunk_offset = (this.chunk_offset++) % this.chunk_size;
+			if (Hdfs.Core.DEBUG && this.DEBUG) {
+				System.out.format("[new chunk %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
+			}
+			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+				writeToDataNode(new byte[] {(byte) arg0}, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
+			}
+			this.chunk_offset++;
 		}
 	}
 	
-	
-	
-	public void close() throws IOException{
-//		List<HDFSChunk> allChunks = file.getChunkList();
-//		for (HDFSChunk chunk : allChunks) {
-//			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
-//				try {
-//					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
-//					DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-//					dataNodeStub.modifyChunkPermission(chunk.getChunkName());
-//				} catch (RemoteException e) {
-//					throw new IOException("Cannot connect to Name Node");
-//				} catch (NotBoundException e) {
-//					throw new IOException("Cannot connect to Name Node");
-//				}
-//			}
-//		}
-		this.nameNodeStub.commitFile(file);
-
+	@Override 
+	public void write(byte[] b) throws IOException {
+		write(b, 0, b.length);
 	}
 	
-	private void writeToDataNode(byte[] content, DataNodeEntry dataNode, String chunkName) throws IOException {
+	@Override
+	public void write(byte[] b, int offset, int len) throws IOException {
+		
+		if (offset < 0 || offset > b.length) {
+			throw new IOException("Arrays out of bound:" + offset);
+		}
+		
+		if (offset + len > b.length || offset + len < 0) {
+			throw new IOException("Arrays out of bound:" + offset + len);
+		}
+		
+		int written = 0;
+		
+		while (written < len) {
+			
+			if (this.chunk_offset == this.chunk_size) {
+				
+				this.file.addChunk();
+				this.chunk_offset = this.chunk_offset % this.chunk_size;
+				
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
+					System.out.format("[apply    %s]: buffer <offset = %d>;  "
+							+ "chunk<offset = %d>\n", getCurrentChunk().getChunkName(), 
+							offset + written, this.chunk_offset);
+				}
+				
+			}
+			
+			if (len - written < this.chunk_size - this.chunk_offset) { //Needn't to apply for a new chunk
+				
+				int towrite = len - written;
+				
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
+					System.out.format("[continue %s]: buffer <from %d to  %d>;  "
+							+ "chunk<from %d to %d>\n", getCurrentChunk().getChunkName(), 
+							offset + written, offset + written + towrite, 
+							this.chunk_offset, this.chunk_offset + written + towrite);
+				}
+				
+				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+					writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
+							getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
+				}
+				
+				this.chunk_offset += towrite;
+				written += towrite;
+				
+			} else {//if (len - written > this.chunk_size - this.chunk_offset) { // Need fill out current chunk and apply more
+				
+				int towrite = this.chunk_size - this.chunk_offset;
+				
+				if (Hdfs.Core.DEBUG && this.DEBUG) {
+					System.out.format("[fill out %s]: buffer <from %d to  %d>;  "
+							+ "chunk<from %d to %d>\n", getCurrentChunk().getChunkName(), 
+							offset + written, offset + written + towrite, 
+							this.chunk_offset, this.chunk_offset + towrite);
+				}
+				
+				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+					writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
+							getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
+				}
+				
+				this.chunk_offset += towrite;
+				written += towrite;
+			} 
+			
+		}
+		
 		if (Hdfs.Core.DEBUG && this.DEBUG) {
-			System.out.println("DEBUG: HDFSOutputStream: Write to DataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
+			System.out.format("[before return] status: Chunk<total chunks = %d, offset = %d, size = %d>, buff<offset = %d, from = %d, to = %d>\n",
+					this.file.getChunkList().size(), this.chunk_offset, this.chunk_size, offset + written, offset, len);
+		}
+		
+	}
+
+	private void writeToDataNode(byte[] b, DataNodeEntry dataNode, String chunkName) throws IOException {
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
+			System.out.println("DEBUG HDFSNewOutputStream.writeToDataNode:\tDataNode ip=" + dataNode.dataNodeRegistryIP + ":" + dataNode.dataNodeRegistryPort);
 		}
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
 		try {
-			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup("DataNode");
-			dataNodeStub.writeToLocal(content, chunkName, this.chunkOffset);
+			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+			dataNodeStub.writeToLocal(b, chunkName, this.chunk_offset);
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
 	}
-
 	
 	private HDFSChunk getCurrentChunk() {
 		return file.getChunkList().get(file.getChunkList().size() - 1);
 	}
 	
+	public void close() throws IOException {
+		
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
+			System.out.println("DEBUG HDFSNewOutputStream.close():\tBefore sort firstlines, current chunks are:");
+			for (HDFSChunk chunk : this.file.getChunkList()) {
+				System.out.print("\t" + chunk.getChunkName());
+			}
+		}
+		
+		this.file.backupChunkList();
+		
+		rearrangeChunks();
+		
+		if (Hdfs.Core.DEBUG && this.DEBUG) {
+			System.out.println("\n\nDEBUG HDFSNewOutputStream.close():\tAfter sort firstlines, current chunks are:");
+			for (HDFSChunk leftChunk : this.file.getChunkList()) {
+				System.out.print("\t" + leftChunk.getChunkName());
+			}
+		}
+		
+		cleanupChunks();
+		this.nameNodeStub.commitFile(file);
+	}
 	
+	
+	private void rearrangeChunks() {
+		
+		List<HDFSChunk> chunkList = this.file.getChunkList();
+		
+		for (int i = 0; i < chunkList.size(); i++) {
+			
+			if (i < chunkList.size()) {
+				
+				HDFSChunk currChunk = chunkList.get(i);
+				
+				HDFSLineFeedCheck nextFirstLine;
+				
+				try {
+					do {
+						if (i + 1 >= chunkList.size()) {
+							break;
+						}
+						HDFSChunk nextChunk = chunkList.get(i + 1);
+						DataNodeEntry nextChunkEntry = nextChunk.getDataNode(0);
+						
+						/* Read "first line" of next chunk */
+						Registry nextChunkDataNodeR = LocateRegistry.getRegistry(nextChunkEntry.dataNodeRegistryIP, nextChunkEntry.dataNodeRegistryPort);
+						DataNodeRemoteInterface nextChunkDataNodeS = (DataNodeRemoteInterface) nextChunkDataNodeR.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+						nextFirstLine = nextChunkDataNodeS.readLine(nextChunk.getChunkName());
+						
+						/* Write the "first line" of next chunk to current chunk*/
+						for (DataNodeEntry currChunkDataNodeEntry : currChunk.getAllLocations()) {
+							Registry currChunkDataNodeR = LocateRegistry.getRegistry(currChunkDataNodeEntry.dataNodeRegistryIP, currChunkDataNodeEntry.dataNodeRegistryPort);
+							DataNodeRemoteInterface currDataNodeS = (DataNodeRemoteInterface) currChunkDataNodeR.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+//							currDataNodeS.writeToLocal(nextFirstLine.line.getBytes(), currChunk.getChunkName(), currChunk.getChunkSize());
+							currDataNodeS.writeToLocal(nextFirstLine.line.getBytes(), currChunk.getChunkName(), currChunk.getChunkSize());
+						}
+						currChunk.updateChunkSize(nextFirstLine.line.getBytes().length);
+						
+						
+						/* If the next chunk doesn't contain any "\n" 
+						 * Remove the next chunk */
+						if (!nextFirstLine.metLineFeed) {
+							chunkList.remove(i + 1);
+						}
+
+						
+					} while (!nextFirstLine.metLineFeed && i + 1 < chunkList.size());
+	
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
+	
+	private void cleanupChunks() {
+		
+		List<HDFSChunk> chunkList = this.file.getChunkList();
+		
+		for (int i = 0; i < chunkList.size(); i++) {
+
+			HDFSChunk currChunk = chunkList.get(i);
+			/* remove the first line current chunk */
+			for (DataNodeEntry currChunkDataNodeEntry : currChunk.getAllLocations()) {
+				try {
+					Registry currChunkDataNodeR = LocateRegistry.getRegistry(currChunkDataNodeEntry.dataNodeRegistryIP, currChunkDataNodeEntry.dataNodeRegistryPort);
+					DataNodeRemoteInterface currDataNodeS = (DataNodeRemoteInterface) currChunkDataNodeR.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+					if (i == 0) {
+						currDataNodeS.deleteFirstLine(currChunk.getChunkName(), true);
+					} else {
+						currDataNodeS.deleteFirstLine(currChunk.getChunkName(), false);
+					}
+				} catch (Exception e) {
+					//TODO: handle exception
+				}
+			}
+			
+		}
+	}
 }

@@ -6,7 +6,6 @@ import hdfs.NameNode.NameNodeRemoteInterface;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 

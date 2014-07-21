@@ -202,22 +202,27 @@ public class NameNode implements NameNodeRemoteInterface{
 		synchronized (this.sysCheckSync) {
 			
 			this.fileTbl.put(file.getName(), file);
-			List<HDFSChunk> chunkList = file.getChunkList();
+			List<HDFSChunk> totalChunkList = file.getTotalChunkList();
+			List<HDFSChunk> validChunkList = file.getChunkList();
 			if (Hdfs.Core.DEBUG) {
-				System.out.format("DEBUG NameNode.commitFile(): chunkList length=%d\n", chunkList.size());
+				System.out.format("DEBUG NameNode.commitFile(): Total ChunkList length = %d\n", totalChunkList.size());
 			}
 			
-			for (HDFSChunk chunk : chunkList) {
+			for (HDFSChunk chunk : totalChunkList) {
 
 				if (Hdfs.Core.DEBUG) {
-					System.out.format("DEBUG NameNode.commitFile(): location size=%d\n", chunk.getAllLocations().size());
+					System.out.format("DEBUG NameNode.commitFile(): location num= %d \n", chunk.getAllLocations().size());
 				}
 				for (DataNodeEntry dn : chunk.getAllLocations()) {
 					if (Hdfs.Core.DEBUG) {
 						System.out.format("DEBUG NameNode.commitFile(): locations:%s\n", dn.getNodeName());
 					}
-					this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
-					this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName());
+					if (validChunkList.contains(chunk)) {
+						this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
+						this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), true, false);
+					} else {
+						this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), false, false);
+					}
 				}
 			}
 		}
@@ -488,7 +493,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					buff = srcDataNodeStub.read(chunkName, offset);
 				}
 				for (DataNodeEntry dstDataNode : dstDataNodes) {
-					NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).commitChunk(chunkName);
+					NameNode.this.dataNodeStubTbl.get(dstDataNode.getNodeName()).commitChunk(chunkName, true, true);
 				}
 			} catch (IOException e) {
 				if (Hdfs.Core.DEBUG) {
