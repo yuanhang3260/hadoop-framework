@@ -346,7 +346,7 @@ public class Utility {
 		
 		JobConf conf = new JobConf();
 		conf.setJobName(jobName);
-		conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
+		//conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
 		conf.setMapperClass(mapperClass);
 		conf.setReducerClass(reducerClass);
 		conf.setInputPath(fileIn);

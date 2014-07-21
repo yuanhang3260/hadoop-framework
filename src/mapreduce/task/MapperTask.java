@@ -5,9 +5,13 @@ import mapreduce.io.Split;
 public class MapperTask extends Task implements MapRedTask{
 	
 	private static final long serialVersionUID = -4448997561951975942L;
+	
 	public Split split;
+	
 	public Class<?> mapperClass;
+	
 	private int partitionNum;
+	
 	private JarFileEntry jarEntry;
 	
 	public MapperTask(String jobId, String tid, int level, Split split, Class<?> theClass, int num, JarFileEntry jarEntry) {
@@ -44,6 +48,20 @@ public class MapperTask extends Task implements MapRedTask{
 	
 	public JarFileEntry getJarEntry() {
 		return this.jarEntry;
+	}
+	
+	public void setTaskTrackerLocalJarPath(String localPath) {
+		
+		this.jarEntry.setLocalPath(localPath);
+
+	}
+	
+
+	@Override
+	public String getJarLocalPath() {
+
+		return this.jarEntry.getLocalPath();
+	
 	}
 
 }

@@ -151,6 +151,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * @param job The job to initialize
 	 */
 	private synchronized void initMapTasks(Job job) {
+		
 		for (Split split : job.getSplit()) {
 			
 			MapperTask task = 
@@ -171,6 +172,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			System.out.println("DEBUG JobTrakcer.initMapTask(): map tasks initialization finished, current job scheduling queue: ");
 			this.jobScheduler.printScheduleTbl();
 		}
+
 	}
 	
 	private void initReduceTasks(String jobId) {
@@ -204,6 +206,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
 			this.jobStatusTbl.get(job.getJobId()).reducerStatusTbl.put(task.getTaskId(), stat);
 		}
+		
 	}
 	
 	
@@ -787,21 +790,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 								}
 								size--;
 							}
-//							
-//							for (Task task : tasks) {
-//								if (Hdfs.Core.DEBUG) {
-//									System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task " + task.getTaskId() + " in job " + task.getJobId() + " out of queue");
-//								}
-//								if (task instanceof MapperTask) {
-//									JobTracker.this.jobScheduler.addMapTask((MapperTask) task);
-//								} else if (task instanceof ReducerTask) {
-//									JobTracker.this.jobScheduler.addReduceTask((ReducerTask) task);
-//								} else if (task instanceof CleanerTask) {
-//									JobTracker.this.jobScheduler.addCleanTask((CleanerTask) task);
-//								} else if (task instanceof KillerTask) {
-//									JobTracker.this.jobScheduler.addKillerTask((KillerTask) task);
-//								}
-//							}
+
 						}
 
 //						/* clean the queue */

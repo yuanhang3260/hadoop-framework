@@ -50,5 +50,15 @@ public class ReducerTask extends Task implements MapRedTask {
 	public JarFileEntry getJarEntry() {
 		return this.jarEntry;
 	}
+	
+	public void setTaskTrackerLocalJarPath(String localPath) {
+		this.jarEntry.setLocalPath(localPath);
+	}
+
+	@Override
+	public String getJarLocalPath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
