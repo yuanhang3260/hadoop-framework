@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <mapreduce>
 	<core>
-		<jobtracker-ip>128.237.213.225</jobtracker-ip>
+		<jobtracker-ip>128.237.222.59</jobtracker-ip>
 		<jobtracker-registry-port>1100</jobtracker-registry-port>
 	</core>
 	
