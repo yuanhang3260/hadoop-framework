@@ -222,7 +222,8 @@ public class Utility {
 		System.out.println("Usage:\thadoop\tdelete\t<obj file name>");
 	}
 	
-	/* ------------- MapReduce utility area ------------- */
+	/* -------------------- MapReduce utility area --------------------- */
+	
 	private static void mapredUtility(String[] args) {
 		if (args[2].equals("lsjob")) {
 			if (args.length != 3) {
@@ -238,6 +239,13 @@ public class Utility {
 			}
 			/* submit job to Job Tracker */
 			submit(args);
+		} else if (args[2].equals("kill")) {
+			if (args.length != 4) {
+				printKillUsage();
+				return;
+			}
+			
+			kill(args);
 		}
 	}
 
@@ -344,6 +352,32 @@ public class Utility {
 		conf.setPriority(priority);
 		JobClient.runJob(conf);
 		
+	}
+	
+	private static void kill(String[] args) {
+		String jobId = args[3];
+		Registry jobTrackerRegistry = null;
+		try {
+			jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, 
+					MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			
+			JobTrackerRemoteInterface jobTrackerStub = 
+					(JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
+			
+			jobTrackerStub.terminateJob(jobId);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	
+	private static void printKillUsage() {
+		System.out.println("kill:\tKill a job\nUsage: hadoop mapred kill <jobId>");
 	}
 	
 	private static void printSubmitUsage() {
