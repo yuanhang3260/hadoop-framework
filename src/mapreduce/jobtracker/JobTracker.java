@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,14 +41,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	private JobScheduler jobScheduler;
 	
 	/* host IP, task tracker port */
-	private ConcurrentHashMap<String, TaskTrackerInfo> taskTrackerTbl = new ConcurrentHashMap<String, TaskTrackerInfo>();
+	private AbstractMap<String, TaskTrackerInfo> taskTrackerTbl = new ConcurrentHashMap<String, TaskTrackerInfo>();
 	
 	/* keep jobs in this tbl after submission from jobclient */
-	private ConcurrentHashMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();
+	private AbstractMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();
 	
-	private ConcurrentHashMap<String, Task> taskTbl = new ConcurrentHashMap<String, Task>();
+	private AbstractMap<String, Task> taskTbl = new ConcurrentHashMap<String, Task>();
 	
-	private ConcurrentHashMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
+	private AbstractMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
 	
 //	public static void main(String[] args) {
 //		JobTracker jt = new JobTracker();
@@ -129,7 +130,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	
 	private void initJob(Job job) {
-		JobStatus jobStatus = new JobStatus(job.getJobId(), job.getSplit().size(), job.getJobConf().getNumReduceTasks());
+		JobStatus jobStatus = new JobStatus(job.getJobId(), job.getJobConf().getJobName(), job.getSplit().size(), job.getJobConf().getNumReduceTasks());
 		if (Hdfs.Core.DEBUG) {
 			System.out.println("DEBUG JobTracker.submitJob() numReduceTasks = " + job.getJobConf().getNumReduceTasks());
 		}
@@ -173,7 +174,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (Hdfs.Core.DEBUG) {
 			System.out.println("DEBUG JobTracker.initReduceTasks() numReduceTasks = " + numOfReducer);
 		}
-		ConcurrentHashMap<String, TaskStatus> mapperStatusTbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
+		AbstractMap<String, TaskStatus> mapperStatusTbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
 		Set<String> mapIdSet = mapperStatusTbl.keySet();	
 		
 		/* create partition entry array */
@@ -235,7 +236,16 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (report.emptySlot > 0 && allTasks.size() != 0) {
 			int queueSize = allTasks.size();
 			for (int i = 0; i < report.emptySlot && i < queueSize; i++) {
-				assignment.add(allTasks.poll());
+				Task task = allTasks.poll();
+				assignment.add(task);
+				/* keep taskTracker ip into this task's status entry */
+				if (task instanceof MapperTask) {
+					this.jobStatusTbl.get(task.getJobId()).mapperStatusTbl.get(task.getTaskId()).taskTrackerIp =
+							report.taskTrackerIp;
+				} else if (task instanceof ReducerTask) {
+					this.jobStatusTbl.get(task.getJobId()).reducerStatusTbl.get(task.getTaskId()).taskTrackerIp =
+							report.taskTrackerIp;
+				}
 			}
 		}
 		
@@ -346,7 +356,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 	}
 	
-	private boolean reducerAllSuccess(ConcurrentHashMap<String, TaskStatus> reducerStatusTbl) {
+	private boolean reducerAllSuccess(AbstractMap<String, TaskStatus> reducerStatusTbl) {
 		Set<String> taskId = reducerStatusTbl.keySet();
 		for (String id : taskId) {
 			if (reducerStatusTbl.get(id).status == WorkStatus.FAILED) {
@@ -413,7 +423,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		HashMap<String, List<String>> mapClean = 
 				new HashMap<String, List<String>>();
 		
-		ConcurrentHashMap<String, TaskStatus> mapperStatusTbl = 
+		AbstractMap<String, TaskStatus> mapperStatusTbl = 
 				this.jobStatusTbl.get(jobId).mapperStatusTbl;
 		
 		Set<String> mapTaskIds = mapperStatusTbl.keySet();
@@ -439,7 +449,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		HashMap<String, List<String>> reduceClean = 
 				new HashMap<String, List<String>>();
 		
-		ConcurrentHashMap<String, TaskStatus> reducerStatusTbl =
+		AbstractMap<String, TaskStatus> reducerStatusTbl =
 				this.jobStatusTbl.get(jobId).reducerStatusTbl;
 		
 		Set<String> reduceTaskIds = reducerStatusTbl.keySet();
@@ -509,8 +519,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	}
 	
 	@Override
-	public JobStatus getJobProgress(String jobId) throws RemoteException {
+	public JobStatus getJobStatus(String jobId) throws RemoteException {
 		return this.jobStatusTbl.get(jobId);
+	}
+	
+	@Override
+	public AbstractMap<String, JobStatus> getAllJobStatus() throws RemoteException {
+		return this.jobStatusTbl;
 	}
 	
 	/* JobScheduler */

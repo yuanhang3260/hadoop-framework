@@ -141,7 +141,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 
 	@Override
-	public JobStatus getJobProgress(String jobId) throws RemoteException {
+	public JobStatus getJobStatus(String jobId) throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;
 	}

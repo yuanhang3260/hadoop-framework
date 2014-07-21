@@ -9,10 +9,10 @@ public class testJobSubmit_Ngram {
 	public static void main(String[] args) {
 		JobConf conf = new JobConf();
 		
-		conf.setJobName("jobSubmitTest");
+		conf.setJobName("nGram2");
 		
 		conf.setInputPath("hello");
-		conf.setOutputPath("ngram");
+		conf.setOutputPath("ngram2");
 		
 //		conf.setMapperClass(WordCountMapper.class);
 //		conf.setReducerClass(WordCountReducer.class);

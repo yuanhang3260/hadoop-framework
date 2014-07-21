@@ -1,8 +1,8 @@
 package util;
 
 import global.Hdfs;
+import global.MapReduce;
 import global.Parser;
-import global.Parser.ConfFormatException;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.IO.HDFSBufferedOutputStream;
 import hdfs.IO.HDFSInputStream;
@@ -18,11 +18,16 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Set;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
+import mapreduce.JobClient;
+import mapreduce.JobConf;
+import mapreduce.jobtracker.JobStatus;
+import mapreduce.jobtracker.JobTrackerRemoteInterface;
+import mapreduce.jobtracker.TaskStatus;
+import mapreduce.jobtracker.WorkStatus;
 
 public class Utility {
 	
@@ -30,6 +35,7 @@ public class Utility {
 		
 		try {
 			Parser.hdfsCoreConf();
+			Parser.mapreduceCoreConf();
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -77,6 +83,8 @@ public class Utility {
 		} else if (args[1].equals("ls")) {
 			listFiles();
 			return;
+		} else if (args[1].equals("mapred")) {
+			mapredUtility(args);
 		} else {
 			printUsage();
 			return;
@@ -212,5 +220,137 @@ public class Utility {
 	
 	private static void printRmUsage() {
 		System.out.println("Usage:\thadoop\tdelete\t<obj file name>");
+	}
+	
+	/* ------------- MapReduce utility area ------------- */
+	private static void mapredUtility(String[] args) {
+		if (args[2].equals("lsjob")) {
+			if (args.length != 3) {
+				printLsjobUsage();
+				return;
+			}
+			/* list status of all jobs submitted */
+			lsjob();
+		} else if (args[2].equals("submit")) {
+			if (args.length != 10) {
+				printSubmitUsage();
+				return;
+			}
+			/* submit job to Job Tracker */
+			submit(args);
+		}
+	}
+
+	private static void lsjob() {
+		Registry jobTrackerRegistry;
+		try {
+			jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, 
+															MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			
+			JobTrackerRemoteInterface jobTrackerStub = 
+					(JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
+			
+			AbstractMap<String, JobStatus> jobStatusTbl = jobTrackerStub.getAllJobStatus();
+			Set<String> jobIds = jobStatusTbl.keySet();
+			System.out.println("Number of jobs on Job Tracker in total: " + jobIds.size());
+			for (String jobId : jobIds) {
+				lsonejob(jobId, jobStatusTbl);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	private static void lsonejob(String jobId, AbstractMap<String, JobStatus> jobStatusTbl) {
+		System.out.println("--------------------------------");
+		System.out.println("Job Name: " + jobStatusTbl.get(jobId).jobName);
+		System.out.println("Job ID: " + jobId);
+		System.out.println("Number of mapper  tasks in total: " + jobStatusTbl.get(jobId).mapTaskTotal);
+		System.out.println("Number of reducer tasks in total: " + jobStatusTbl.get(jobId).reduceTaskTotal);
+		WorkStatus status = jobStatusTbl.get(jobId).status;
+		System.out.println("Status: " + status);
+		if (status == WorkStatus.RUNNING) {
+			/* print out all mapper tasks status */
+			AbstractMap<String, TaskStatus> mapperTbl = jobStatusTbl.get(jobId).mapperStatusTbl;
+			Set<String> mapTaskIds = mapperTbl.keySet();
+			for (String mapTaskId : mapTaskIds) {
+				String ip = mapperTbl.get(mapTaskId).taskTrackerIp == null ? "not assigned yet" : mapperTbl.get(mapTaskId).taskTrackerIp;
+				System.out.println("Mapper  task (id = " + mapTaskId + ") status: " + mapperTbl.get(mapTaskId).status + ", Task Tracker " + ip);
+			}
+			
+			/* print out all reducer tasks status */
+			AbstractMap<String, TaskStatus> reducerTbl = jobStatusTbl.get(jobId).reducerStatusTbl;
+			Set<String> reduceTaskIds = reducerTbl.keySet();
+			if (reduceTaskIds.size() == 0) {
+				System.out.println("Reducer tasks will run after mapper tasks complete");
+			}
+			for (String reduceTaskId : reduceTaskIds) {
+				String ip = reducerTbl.get(reduceTaskId).taskTrackerIp == null ? "not assigned yet" : reducerTbl.get(reduceTaskId).taskTrackerIp;
+				System.out.println("Reducer task (id = " + reduceTaskId + ") status: " + reducerTbl.get(reduceTaskId).status + ", Task Tracker " + ip);
+			}
+		}
+	}
+	
+	private static void submit(String[] args) {
+		// TODO Auto-generated method stub
+		String jobName = args[3];
+		String mapperClassName = args[4];
+		String reducerClassName = args[5];
+		String fileIn = args[6];
+		String fileOut = args[7];
+		int partitionNum = 1;
+		try {
+			partitionNum = Integer.parseInt(args[8]);
+		} catch (NumberFormatException e) {
+			System.out.println("Exception: NumOfReducer should be an integer ");
+			printSubmitUsage();
+			return;
+		}
+		int priority = 0;
+		try {
+			priority = Integer.parseInt(args[9]);
+		} catch (NumberFormatException e) {
+			System.out.println("Exception: JobPriority shoud be an interger");
+			printSubmitUsage();
+			return;
+		}
+		Class<?> mapperClass = null;
+		Class<?> reducerClass = null;
+		try {
+			mapperClass = Class.forName(mapperClassName);
+		} catch (ClassNotFoundException e) {
+			System.out.println("Exception: Mapper class not found");
+			printSubmitUsage();
+			return;
+		}
+		
+		try {
+			reducerClass = Class.forName(reducerClassName);
+		} catch (ClassNotFoundException e) {
+			System.out.println("Exception: Reducer class not found");
+			printSubmitUsage();
+			return;
+		}
+		
+		JobConf conf = new JobConf();
+		conf.setJobName(jobName);
+		conf.setMapperClass(mapperClass);
+		conf.setReducerClass(reducerClass);
+		conf.setInputPath(fileIn);
+		conf.setOutputPath(fileOut);
+		conf.setNumReduceTasks(partitionNum);
+		conf.setPriority(priority);
+		JobClient.runJob(conf);
+		
+	}
+	
+	private static void printSubmitUsage() {
+		System.out.println("submit:\tSubmit a mapreduce job to JobTracker\nUsage: hadoop mapred submit <JobName> <MapperClassName> <ReducerClassName> <InputFilePath> <OutputFilePath> <NumOfReducer> <JobPriority>");
+	}
+	
+	private static void printLsjobUsage() {
+		System.out.println("lsjob:\tList all jobs' status on Job Tracker\nUsage:\thadoop\tmapred\tlsjob");
 	}
 }

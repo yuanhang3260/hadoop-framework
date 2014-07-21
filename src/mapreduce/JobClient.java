@@ -63,7 +63,7 @@ public class JobClient {
 				Thread.sleep(1000 * 3);
 //				int numMapIncomplete = jobTrackerStub.checkMapProgress(jobId);
 //				int numReduceIncomplete = jobTrackerStub.checkReduceProgress(jobId);
-				JobStatus jobStatus = jobTrackerStub.getJobProgress(jobId);
+				JobStatus jobStatus = jobTrackerStub.getJobStatus(jobId);
 				int numMapIncomplete = jobStatus.mapTaskLeft;
 				int numReduceIncomplete = jobStatus.reduceTaskLeft;
 				

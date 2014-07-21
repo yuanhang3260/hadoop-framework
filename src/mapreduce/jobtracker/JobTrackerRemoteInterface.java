@@ -2,6 +2,7 @@ package mapreduce.jobtracker;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.AbstractMap;
 import java.util.List;
 
 import mapreduce.Job;
@@ -54,5 +55,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @return JobStatus current status of the job
 	 * @throws RemoteException
 	 */
-	public JobStatus getJobProgress(String jobId) throws RemoteException;
+	public JobStatus getJobStatus(String jobId) throws RemoteException;
+	
+	public AbstractMap<String, JobStatus> getAllJobStatus() throws RemoteException;
 }
