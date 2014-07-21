@@ -21,5 +21,5 @@ public class JobTrackerACK implements Serializable{
 		this.newAddedTasks = newAddedTasks;
 		this.rcvTasks = rcvTasks;
 	}
-	
+
 }

@@ -261,7 +261,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
             
             String className = je.getName().substring(0, je.getName().length() - 6);
             className = className.replace('/', '.');
-            if (className.equals(this.task.getClass().getName())) {
+            if (className.equals(this.task.getReducerClassName())) {
             	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
             }
         }

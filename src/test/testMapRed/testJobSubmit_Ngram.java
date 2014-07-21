@@ -14,6 +14,7 @@ public class testJobSubmit_Ngram {
 		conf.setInputPath("hello");
 		conf.setOutputPath("ngram2");
 		
+
 		conf.setMapperClassName("example.Ngram.NgramMapper");
 		conf.setReducerClassName("example.Ngram.NgramReducer");
 		

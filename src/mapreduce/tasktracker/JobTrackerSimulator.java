@@ -1,12 +1,14 @@
 package mapreduce.tasktracker;
 
-import example.WordCount.WordCountMapper;
-import example.WordCount.WordCountReducer;
 import global.Hdfs;
 import global.MapReduce;
+import global.Parser;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -16,21 +18,29 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import mapreduce.Job;
+import mapreduce.core.Mapper;
+import mapreduce.core.Reducer;
 import mapreduce.io.Split;
+import mapreduce.io.writable.Writable;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
+import mapreduce.task.JarFileEntry;
 import mapreduce.task.MapperTask;
 import mapreduce.task.PartitionEntry;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
+
 
 public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	
@@ -42,6 +52,14 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	private List<Task> taskList = Collections.synchronizedList(new LinkedList<Task>());
 	
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException, NotBoundException, InterruptedException {
+		try {
+			Parser.hdfsCoreConf();
+			Parser.mapreduceCoreConf();
+			Parser.mapreduceJobTrackerConf();
+			Parser.mapreduceTaskTrackerIndividualConf(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		JobTrackerSimulator jt = new JobTrackerSimulator();
 		
@@ -65,9 +83,24 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		Thread.sleep(1000 * 3);
 		
+		String mapperClassName = null;
+		String reducerClassName = null;
+		
+		try {
+			mapperClassName = jt.loadMapperClass();
+			reducerClassName = jt.loadReducerClass();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
 			Split split = new Split(file1, mapperSEQ);
-			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, WordCountMapper.class, reducerNum, null));
+			JarFileEntry jarEntry = new JarFileEntry("128.237.222.59", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
+			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, mapperClassName, reducerNum, jarEntry));
 		}
 
 		Thread.sleep(1000 * 15);
@@ -78,7 +111,9 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT);
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
-			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, WordCountReducer.class, partitionEntry, "output-part" + reducerSEQ, null));
+			JarFileEntry jarEntry = new JarFileEntry("localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
+			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, reducerClassName, partitionEntry, "output-part" + reducerSEQ, jarEntry));
+
 		}	
 
 	}
@@ -111,7 +146,6 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		rst.rcvTasks = new ArrayList<TaskStatus>();
 		
 		while (this.taskList.size() > 0) {
-			System.out.println("JobTrackerSimu: run a task!");
 			synchronized (this.taskList) {
 				rst.newAddedTasks.add(this.taskList.get(0));
 				this.taskList.remove(0);
@@ -126,6 +160,10 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 			}
 		}
 			
+		for (Task task : rst.newAddedTasks) {
+			System.out.format("new task: <jid = %s, tid = %s>\n", task.getJobId(), task.getTaskId());
+		}
+		
 		return rst;
 	}
 
@@ -157,6 +195,76 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	@Override
 	public void terminateJob(String jobId) throws RemoteException {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	public String loadMapperClass ()
+			throws IOException, ClassNotFoundException {
+		
+		/* Load Jar file */
+		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
+		JarFile jarFile = new JarFile(jarFilePath);
+		Enumeration<JarEntry> e = jarFile.entries();
+		
+		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
+		ClassLoader cl = URLClassLoader.newInstance(urls);
+		
+		Class<Mapper<Writable, Writable, Writable, Writable>> mapperClass = null;
+		
+		/* Iterate .class files */
+		while (e.hasMoreElements()) {
+            
+			JarEntry je = e.nextElement();
+            
+			if(je.isDirectory() || !je.getName().endsWith(".class")){
+                continue;
+            }
+            
+            String className = je.getName().substring(0, je.getName().length() - 6);
+            className = className.replace('/', '.');
+            if (className.equals(WordCount.WordCountMapper.class.getName())) {
+            	mapperClass = (Class<Mapper<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
+            }
+        }
+		
+		System.out.println("Mapper class:" + mapperClass.getName());
+		
+		return mapperClass.getName();
+	}
+	
+	
+	public String loadReducerClass ()
+			throws IOException, ClassNotFoundException {
+		
+		/* Load Jar file */
+		String jarFilePath = "/Users/JeremyFu/Dropbox/WordCount.jar";
+		JarFile jarFile = new JarFile(jarFilePath);
+		Enumeration<JarEntry> e = jarFile.entries();
+		
+		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
+		ClassLoader cl = URLClassLoader.newInstance(urls);
+		
+		Class<Reducer<Writable, Writable, Writable, Writable>> reducerClass = null;
+		
+		/* Iterate .class files */
+		while (e.hasMoreElements()) {
+            
+			JarEntry je = e.nextElement();
+            
+			if(je.isDirectory() || !je.getName().endsWith(".class")){
+                continue;
+            }
+            
+            String className = je.getName().substring(0, je.getName().length() - 6);
+            className = className.replace('/', '.');
+            if (className.equals(WordCount.WordCountReducer.class.getName())) {
+            	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
+            }
+        }
+
+		
+		return reducerClass.getName();
 		
 	}
 

@@ -241,6 +241,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				try {
 					ack = TaskTracker.this
 							.jobTrackerStub.heartBeat(report); //ack is local variable
+					System.out.println("RCV tasks: " + ack.newAddedTasks.size());
 				} catch (RemoteException e1) {
 
 					// wait for next heart beat;
@@ -254,9 +255,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					continue;
 				}
 				
-				if (ack == null) {
-					continue;
-				}
+//				if (ack == null) {
+//					continue;
+//				}
 				
 				
 				
@@ -283,21 +284,27 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						if (newTask instanceof MapperTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
 							TaskTracker.this.syncTaskList.add(newTask);
+							System.out.println("Mapper Task");
 						
 						} else if (newTask instanceof ReducerTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolderName);
 							TaskTracker.this.syncTaskList.add(newTask);
+							System.out.println("Reducer Task");
 							
 						} else if (newTask instanceof CleanerTask){
 							cleanTaskList.add(newTask);
 							CleanJob cleanJob = new CleanJob((CleanerTask)newTask);
 							Thread cleanJobTh = new Thread(cleanJob);
 							cleanJobTh.start();
+							System.out.println("Cleaner Task");
 						} else if (newTask instanceof KillerTask) {
 							killJobTaskList.add(newTask);
 							KillJob killJob = new KillJob((KillerTask) newTask);
 							Thread killJobTh = new Thread(killJob);
 							killJobTh.start();
+							System.out.println("Killer Task");
+						} else {
+							System.out.println("UNknown task");
 						}
 					}
 					
@@ -483,8 +490,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								continue;
 							}
 						}
-
 					}
+					
+					((MapRedTask) task).setTaskTrackerLocalJarPath(TaskTracker.
+							this.taskJarFolder.getAbsolutePath() + "/" + 
+							task.getJobId() + ".jar");
 					
 					ProcessBuilder pb = null;
 					
@@ -519,10 +529,12 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		
 		private void downloadJar (MapRedTask task, String jid) throws IOException {
 			try {
-				File localFile = new File(TaskTracker.this.taskJarFolder.getName() + "/" + jid + ".jar");
+				File localFile = new File(TaskTracker.this.taskJarFolder.getAbsolutePath() + "/" + jid + ".jar");
 				FileOutputStream fout = new FileOutputStream(localFile);
 				
 				JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
+				
+				System.out.println("TaskTracker IP for downloading jar : " + jarEntry.getTaskTrackerIp() + ":" + jarEntry.getServerPort());
 				
 				Socket soc = new Socket(jarEntry.getTaskTrackerIp(),
 						jarEntry.getServerPort());
@@ -547,8 +559,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				out.close();
 				fout.close();
 				soc.close();
-				
-				task.setTaskTrackerLocalJarPath(TaskTracker.this.taskJarFolder.getName() + "/" + jid + ".jar");
+
 			} catch (Exception e) {
 				throw new IOException("Failed to download Jar file", e);
 			}
@@ -560,6 +571,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		ServerSocket serverSoc;
 		
 		public PartitionServer(int port) throws IOException {
+			System.out.println("PartitionServer is listening at:" + port);
 			this.serverSoc = new ServerSocket(port);
 		}
 
@@ -615,7 +627,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					if (MapReduce.Core.DEBUG) {
 						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
-								+ "respond file:\\" + mapperFileFullPath);
+								+ "respond file:" + mapperFileFullPath);
 					}
 					
 					fin = new FileInputStream(file);
