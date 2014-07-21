@@ -8,12 +8,14 @@ public class MapperTask extends Task{
 	public Split split;
 	public Class<?> mapperClass;
 	private int partitionNum;
+	private JarFileEntry jarEntry;
 	
-	public MapperTask(String jobId, String tid, int level, Split split, Class<?> theClass, int num) {
+	public MapperTask(String jobId, String tid, int level, Split split, Class<?> theClass, int num, JarFileEntry jarEntry) {
 		super(jobId, tid, level);
 		this.split = split;
 		this.mapperClass = theClass;
 		this.partitionNum = num;
+		this.jarEntry = jarEntry;
 	}
 	
 	/**
@@ -24,11 +26,12 @@ public class MapperTask extends Task{
 	 * @param theClass The mapper class submitted by client
 	 * @param num Total partition number
 	 */
-	public MapperTask(String jobId, String tid, Split split, Class<?> theClass, int num) {
+	public MapperTask(String jobId, String tid, Split split, Class<?> theClass, int num, JarFileEntry jarEntry) {
 		super(jobId, tid, 0);
 		this.split = split;
 		this.mapperClass = theClass;
 		this.partitionNum = num;
+		this.jarEntry = jarEntry;
 	}
 	
 	public Split getSplit() {
@@ -37,6 +40,10 @@ public class MapperTask extends Task{
 	
 	public int getPartitionNum() {
 		return this.partitionNum;
+	}
+	
+	public JarFileEntry getJarEntry() {
+		return this.jarEntry;
 	}
 
 }

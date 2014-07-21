@@ -30,7 +30,6 @@ public class Task implements Serializable {
 		this.jobId = jobId;
 		this.priorityLevel = level;
 		this.status = WorkStatus.READY;
-		//this.status = WorkStatus.RUNNING;
 	}
 	
 	public int getRescheduleNum() {
@@ -110,6 +109,13 @@ public class Task implements Serializable {
 	/*--------- Task status check ----------*/
 	public boolean isRunning() {
 		return (this.status == WorkStatus.RUNNING);
+	}
+	
+	public boolean isNOTRunning() {
+		return (this.status == WorkStatus.FAILED ||
+				this.status == WorkStatus.SUCCESS ||
+				this.status == WorkStatus.TERMINATED ||
+				this.status == WorkStatus.READY);
 	}
 	
 	/*--------- File Name -------------------*/

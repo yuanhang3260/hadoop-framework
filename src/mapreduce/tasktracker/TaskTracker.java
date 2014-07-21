@@ -29,6 +29,7 @@ import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.CleanerTask;
+import mapreduce.task.KillerTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
@@ -51,6 +52,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	String taskTrackerTmpFolder;
 	String taskTrackerMapperFolderName;
 	String taskTrackerReducerFolderName;
+	File taskJarFolder;
 	
 	public static final int BUFF_SIZE = 1024 * 1024;
 	
@@ -129,9 +131,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
-		
-		System.out.println("Reducer DIR:" + this.taskTrackerReducerFolderName);
-		
 		File taskTrackerReducerFolder = new File(this.taskTrackerReducerFolderName);
 		if (!taskTrackerReducerFolder.exists()) {
 			taskTrackerReducerFolder.mkdir();
@@ -141,11 +140,14 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			}
 		}
 		
-//		/* Init tmp file folder*/
-//		File tmpFileDirectory = new File(this.taskTrackerTmpFolder);
-//		if (!tmpFileDirectory.exists()) {
-//			tmpFileDirectory.mkdirs();
-//		}
+		this.taskJarFolder = new File(this.taskTrackerTmpFolder + "/" + "Jar");
+		if (!this.taskJarFolder.exists()) {
+			this.taskJarFolder.mkdir();
+		} else {
+			for (File staleFile : this.taskJarFolder.listFiles()) {
+				staleFile.delete();
+			}
+		}
 
 		/* Start Heart beat */
 		HeartBeat hb = new HeartBeat();
@@ -172,15 +174,21 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	/*----------------Private Method----------------*/
 	
-	private void rmTask(String id) {
+	private void rmTask(String jid, String tid) {
+		
 		synchronized (this.syncTaskList) {
+			
 			for (Task task : this.syncTaskList) {
-				if ((task.getJobId() + task.getTaskId()).equals(id)) {
+				
+				if (task.getJobId().equals(jid) && task.getTaskId().equals(tid)) {
+					
 					this.syncTaskList.remove(task);
+					
 					if (MapReduce.Core.DEBUG) {
 						System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
 								task.getJobId(), task.getTaskId());
 					}
+					
 					break;
 				}
 			}
@@ -245,10 +253,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					continue;
 				}
 				
-//				List<Task> newAddedTasks = ack.newAddedTasks;
 				
+				
+				/* remove the acknowledged tasks */
 				for (TaskStatus ackTask : ack.rcvTasks) {
-					TaskTracker.this.rmTask(ackTask.jobId + ackTask.taskId);
+					TaskTracker.this.rmTask(ackTask.jobId, ackTask.taskId);
 				}
 				
 				if (ack.newAddedTasks != null && ack.newAddedTasks.size() > 0) {
@@ -263,6 +272,8 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 //					}
 					
 					List<Task> cleanTaskList = new ArrayList<Task>();
+					List<Task> killJobTaskList = new ArrayList<Task>();
+					
 					for (Task newTask : ack.newAddedTasks) {
 						if (newTask instanceof MapperTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
@@ -274,14 +285,23 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							
 						} else if (newTask instanceof CleanerTask){
 							cleanTaskList.add(newTask);
-							CleanJob cleanJob =new CleanJob((CleanerTask)newTask);
+							CleanJob cleanJob = new CleanJob((CleanerTask)newTask);
 							Thread cleanJobTh = new Thread(cleanJob);
 							cleanJobTh.start();
+						} else if (newTask instanceof KillerTask) {
+							killJobTaskList.add(newTask);
+							KillJob killJob = new KillJob((KillerTask) newTask);
+							Thread killJobTh = new Thread(killJob);
+							killJobTh.start();
 						}
 					}
 					
 					for (Task cleanTask : cleanTaskList) {
 						ack.newAddedTasks.remove(cleanTask);
+					}
+					
+					for (Task killJobTask : killJobTaskList) {
+						ack.newAddedTasks.remove(killJobTask);
 					}
 					
 					/* Allocate a thread to start new added tasks */
@@ -335,69 +355,72 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			while (true) {
 				
 				Task[] taskArray = null;
+				
 				synchronized (TaskTracker.this.syncTaskList) {
 					taskArray = TaskTracker.this.syncTaskList.toArray(new Task[0]);
 				}
+				
 				for (Task task : taskArray) {
 					if (task == null) {
 						break;
-						
 					}
-					if (task.isRunning()) {
-						if (task.getProcRef() != null) {
-							try{
-								int exitVal = task.getProcRef().exitValue();
-								
-								if (exitVal == 0) {
-									task.commitTask();
-									if (MapReduce.Core.DEBUG) {
-										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-											+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
-											task.getJobId(), task.getTaskId(), type);
-									}
-								} else {
-									task.failedTask();
-									if (MapReduce.Core.DEBUG) {
-										String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
-										System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
-											+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
-											task.getJobId(), task.getTaskId(), type, exitVal);
-										
-										byte[] errBuff = new byte[1024];
-										int c = 0;
-										try {
-											while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
-												System.out.print(new String(errBuff, 0 ,c));
-											}
-										} catch (IOException e) {
-											e.printStackTrace();
-										}
-										
-									}
-
+					if (!task.isRunning()) {
+						continue;
+					}
+					
+					if (task.getProcRef() != null) {
+						try{
+							int exitVal = task.getProcRef().exitValue();
+							
+							if (exitVal == 0) {
+								task.commitTask();
+								if (MapReduce.Core.DEBUG) {
+									String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+									System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+										+ "Task<jid=%s, tid=%s, type=%s> succeeded.\n",
+										task.getJobId(), task.getTaskId(), type);
 								}
-							} catch (IllegalThreadStateException e) {
-								if (Hdfs.Core.DEBUG || MapReduce.Core.DEBUG) {
-									if (task instanceof ReducerTask) {
-										
-										InputStream tmpInputStream = task.getInputStream();
-										byte[] buff = new byte[512];
-										int c = 0;
-										try {
-											System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
-											while ((c = tmpInputStream.read(buff)) != -1) {
-												System.out.print(new String(buff, 0, c));
-											}
-											System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
-										} catch (IOException e1) {
-											e1.printStackTrace();
+							} else {
+								task.failedTask();
+								if (MapReduce.Core.DEBUG) {
+									String type = (task instanceof MapperTask) ? "Mapper" : "Reducer";
+									System.out.format("DEBUG TaskTracker.ProcessUpdate.run():\t"
+										+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
+										task.getJobId(), task.getTaskId(), type, exitVal);
+									
+									byte[] errBuff = new byte[1024];
+									int c = 0;
+									try {
+										while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
+											System.out.print(new String(errBuff, 0 ,c));
 										}
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									
+								}
+
+							}
+						} catch (IllegalThreadStateException e) {
+							if (Hdfs.Core.DEBUG || MapReduce.Core.DEBUG) {
+								if (task instanceof ReducerTask) {
+									
+									InputStream tmpInputStream = task.getInputStream();
+									byte[] buff = new byte[512];
+									int c = 0;
+									try {
+										System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
+										while ((c = tmpInputStream.read(buff)) != -1) {
+											System.out.print(new String(buff, 0, c));
+										}
+										System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
+									} catch (IOException e1) {
+										e1.printStackTrace();
 									}
 								}
 							}
-						} 
-					}
+						}
+					} 
 				}
 
 				try {
@@ -434,6 +457,19 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				for (Task task : taskList) {
 					
 					String taskID = String.format("%s-%s", task.getJobId(), task.getTaskId());
+					
+					/* Check jar file availability */
+					boolean foundJar = false;
+					for (File file : TaskTracker.this.taskJarFolder.listFiles()) {
+						if (file.getName().equals(String.format("%s.jar", task.getJobId()))) {
+							foundJar = true;
+							break;
+						}
+					}
+					
+					if (!foundJar) {
+						Socket soc = new Socket("");
+					}
 					
 					ProcessBuilder pb = null;
 					
@@ -480,7 +516,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			while (true) {
 				try {
 					Socket soc = this.serverSoc.accept();
-					PartitionResponser pr = new PartitionResponser(soc);
+					RequestResponser pr = new RequestResponser(soc);
 					Thread prTh = new Thread(pr);
 					prTh.start();
 				} catch (IOException e) {
@@ -491,11 +527,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		}
 	}
 	
-	private class PartitionResponser implements Runnable {
+	private class RequestResponser implements Runnable {
 		
 		Socket soc;
 		
-		public PartitionResponser (Socket soc) {
+		public RequestResponser (Socket soc) {
 			this.soc = soc;
 		}
 		
@@ -508,23 +544,53 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			try {
 				
 				/* Set up */
-				in =
-				        new BufferedReader(
-				            new InputStreamReader(soc.getInputStream()));
+				in = new BufferedReader(
+						new InputStreamReader(soc.getInputStream()));
 				
-				out =
-				        new BufferedOutputStream(soc.getOutputStream());
+				out = new BufferedOutputStream(soc.getOutputStream());
 				
+				
+				/* Receive request type */
+				String reqType = in.readLine();
 				/* Receive requested file */
 				String fileName = in.readLine();
-				File file = new File(TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
-				System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t OPENNING " + TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName);
-				fin = new FileInputStream(file);
-				byte[] buff = new byte[BUFF_SIZE];
-				int readBytes = 0;
-				while((readBytes = fin.read(buff)) != -1) {
-					out.write(buff, 0, readBytes);
+				
+				if (reqType.equals("mapper-file")) {
+					
+					String mapperFileFullPath = 
+							TaskTracker.this.taskTrackerMapperFolderName +"/" + fileName;
+					File file = new File(mapperFileFullPath);
+					
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
+								+ "respond file:\\" + mapperFileFullPath);
+					}
+					
+					fin = new FileInputStream(file);
+					byte[] buff = new byte[BUFF_SIZE];
+					int readBytes = 0;
+					while((readBytes = fin.read(buff)) != -1) {
+						out.write(buff, 0, readBytes);
+					}
+				} else if (reqType.equals("jar-file")) {
+					
+					String jarFileFullPath = fileName;
+					
+					File file = new File(jarFileFullPath);
+					
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
+								+ "respond file:\\" + jarFileFullPath);
+					}
+					
+					fin = new FileInputStream(file);
+					byte[] buff = new byte[BUFF_SIZE];
+					int readBytes = 0;
+					while((readBytes = fin.read(buff)) != -1) {
+						out.write(buff, 0, readBytes);
+					}
 				}
+				
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -582,21 +648,81 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			for (String mapperFileName : this.task.getMapperFile()) {
 				
 				for (int i = 0; i < task.getPartitionNum(); i++) {
-					File mapperIntermediateFile = new File(TaskTracker.this.taskTrackerMapperFolderName + "/" + mapperFileName + "-" + i);
-					System.out.println("CLEANUP: " +
-							(TaskTracker.this.taskTrackerMapperFolderName + "/" + mapperFileName + "-" + i) + "\t" +
-							mapperIntermediateFile.delete());
+					
+					String fileFullPath = String.format("%s/%s-%d", 
+							TaskTracker.this.taskTrackerMapperFolderName,
+							mapperFileName, i);
+					
+					File mapperIntermediateFile = new File(fileFullPath);
+					mapperIntermediateFile.delete();
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("DEBUG TaskTracker.CleanJob.run()\tclean up "
+								+ fileFullPath +" with status " + mapperIntermediateFile.delete());
+					} else {
+						mapperIntermediateFile.delete();
+					}
 					
 				}
 			}
 			
 			for (String reducerFileName : this.task.getReducerFile()) {
-				File reducerTmpFile = new File (TaskTracker.this.taskTrackerReducerFolderName + "/" + reducerFileName);
-				System.out.println("CLEANUP: " +
-						((TaskTracker.this.taskTrackerReducerFolderName + "/" + reducerFileName)) + "\t" +
-						reducerTmpFile.delete());
+				
+				String fileFullPath = String.format("%s/%s", 
+						TaskTracker.this.taskTrackerReducerFolderName ,
+						reducerFileName);
+				
+				File reducerTmpFile = new File (fileFullPath);
+				
+				if (MapReduce.Core.DEBUG) {
+					System.out.println("DEBUG TaskTracker.CleanJob.run()\tclean up " 
+							+ fileFullPath + "with status " + reducerTmpFile.delete());
+				} else {
+					reducerTmpFile.delete();
+				}
 				
 			}
+		}
+		
+	}
+	
+	private class KillJob implements Runnable {
+
+		private KillerTask killJobTask;
+		
+		public KillJob (KillerTask task) {
+			this.killJobTask = task;
+		}
+		
+		@Override
+		public void run() {
+			
+			Task[] taskList = null;
+			synchronized (TaskTracker.this.syncTaskList) {
+				taskList = TaskTracker.this.syncTaskList.toArray(new Task[0]);
+			}
+			
+			String jid = this.killJobTask.getJobId();
+			
+			for (String tid : this.killJobTask.getTaskIds()) {
+				
+				for (Task taskOnTaskTracker : taskList) {
+					
+					if (taskOnTaskTracker.getJobId().equals(jid) 
+							&& taskOnTaskTracker.getTaskId().equals(tid)) {
+						
+						taskOnTaskTracker.getProcRef().destroy();
+						
+						taskOnTaskTracker.failedTask();
+						
+						System.out.format("Task<jid = %d, tid=  %d> is killed with CODE(%d)", 
+								taskOnTaskTracker.getJobId(), taskOnTaskTracker.getTaskId(), 
+								taskOnTaskTracker.getProcRef().exitValue());
+						
+						rmTask(taskOnTaskTracker.getJobId(), taskOnTaskTracker.getTaskId());
+					}
+				}
+			}
+			
 		}
 		
 	}

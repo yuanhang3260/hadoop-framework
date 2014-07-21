@@ -154,4 +154,10 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		return null;
 	}
 
+	@Override
+	public void terminateJob(String jobId) throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

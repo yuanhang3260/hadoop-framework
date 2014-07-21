@@ -33,6 +33,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 	
 	public ReducerTask task;
 	public Reducer<K1, V1, K2, V2> reducer;
+	private static final int BUFF_SIZE = 1024;
 	
 	public static void main(String[] args) {
 		
@@ -182,12 +183,13 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
 			BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
 			
-			String request = String.format("%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
+			
+			String request = String.format("mapper-file\n%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
 			//System.out.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
 			out.write(request.toCharArray());
 			out.flush();
 			
-			byte[] buff = new byte[1024];
+			byte[] buff = new byte[BUFF_SIZE];
 			int readBytes = 0;
 			
 			while ((readBytes = in.read(buff)) != -1) {
