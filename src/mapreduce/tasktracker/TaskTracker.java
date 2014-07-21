@@ -267,7 +267,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							
 						} else {
 							//Unknown task: Do nothing;
-							ack.newAddedTasks.remove(newTask);
+							//ack.newAddedTasks.remove(newTask);
 						}
 						
 						TaskTracker.this.syncTaskList.add(newTask);

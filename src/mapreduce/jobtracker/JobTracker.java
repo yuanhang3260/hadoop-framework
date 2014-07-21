@@ -237,6 +237,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			int queueSize = allTasks.size();
 			for (int i = 0; i < report.emptySlot && i < queueSize; i++) {
 				Task task = allTasks.poll();
+				if (task instanceof CleanerTask) {
+					System.out.println("[Assign cleaner task to ip" + report.taskTrackerIp);
+				}
 				assignment.add(task);
 				/* keep taskTracker ip into this task's status entry */
 				if (task instanceof MapperTask) {
@@ -306,7 +309,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							/* job success */
 							jobStatus.status = WorkStatus.SUCCESS;
 							//TODO: CLEAN UP ALL THE INTERMEDIATE FILES
-							//cleanUp(jobStatus.jobId);
+							cleanUp(jobStatus.jobId);
 						}
 						
 					}
@@ -455,18 +458,19 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		Set<String> reduceTaskIds = reducerStatusTbl.keySet();
 		for (String reduceTaskId : reduceTaskIds) {
 			ReducerTask reducerTask = (ReducerTask) this.taskTbl.get(reduceTaskId);
+			String taskTrackerIp = reducerStatusTbl.get(reduceTaskId).taskTrackerIp;
 			PartitionEntry[] entries = reducerTask.getEntries();
 			
 			for (PartitionEntry entry : entries) {
 				/* reducer's intermediate file: jid-tid-mapTaskId */
 				String reduceFileName = jobId + "-" + reduceTaskId + "-" + entry.getTID();
 				
-				if (!reduceClean.containsKey(entry.getHost())) {
+				if (!reduceClean.containsKey(taskTrackerIp)) {
 					List<String> fileNames = new LinkedList<String>();
 					fileNames.add(reduceFileName);
-					reduceClean.put(entry.getHost(), fileNames);
+					reduceClean.put(taskTrackerIp, fileNames);
 				} else {
-					reduceClean.get(entry.getHost()).add(reduceFileName);
+					reduceClean.get(taskTrackerIp).add(reduceFileName);
 				}
 			}
 			
@@ -501,6 +505,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			CleanerTask task = cleanTaskTbl.get(host);
 			/* add tasks to the specific TaskTracker's queue */
 			this.jobScheduler.addCleanTask(task);
+			
 			System.out.println("Job id = " + task.getJobId() + " partitionNum = " + task.getPartitionNum());
 			System.out.println("MapperFileName: " + Arrays.toString(task.getMapperFile().toArray()));
 			System.out.println("ReducerFileName: " + Arrays.toString(task.getReducerFile().toArray()));
