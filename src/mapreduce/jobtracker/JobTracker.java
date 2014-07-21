@@ -416,6 +416,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		this.jobStatusTbl.get(jobId).status = WorkStatus.FAILED;
 	}
 	
+	/**
+	 * Terminate the job by sending KillerTasks to all related TaskTrackers
+	 */
 	public void terminateJob(String jobId) {
 		this.jobStatusTbl.get(jobId).status = WorkStatus.TERMINATED;
 	}

@@ -112,6 +112,13 @@ public class Task implements Serializable {
 		return (this.status == WorkStatus.RUNNING);
 	}
 	
+	public boolean isNOTRunning() {
+		return (this.status == WorkStatus.FAILED ||
+				this.status == WorkStatus.SUCCESS ||
+				this.status == WorkStatus.TERMINATED ||
+				this.status == WorkStatus.READY);
+	}
+	
 	/*--------- File Name -------------------*/
 	public String localFileNameWrapper(int partitionSEQ) {
 		return String.format("%s/%s-%s-%d", this.filePrefix, this.jobId, this.tid, partitionSEQ);

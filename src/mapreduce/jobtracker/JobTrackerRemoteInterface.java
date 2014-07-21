@@ -58,4 +58,11 @@ public interface JobTrackerRemoteInterface extends Remote {
 	public JobStatus getJobStatus(String jobId) throws RemoteException;
 	
 	public AbstractMap<String, JobStatus> getAllJobStatus() throws RemoteException;
+	
+	/**
+	 * terminate all the tasks of this Job
+	 * @param jobId
+	 * @throws RemoteException
+	 */
+	public void terminateJob(String jobId) throws RemoteException;
 }
