@@ -13,11 +13,11 @@ public class JobConf implements Serializable {
 	private String inputPath;
 	private String outputPath;
 	
-	private Class<?> mapperClass;
+	private String mapperClassName;
 	private Class<?> mapOutputKeyClass;
 	private Class<?> mapOutputValueClass;
 	
-	private Class<?> reducerClass;
+	private String reducerClassName;
 	private Class<?> outputKeyClass;
 	private Class<?> outputValueClass;
 	
@@ -67,12 +67,12 @@ public class JobConf implements Serializable {
 		return this.outputPath;
 	}
 	
-	public void setMapperClass(Class<?> theClass) {
-		this.mapperClass = theClass;
+	public void setMapperClassName(String theClassName) {
+		this.mapperClassName = theClassName;
 	}
 	
-	public Class<?> getMapper() {
-		return this.mapperClass;
+	public String getMapperClassName() {
+		return this.mapperClassName;
 	}
 	
 	public void setMapOutputKeyClass(Class<?> theClass) {
@@ -92,12 +92,12 @@ public class JobConf implements Serializable {
 		return this.mapOutputValueClass;
 	}
 	
-	public void setReducerClass(Class<?> theClass) {
-		this.reducerClass = theClass;
+	public void setReducerClassName(String theClassName) {
+		this.reducerClassName = theClassName;
 	}
 	
-	public Class<?> getReducerClass() {
-		return this.reducerClass;
+	public String getReducerClassName() {
+		return this.reducerClassName;
 	}
 	
 	public void setOutputKeyClass(Class<?> theClass) {

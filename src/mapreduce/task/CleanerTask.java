@@ -11,8 +11,8 @@ public class CleanerTask extends Task {
 	private List<String> mapperFileName;
 	private List<String> reducerFileName;
 	
-	public CleanerTask(String ip, String jobId, int partitionNum) {
-		super(jobId, "clean", 1);
+	public CleanerTask(String ip, String jobId, String taskId, int partitionNum) {
+		super(jobId, taskId, 3);
 		this.taskTrackerIp = ip;
 		this.partitionNum = partitionNum;
 		this.mapperFileName = new LinkedList<String>();

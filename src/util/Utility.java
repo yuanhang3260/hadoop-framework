@@ -326,29 +326,29 @@ public class Utility {
 			printSubmitUsage();
 			return;
 		}
-		Class<?> mapperClass = null;
-		Class<?> reducerClass = null;
-		try {
-			mapperClass = Class.forName(mapperClassName);
-		} catch (ClassNotFoundException e) {
-			System.out.println("Exception: Mapper class not found");
-			printSubmitUsage();
-			return;
-		}
-		
-		try {
-			reducerClass = Class.forName(reducerClassName);
-		} catch (ClassNotFoundException e) {
-			System.out.println("Exception: Reducer class not found");
-			printSubmitUsage();
-			return;
-		}
+		String mapperClassName = null;
+		String reducerClassName = null;
+//		try {
+//			mapperClass = Class.forName(mapperClassName);
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("Exception: Mapper class not found");
+//			printSubmitUsage();
+//			return;
+//		}
+//		
+//		try {
+//			reducerClass = Class.forName(reducerClassName);
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("Exception: Reducer class not found");
+//			printSubmitUsage();
+//			return;
+//		}
 		
 		JobConf conf = new JobConf();
 		conf.setJobName(jobName);
 		//conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
-		conf.setMapperClass(mapperClass);
-		conf.setReducerClass(reducerClass);
+		conf.setMapperClassName(mapperClass);
+		conf.setReducerClassName(reducerClass);
 		conf.setInputPath(fileIn);
 		conf.setOutputPath(fileOut);
 		conf.setNumReduceTasks(partitionNum);

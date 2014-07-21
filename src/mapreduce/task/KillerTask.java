@@ -11,7 +11,7 @@ public class KillerTask extends Task {
 	private transient String taskTrackerIp;
 
 	public KillerTask(String ip, String jobId, String tid, List<String> taskIds) {
-		super(jobId, tid, 2);
+		super(jobId, tid, 5);
 		this.taskTrackerIp = ip;
 		this.jobId = jobId;
 		this.taskIds = taskIds;
