@@ -12,7 +12,7 @@ public class NgramMapper extends Mapper<Text, Text, Text, IntWritable>{
 	public void map(Text key, Text value,
 			OutputCollector<Text, IntWritable> output) {
 		String line = value.toString();
-		String[] words = line.split("\\W");
+		String[] words = Tokenizer.tokenize(line);
 		int numWords = words.length;
 		StringBuilder sb;
 		for (int i = 0; i <= numWords - nGram; i++) {
