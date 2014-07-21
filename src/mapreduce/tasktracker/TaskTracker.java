@@ -29,6 +29,7 @@ import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.task.CleanerTask;
+import mapreduce.task.KillerTask;
 import mapreduce.task.MapperTask;
 import mapreduce.task.ReducerTask;
 import mapreduce.task.Task;
@@ -597,6 +598,27 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						reducerTmpFile.delete());
 				
 			}
+		}
+		
+	}
+	
+	private class KillJob implements Runnable {
+
+		private KillerTask killJobTask;
+		
+		public KillJob (KillerTask task) {
+			this.task = task;
+		}
+		
+		@Override
+		public void run() {
+			
+			synchronized (TaskTracker.this.syncTaskList) {
+				Task[] taskList = TaskTracker.this.syncTaskList.toArray(new Task[0]);
+			}
+			
+			this.killJobTask.get
+			
 		}
 		
 	}
