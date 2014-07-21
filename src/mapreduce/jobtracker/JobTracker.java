@@ -510,6 +510,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			
 			String taskTrackerIp = mapperStatusTbl.get(mapTaskId).taskTrackerIp;
 			
+			if (taskTrackerIp == null) {
+				continue;
+			}
+			
 			List<String> ids = mapClean.get(taskTrackerIp);
 			
 			String mapFilePrefix = jobId + "-" + mapTaskId;
@@ -532,9 +536,13 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				this.jobStatusTbl.get(jobId).reducerStatusTbl;
 		
 		Set<String> reduceTaskIds = reducerStatusTbl.keySet();
+		
 		for (String reduceTaskId : reduceTaskIds) {
+			
 			ReducerTask reducerTask = (ReducerTask) this.taskTbl.get(reduceTaskId);
+			
 			String taskTrackerIp = reducerStatusTbl.get(reduceTaskId).taskTrackerIp;
+			
 			PartitionEntry[] entries = reducerTask.getEntries();
 			
 			for (PartitionEntry entry : entries) {
@@ -545,6 +553,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					List<String> fileNames = new LinkedList<String>();
 					fileNames.add(reduceFileName);
 					reduceClean.put(taskTrackerIp, fileNames);
+					
 				} else {
 					reduceClean.get(taskTrackerIp).add(reduceFileName);
 				}
@@ -556,6 +565,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		HashMap<String, CleanerTask> cleanTaskTbl = new HashMap<String, CleanerTask>();
 		
 		Set<String> hostIps = mapClean.keySet();
+		
 		for (String hostIp : hostIps) {
 			CleanerTask cleanerTask = new CleanerTask(hostIp, jobId, reduceTaskIds.size());
 			cleanerTask.addMapperFile(mapClean.get(hostIp));
@@ -564,10 +574,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		hostIps = reduceClean.keySet();
 		for (String hostIp : hostIps) {
+			
 			if (!cleanTaskTbl.containsKey(hostIp)) {
 				CleanerTask cleanerTask = new CleanerTask(hostIp, jobId, reduceTaskIds.size());
 				cleanerTask.addReducerFile(reduceClean.get(hostIp));
 				cleanTaskTbl.put(hostIp, cleanerTask);
+				
 			} else {
 				cleanTaskTbl.get(hostIp).addReducerFile(reduceClean.get(hostIp));
 			}
@@ -575,7 +587,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		/* print out to check */
 		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		
 		Set<String> hosts = cleanTaskTbl.keySet();
+		
 		for (String host : hosts) {
 			System.out.println("CleanerTask for TaskTracker " + host);
 			CleanerTask task = cleanTaskTbl.get(host);
@@ -586,6 +600,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			System.out.println("MapperFileName: " + Arrays.toString(task.getMapperFile().toArray()));
 			System.out.println("ReducerFileName: " + Arrays.toString(task.getReducerFile().toArray()));
 		}
+		
 		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	}
 	

@@ -1,6 +1,7 @@
 package mapreduce.task;
 
-public class ReducerTask extends Task {
+
+public class ReducerTask extends Task implements MapRedTask {
 	
 	/**
 	 * 

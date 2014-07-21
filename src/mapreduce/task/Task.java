@@ -6,7 +6,7 @@ import java.io.Serializable;
 import mapreduce.jobtracker.WorkStatus;
 
 
-public class Task implements Serializable {
+public abstract class Task implements Serializable {
 	/**
 	 * 
 	 */
