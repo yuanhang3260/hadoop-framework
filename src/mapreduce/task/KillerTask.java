@@ -1,6 +1,5 @@
 package mapreduce.task;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class KillerTask extends Task {
@@ -9,12 +8,15 @@ public class KillerTask extends Task {
 	
 	private String jobId;
 	private List<String> taskIds;
+	private transient String taskTrackerIp;
 
-	public KillerTask(String jobId, String tid, int level) {
-		super(jobId, tid, 2);
+	public KillerTask(String ip, String jobId, String tid, List<String> taskIds) {
+		super(jobId, tid, 5);
+		this.taskTrackerIp = ip;
 		this.jobId = jobId;
-		this.taskIds = new LinkedList<String>();
+		this.taskIds = taskIds;
 	}
+	
 	
 	public String getJobId() {
 		return this.jobId;
@@ -22,5 +24,9 @@ public class KillerTask extends Task {
 	
 	public List<String> getTaskIds() {
 		return this.taskIds;
+	}
+	
+	public String getTaskTrackerIp() {
+		return this.taskTrackerIp;
 	}
 }

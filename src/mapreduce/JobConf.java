@@ -2,17 +2,22 @@ package mapreduce;
 
 import java.io.Serializable;
 
+import mapreduce.task.JarFileEntry;
+
 public class JobConf implements Serializable {
+
+	private static final long serialVersionUID = 1437439113195756219L;
+
 	private String jobName;
 	
 	private String inputPath;
 	private String outputPath;
 	
-	private Class<?> mapperClass;
+	private String mapperClassName;
 	private Class<?> mapOutputKeyClass;
 	private Class<?> mapOutputValueClass;
 	
-	private Class<?> reducerClass;
+	private String reducerClassName;
 	private Class<?> outputKeyClass;
 	private Class<?> outputValueClass;
 	
@@ -20,6 +25,15 @@ public class JobConf implements Serializable {
 	private int numReduceTasks;
 	
 	private int priorityLevel;
+	private JarFileEntry jarFileEntry;
+	
+	public void setJarFileEntry(String ip, int port, String path) {
+		this.jarFileEntry = new JarFileEntry(ip, port, path);
+	}
+	
+	public JarFileEntry getJarFileEntry() {
+		return this.jarFileEntry;
+	}
 	
 	public void setPriority(int level) {
 		this.priorityLevel = level;
@@ -53,12 +67,12 @@ public class JobConf implements Serializable {
 		return this.outputPath;
 	}
 	
-	public void setMapperClass(Class<?> theClass) {
-		this.mapperClass = theClass;
+	public void setMapperClassName(String theClassName) {
+		this.mapperClassName = theClassName;
 	}
 	
-	public Class<?> getMapper() {
-		return this.mapperClass;
+	public String getMapperClassName() {
+		return this.mapperClassName;
 	}
 	
 	public void setMapOutputKeyClass(Class<?> theClass) {
@@ -78,12 +92,12 @@ public class JobConf implements Serializable {
 		return this.mapOutputValueClass;
 	}
 	
-	public void setReducerClass(Class<?> theClass) {
-		this.reducerClass = theClass;
+	public void setReducerClassName(String theClassName) {
+		this.reducerClassName = theClassName;
 	}
 	
-	public Class<?> getReducerClass() {
-		return this.reducerClass;
+	public String getReducerClassName() {
+		return this.reducerClassName;
 	}
 	
 	public void setOutputKeyClass(Class<?> theClass) {

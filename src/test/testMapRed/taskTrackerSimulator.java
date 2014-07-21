@@ -1,6 +1,8 @@
 package test.testMapRed;
 
 import global.MapReduce;
+import global.Parser;
+import global.Parser.ConfOpt;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -28,8 +30,9 @@ public class taskTrackerSimulator {
 	public static int NUM_OF_HEART_BEAT = 7;
 	
 	public static void main(String[] args) {
+		
 		try {
-			Registry jtRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			Registry jtRegistry = LocateRegistry.getRegistry("localhost",1100);
 			JobTrackerRemoteInterface jtStub = (JobTrackerRemoteInterface) jtRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
 			jtStub.join("128.237.213.225", 1500, 8000, 5);
 			Thread.sleep(1000 * 10);
@@ -67,7 +70,7 @@ public class taskTrackerSimulator {
 //					Thread.sleep(1000 * 60);//make it unavailable
 //				}
 				
-				Thread.sleep(1000 * 3);
+				Thread.sleep(1000 * 20);
 				report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, allStatus);
 				//report = new TaskTrackerReport(Inet4Address.getLocalHost().getHostAddress(), 4, new ArrayList<TaskStatus>());
 				ack = jtStub.heartBeat(report);

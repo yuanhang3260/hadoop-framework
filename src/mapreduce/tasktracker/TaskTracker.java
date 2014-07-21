@@ -490,8 +490,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								continue;
 							}
 						}
-
 					}
+					
+					((MapRedTask) task).setTaskTrackerLocalJarPath(TaskTracker.
+							this.taskJarFolder.getAbsolutePath() + "/" + 
+							task.getJobId() + ".jar");
 					
 					ProcessBuilder pb = null;
 					
@@ -556,8 +559,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				out.close();
 				fout.close();
 				soc.close();
-				
-				task.setTaskTrackerLocalJarPath(TaskTracker.this.taskJarFolder.getName() + "/" + jid + ".jar");
+
 			} catch (Exception e) {
 				throw new IOException("Failed to download Jar file", e);
 			}
@@ -625,7 +627,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					if (MapReduce.Core.DEBUG) {
 						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
-								+ "respond file:\\" + mapperFileFullPath);
+								+ "respond file:" + mapperFileFullPath);
 					}
 					
 					fin = new FileInputStream(file);

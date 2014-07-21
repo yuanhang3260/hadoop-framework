@@ -1,7 +1,5 @@
 package mapreduce.tasktracker;
 
-import example.WordCount.WordCountMapper;
-import example.WordCount.WordCountReducer;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
@@ -85,12 +83,12 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		Thread.sleep(1000 * 3);
 		
-		Class mapperClass = null;
-		Class reducerClass = null;
+		String mapperClassName = null;
+		String reducerClassName = null;
 		
 		try {
-			mapperClass = jt.loadMapperClass();
-			reducerClass = jt.loadReducerClass();
+			mapperClassName = jt.loadMapperClass();
+			reducerClassName = jt.loadReducerClass();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -102,7 +100,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
 			Split split = new Split(file1, mapperSEQ);
 			JarFileEntry jarEntry = new JarFileEntry("128.237.222.59", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
-			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, mapperClass, reducerNum, jarEntry));
+			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, mapperClassName, reducerNum, jarEntry));
 		}
 
 		Thread.sleep(1000 * 15);
@@ -114,7 +112,8 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
 			JarFileEntry jarEntry = new JarFileEntry("localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
-			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, reducerClass, partitionEntry, "output-part" + reducerSEQ, jarEntry));
+			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, reducerClassName, partitionEntry, "output-part" + reducerSEQ, jarEntry));
+
 		}	
 
 	}
@@ -200,7 +199,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	}
 	
 	
-	public Class<Mapper<Writable, Writable, Writable, Writable>> loadMapperClass ()
+	public String loadMapperClass ()
 			throws IOException, ClassNotFoundException {
 		
 		/* Load Jar file */
@@ -231,11 +230,11 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		System.out.println("Mapper class:" + mapperClass.getName());
 		
-		return mapperClass;
+		return mapperClass.getName();
 	}
 	
 	
-	public Class<Reducer<Writable, Writable, Writable, Writable>> loadReducerClass ()
+	public String loadReducerClass ()
 			throws IOException, ClassNotFoundException {
 		
 		/* Load Jar file */
@@ -259,12 +258,13 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
             
             String className = je.getName().substring(0, je.getName().length() - 6);
             className = className.replace('/', '.');
-            if (className.equals(WordCountReducer.class.getName())) {
+            if (className.equals(WordCount.WordCountReducer.class.getName())) {
             	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
             }
         }
+
 		
-		return reducerClass;
+		return reducerClass.getName();
 		
 	}
 

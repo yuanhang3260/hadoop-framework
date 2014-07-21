@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -222,7 +223,8 @@ public class Utility {
 		System.out.println("Usage:\thadoop\tdelete\t<obj file name>");
 	}
 	
-	/* ------------- MapReduce utility area ------------- */
+	/* -------------------- MapReduce utility area --------------------- */
+	
 	private static void mapredUtility(String[] args) {
 		if (args[2].equals("lsjob")) {
 			if (args.length != 3) {
@@ -232,12 +234,19 @@ public class Utility {
 			/* list status of all jobs submitted */
 			lsjob();
 		} else if (args[2].equals("submit")) {
-			if (args.length != 10) {
+			if (args.length != 11) {
 				printSubmitUsage();
 				return;
 			}
 			/* submit job to Job Tracker */
 			submit(args);
+		} else if (args[2].equals("kill")) {
+			if (args.length != 4) {
+				printKillUsage();
+				return;
+			}
+			
+			kill(args);
 		}
 	}
 
@@ -296,13 +305,14 @@ public class Utility {
 	private static void submit(String[] args) {
 		// TODO Auto-generated method stub
 		String jobName = args[3];
-		String mapperClassName = args[4];
-		String reducerClassName = args[5];
-		String fileIn = args[6];
-		String fileOut = args[7];
+		String jarFilePath = args[4];
+		String mapperClassName = args[5];
+		String reducerClassName = args[6];
+		String fileIn = args[7];
+		String fileOut = args[8];
 		int partitionNum = 1;
 		try {
-			partitionNum = Integer.parseInt(args[8]);
+			partitionNum = Integer.parseInt(args[9]);
 		} catch (NumberFormatException e) {
 			System.out.println("Exception: NumOfReducer should be an integer ");
 			printSubmitUsage();
@@ -310,34 +320,35 @@ public class Utility {
 		}
 		int priority = 0;
 		try {
-			priority = Integer.parseInt(args[9]);
+			priority = Integer.parseInt(args[10]);
 		} catch (NumberFormatException e) {
 			System.out.println("Exception: JobPriority shoud be an interger");
 			printSubmitUsage();
 			return;
 		}
-		Class<?> mapperClass = null;
-		Class<?> reducerClass = null;
-		try {
-			mapperClass = Class.forName(mapperClassName);
-		} catch (ClassNotFoundException e) {
-			System.out.println("Exception: Mapper class not found");
-			printSubmitUsage();
-			return;
-		}
-		
-		try {
-			reducerClass = Class.forName(reducerClassName);
-		} catch (ClassNotFoundException e) {
-			System.out.println("Exception: Reducer class not found");
-			printSubmitUsage();
-			return;
-		}
+		String mapperClassName = null;
+		String reducerClassName = null;
+//		try {
+//			mapperClass = Class.forName(mapperClassName);
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("Exception: Mapper class not found");
+//			printSubmitUsage();
+//			return;
+//		}
+//		
+//		try {
+//			reducerClass = Class.forName(reducerClassName);
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("Exception: Reducer class not found");
+//			printSubmitUsage();
+//			return;
+//		}
 		
 		JobConf conf = new JobConf();
 		conf.setJobName(jobName);
-		conf.setMapperClass(mapperClass);
-		conf.setReducerClass(reducerClass);
+		//conf.setJarFileEntry(Inet4Address.getLocalHost().getHostAddress(), , path);
+		conf.setMapperClassName(mapperClass);
+		conf.setReducerClassName(reducerClass);
 		conf.setInputPath(fileIn);
 		conf.setOutputPath(fileOut);
 		conf.setNumReduceTasks(partitionNum);
@@ -346,8 +357,34 @@ public class Utility {
 		
 	}
 	
+	private static void kill(String[] args) {
+		String jobId = args[3];
+		Registry jobTrackerRegistry = null;
+		try {
+			jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, 
+					MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			
+			JobTrackerRemoteInterface jobTrackerStub = 
+					(JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
+			
+			jobTrackerStub.terminateJob(jobId);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	
+	private static void printKillUsage() {
+		System.out.println("kill:\tKill a job\nUsage: hadoop mapred kill <jobId>");
+	}
+	
 	private static void printSubmitUsage() {
-		System.out.println("submit:\tSubmit a mapreduce job to JobTracker\nUsage: hadoop mapred submit <JobName> <MapperClassName> <ReducerClassName> <InputFilePath> <OutputFilePath> <NumOfReducer> <JobPriority>");
+		System.out.println("submit:\tSubmit a mapreduce job to JobTracker\nUsage: hadoop mapred submit <JobName> <JarFilePath> <MapperClassName> <ReducerClassName> <InputFilePath> <OutputFilePath> <NumOfReducer> <JobPriority>");
 	}
 	
 	private static void printLsjobUsage() {

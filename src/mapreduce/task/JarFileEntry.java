@@ -3,10 +3,7 @@ package mapreduce.task;
 import java.io.Serializable;
 
 public class JarFileEntry implements Serializable {	
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -3616669982439495255L;
 
 	private String taskTrackerIp;

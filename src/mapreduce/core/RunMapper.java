@@ -180,7 +180,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
             
             String className = je.getName().substring(0, je.getName().length() - 6);
             className = className.replace('/', '.');
-            if (className.equals(this.task.getClass().getName())) {
+            if (className.equals(this.task.getMapperClassName())) {
             	mapperClass = (Class<Mapper<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
             }
         }
