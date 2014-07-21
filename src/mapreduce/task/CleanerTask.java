@@ -3,6 +3,11 @@ package mapreduce.task;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * An abstraction of the task for Task Tracker to clean some
+ * intermediate file during mapper / reducer phases of a job
+ *
+ */
 public class CleanerTask extends Task {
 
 	private static final long serialVersionUID = 2967629977082519094L;

@@ -2,6 +2,11 @@ package mapreduce.task;
 
 import java.util.List;
 
+/**
+ * An abstraction of task for Task Tracker to terminate some currently
+ * running tasks' processes
+ *
+ */
 public class KillerTask extends Task {
 
 	private static final long serialVersionUID = -2032059767414904871L;

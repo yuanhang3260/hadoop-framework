@@ -2,6 +2,7 @@ package mapreduce.jobtracker;
 
 import global.Hdfs;
 import global.MapReduce;
+import global.Parser;
 import hdfs.DataStructure.DataNodeEntry;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
@@ -51,13 +52,26 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private AbstractMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
 	
-//	public static void main(String[] args) {
-//		JobTracker jt = new JobTracker();
-//		jt.init();
-//		if (Hdfs.Core.DEBUG) {
-//			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
-//		}
-//	}
+	public static void main(String[] args) {
+		
+		try {
+			Parser.hdfsCoreConf();
+			Parser.mapreduceCoreConf();
+			Parser.mapreduceJobTrackerConf();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("The JobTracker rountine cannot read configuration info.\n"
+					+ "Please confirm the mapreduce.xml is placed as ./conf/mapreduce.xml.\n"
+					+ "The JobTracker routine is shutting down...");
+			System.exit(1);
+		}
+		
+		JobTracker jt = new JobTracker();
+		jt.init();
+		if (MapReduce.Core.DEBUG) {
+			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
+		}
+	}
 	
 	public void init() {
 		this.jobScheduler = new JobScheduler();
