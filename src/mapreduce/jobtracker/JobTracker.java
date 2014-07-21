@@ -90,16 +90,16 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return taskTrackerName;
 	}
 	
-	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
-		MapperTask task = new MapperTask(jobId, nameTask(), level, split, theClass, partitionNum);
-		//TODO: by default the status is READY?
-		return task;
-	}
-	
-	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
-		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + "-" + "part" + "-" + reducerSEQ);
-		return task;
-	}
+//	private MapperTask createMapTask(String jobId, int level, Split split, Class<?> theClass, int partitionNum) {
+//		MapperTask task = new MapperTask(jobId, nameTask(), level, split, theClass, partitionNum);
+//		//TODO: by default the status is READY?
+//		return task;
+//	}
+//	
+//	private ReducerTask createReduceTask(String jobId, int level, int reducerSEQ, Class<?> theClass, PartitionEntry[] partitionEntry, String path) {
+//		ReducerTask task = new ReducerTask(jobId, nameTask(), level, reducerSEQ, theClass, partitionEntry, path + "-" + "part" + "-" + reducerSEQ);
+//		return task;
+//	}
 	
 	private synchronized String nameTask() {
 		long taskName = taskNaming++;
@@ -143,25 +143,25 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * @param job The job to initialize
 	 */
 	private synchronized void initMapTasks(Job job) {
-		for (Split split : job.getSplit()) {
-			MapperTask task = 
-					createMapTask(job.getJobId(), job.getJobConf().getPriority(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
-			
-			if (Hdfs.Core.DEBUG) {
-				System.out.println("DEBUG JobTracker.addMapTasks(): now adding task " + task.getTaskId() + " to Task Queue");
-			}
-			
-			this.taskTbl.put(task.getTaskId(), task);
-			/* TODO: initiate another thread to add all tasks */
-			this.jobScheduler.addMapTask(task);
-			/* initialize task status record */
-			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
-			this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl.put(task.getTaskId(), stat);	
-		}
-		if (Hdfs.Core.DEBUG) {
-			System.out.println("DEBUG JobTrakcer.initMapTask(): map tasks initialization finished, current job scheduling queue: ");
-			this.jobScheduler.printScheduleTbl();
-		}
+//		for (Split split : job.getSplit()) {
+//			MapperTask task = 
+//					createMapTask(job.getJobId(), job.getJobConf().getPriority(), split, job.getJobConf().getMapper(), job.getJobConf().getNumReduceTasks());
+//			
+//			if (Hdfs.Core.DEBUG) {
+//				System.out.println("DEBUG JobTracker.addMapTasks(): now adding task " + task.getTaskId() + " to Task Queue");
+//			}
+//			
+//			this.taskTbl.put(task.getTaskId(), task);
+//			/* TODO: initiate another thread to add all tasks */
+//			this.jobScheduler.addMapTask(task);
+//			/* initialize task status record */
+//			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
+//			this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl.put(task.getTaskId(), stat);	
+//		}
+//		if (Hdfs.Core.DEBUG) {
+//			System.out.println("DEBUG JobTrakcer.initMapTask(): map tasks initialization finished, current job scheduling queue: ");
+//			this.jobScheduler.printScheduleTbl();
+//		}
 	}
 	
 	private void initReduceTasks(String jobId) {
@@ -188,14 +188,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		}
 		
 		/* create reducer tasks */
-		for (int j = 0; j < numOfReducer; j++) {
-			ReducerTask task = createReduceTask(job.getJobId(), job.getJobConf().getPriority(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
-			this.taskTbl.put(task.getTaskId(), task);
-			this.jobScheduler.addReduceTask(task);
-			
-			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
-			this.jobStatusTbl.get(job.getJobId()).reducerStatusTbl.put(task.getTaskId(), stat);
-		}
+//		for (int j = 0; j < numOfReducer; j++) {
+//			ReducerTask task = createReduceTask(job.getJobId(), job.getJobConf().getPriority(), j, job.getJobConf().getReducerClass(), entries, job.getJobConf().getOutputPath());
+//			this.taskTbl.put(task.getTaskId(), task);
+//			this.jobScheduler.addReduceTask(task);
+//			
+//			TaskStatus stat = new TaskStatus(job.getJobId(), task.getTaskId(), WorkStatus.RUNNING, null, -1);
+//			this.jobStatusTbl.get(job.getJobId()).reducerStatusTbl.put(task.getTaskId(), stat);
+//		}
 	}
 	
 	

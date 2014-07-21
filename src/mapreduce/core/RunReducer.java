@@ -13,13 +13,18 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
@@ -35,6 +40,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 	public Reducer<K1, V1, K2, V2> reducer;
 	private static final int BUFF_SIZE = 1024;
 	
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		
 		RunReducer<Writable, Writable, Writable, Writable> rr = new RunReducer<Writable, Writable, Writable, Writable>();
@@ -92,8 +98,15 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish merging and start to reduce");
 			}
+			
+			//STEP 1: Load reducer class
+			
+			Class<Reducer<Writable, Writable, Writable, Writable>> reducerClass = 
+					rr.loadClass();
+			
+			//STEP 2: Run mapper
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
-			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) rr.task.getTask().getConstructors()[0].newInstance();
+			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) reducerClass.getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
@@ -112,56 +125,39 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			output.writeToHDFS(rr.task.getOutputPath());
 			
 		} catch (RemoteException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
-			System.out.println("RemoteException caught");
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(1);
 		} catch (FileNotFoundException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(2);
 		} catch (IOException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(3);
 		} catch (InterruptedException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(5);
 		} catch (IllegalArgumentException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(6);
 		} catch (SecurityException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(7);
 		} catch (InstantiationException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(8);
 		} catch (IllegalAccessException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(9);
 		} catch (InvocationTargetException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(10);
 		} catch (NotBoundException e) {
-			if (MapReduce.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
 			System.exit(11);
+		} catch (ClassNotFoundException e) {
+			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
+			e.printStackTrace();
+			System.exit(12);
 		}
 		
 	}
@@ -237,6 +233,40 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				System.exit(14);
 			}
 		}
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Class<Reducer<Writable, Writable, Writable, Writable>> loadClass ()
+			throws IOException, ClassNotFoundException {
+		
+		/* Load Jar file */
+		String jarFilePath = this.task.getJarLocalPath();
+		JarFile jarFile = new JarFile(jarFilePath);
+		Enumeration<JarEntry> e = jarFile.entries();
+		
+		URL[] urls = { new URL("jar:file:" + jarFilePath +"!/") };
+		ClassLoader cl = URLClassLoader.newInstance(urls);
+		
+		Class<Reducer<Writable, Writable, Writable, Writable>> reducerClass = null;
+		
+		/* Iterate .class files */
+		while (e.hasMoreElements()) {
+            
+			JarEntry je = e.nextElement();
+            
+			if(je.isDirectory() || !je.getName().endsWith(".class")){
+                continue;
+            }
+            
+            String className = je.getName().substring(0, je.getName().length() - 6);
+            className = className.replace('/', '.');
+            if (className.equals(this.task.getClass().getName())) {
+            	reducerClass = (Class<Reducer<Writable, Writable, Writable, Writable>>) cl.loadClass(className);
+            }
+        }
+		
+		return reducerClass;
 		
 	}
 }

@@ -458,7 +458,8 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 	
-			synchronized (TaskTracker.this.syncTaskList) {
+			synchronized (TaskTracker.this.syncTaskList) {  //TODO: check the necessity of synchronization
+				
 				for (Task task : taskList) {
 					
 					String taskID = String.format("%s-%s", task.getJobId(), task.getTaskId());
@@ -473,44 +474,16 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					}
 					
 					if (!foundJar) {
-						try {
-							
-							File localFile = new File(TaskTracker.this.taskJarFolder.getName() + "/" + task.getJobId() + ".jar");
-							FileOutputStream fout = new FileOutputStream(localFile);
-							
-							JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
-							
-							Socket soc = new Socket(jarEntry.getTaskTrackerIp(),
-									jarEntry.getServerPort());
-							
-							PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-							BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
-							
-							
-							String request = String.format("jar-file\n%s\n", jarEntry.getFullPath());
-							
-							out.write(request.toCharArray());
-							out.flush();
-							
-							byte[] buff = new byte[BUFF_SIZE];
-							int len = 0;
-							
-							while ((len = in.read(buff)) != -1) {
-								fout.write(buff, 0, len);
-							}
-							
-							in.close();
-							out.close();
-							fout.close();
-							soc.close();
-							
-						} catch (UnknownHostException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						try { 
+							downloadJar((MapRedTask)task, task.getJobId()); 
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							if (MapReduce.Core.DEBUG) {
+								e.printStackTrace();
+								task.failedTask();
+								continue;
+							}
 						}
+
 					}
 					
 					ProcessBuilder pb = null;
@@ -542,7 +515,44 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 			}
 			
-		}	
+		}
+		
+		private void downloadJar (MapRedTask task, String jid) throws IOException {
+			try {
+				File localFile = new File(TaskTracker.this.taskJarFolder.getName() + "/" + jid + ".jar");
+				FileOutputStream fout = new FileOutputStream(localFile);
+				
+				JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
+				
+				Socket soc = new Socket(jarEntry.getTaskTrackerIp(),
+						jarEntry.getServerPort());
+				
+				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+				BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
+				
+				
+				String request = String.format("jar-file\n%s\n", jarEntry.getFullPath());
+				
+				out.write(request.toCharArray());
+				out.flush();
+				
+				byte[] buff = new byte[BUFF_SIZE];
+				int len = 0;
+				
+				while ((len = in.read(buff)) != -1) {
+					fout.write(buff, 0, len);
+				}
+				
+				in.close();
+				out.close();
+				fout.close();
+				soc.close();
+				
+				task.setTaskTrackerLocalJarPath(TaskTracker.this.taskJarFolder.getName() + "/" + jid + ".jar");
+			} catch (Exception e) {
+				throw new IOException("Failed to download Jar file", e);
+			}
+		}
 	}
 	
 	private class PartitionServer implements Runnable {
