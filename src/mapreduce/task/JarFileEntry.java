@@ -8,12 +8,15 @@ public class JarFileEntry implements Serializable {
 	
 	private int serverPort;
 	
-	public JarFileEntry (String taskTrackerIp, int serverPort) {
+	private String jarFileFullPath;
+	
+	public JarFileEntry (String taskTrackerIp, int serverPort, String jarFileFullPath) {
 		
 		this.taskTrackerIp = taskTrackerIp;
 		
 		this.serverPort = serverPort;
 		
+		this.jarFileFullPath = jarFileFullPath;
 	}
 	
 	public String getTaskTrackerIp() {
@@ -22,6 +25,10 @@ public class JarFileEntry implements Serializable {
 	
 	public int getServerPort() {
 		return this.serverPort;
+	}
+	
+	public String getFullPath() {
+		return this.jarFileFullPath;
 	}
 
 }
