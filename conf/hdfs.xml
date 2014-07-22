@@ -3,10 +3,10 @@
 	<core>		
 		<replica-factor>2</replica-factor>
 		
-		<chunk-size unit="B">1237</chunk-size>
+		<chunk-size unit="MB">5</chunk-size>
 		
-		<read-buff-size unit="KB">2</read-buff-size>
-		<write-buff-size unit="KB">2</write-buff-size>
+		<read-buff-size unit="KB">512</read-buff-size>
+		<write-buff-size unit="KB">512</write-buff-size>
 		
 		<partition-tolerance unit="sec">120</partition-tolerance>
 		

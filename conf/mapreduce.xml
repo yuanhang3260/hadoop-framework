@@ -19,7 +19,7 @@
 		<individual>
 			<registry-port>1200</registry-port>
 			<server-port>8000</server-port>
-			<core-num>3</core-num>
+			<core-num>4</core-num>
 		</individual>
 
 	</tasktracker>

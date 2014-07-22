@@ -142,8 +142,41 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			throw new IOException("IOException", e);
 		}
 		
-
 		return sb.toString();
+	}
+	
+	public String readLines(String chunkName, long pos, int numLine) throws IOException {
+		RandomAccessFile file = new RandomAccessFile(chunkNameWrapper(chunkName), "r");
+		long fileSize = file.length();
+		file.seek(pos);
+		long b = 0;
+		
+		StringBuilder sb = new StringBuilder();
+		while (pos + b < fileSize && numLine != 0) {
+			
+			String line = file.readLine();
+			
+			sb.append(line);
+			
+			sb.append("\n");
+			
+			b += line.getBytes().length + 1;
+			
+			numLine--;
+		}
+		
+		if (pos + b > fileSize) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		
+		file.close();
+		
+		if (sb.length() != 0) {
+			return sb.toString();
+		} else {
+			return null;
+		}
+		
 	}
 	
 	/**

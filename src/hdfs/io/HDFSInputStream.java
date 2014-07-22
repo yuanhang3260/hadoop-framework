@@ -33,6 +33,8 @@ public class HDFSInputStream implements Serializable{
 	
 	private boolean DEBUG = false;
 	
+	private long pos;
+	
 	
 	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {
 		this.fileChunkInfoList = chunkInfoList;
@@ -45,6 +47,7 @@ public class HDFSInputStream implements Serializable{
 		this.endOfFile = false;
 		this.currChunkInfo = null;
 		this.dataNodeStub = null;
+		this.pos = 0;
 	}
 	
 	public void printInfo() {
@@ -59,6 +62,39 @@ public class HDFSInputStream implements Serializable{
 		System.out.println("chunkCounter: " + chunkCounter);
 		System.out.println("endOfChunk? " + endOfChunk);
 		System.out.println("endOfFile? " + endOfFile);
+	}
+	
+	/**
+	 * Read up to numLine lines in a chunk data
+	 * @param idx
+	 * @param numLine
+	 * @return
+	 * @throws IOException
+	 */
+	public String readLinesInChunk(int idx, int numLine) throws IOException {
+		int size = fileChunkInfoList.size();
+		
+		if (idx >= size) {
+			/* chunk index out of bound */
+			return null;
+		}
+		HDFSChunk chunkInfo = fileChunkInfoList.get(idx);
+		DataNodeEntry nodeEntry = getNearestDataNode(chunkInfo.getAllLocations());
+		Registry nodeRegistry = null;
+		String data = null;
+		
+		try {
+			nodeRegistry = LocateRegistry.getRegistry(nodeEntry.dataNodeRegistryIP, nodeEntry.dataNodeRegistryPort);
+			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+			data = nodeStub.readLines(chunkInfo.getChunkName(), this.pos, numLine);
+			pos += data.getBytes().length;
+		} catch (RemoteException e) {
+			throw new IOException("Failed to read chunk", e);
+		} catch (NotBoundException e) {
+			throw new IOException("Unable to reach datanode", e);
+		}
+		
+		return data;
 	}
 	
 	/**
@@ -79,6 +115,7 @@ public class HDFSInputStream implements Serializable{
 		DataNodeEntry nodeEntry = getNearestDataNode(chunkInfo.getAllLocations());
 		Registry nodeRegistry = null;
 		String data = null;
+		
 		try {
 			nodeRegistry = LocateRegistry.getRegistry(nodeEntry.dataNodeRegistryIP, nodeEntry.dataNodeRegistryPort);
 			DataNodeRemoteInterface nodeStub = (DataNodeRemoteInterface) nodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
