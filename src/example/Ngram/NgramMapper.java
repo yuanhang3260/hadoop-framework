@@ -1,5 +1,7 @@
 package example.Ngram;
 
+import java.io.IOException;
+
 import mapreduce.core.Mapper;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.writable.IntWritable;
@@ -10,7 +12,7 @@ public class NgramMapper extends Mapper<Text, Text, Text, IntWritable>{
 	public static int nGram = 3;
 	@Override
 	public void map(Text key, Text value,
-			OutputCollector<Text, IntWritable> output) {
+			OutputCollector<Text, IntWritable> output) throws IOException {
 		String line = value.toString();
 		String[] words = Tokenizer.tokenize(line);
 		int numWords = words.length;

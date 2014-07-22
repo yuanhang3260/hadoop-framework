@@ -108,19 +108,21 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 				rm.mapper.map(nextLine.getKey(), nextLine.getValue(), output);
 			}
 			
-			/*------------------ Sort intermediate values ----------------*/
+			output.flushToLocal();
+			
+			/*------------------ Sort intermediate values and write ----------------*/
 			
 			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunMapper.main(): Finish map phase and start to sort intermediate <key, value> pair by key.");
 			}
 			output.sort();
 			
-			/*------------------ Write intermediate values to local  ----------------*/
+//			/*------------------ Write intermediate values to local  ----------------*/
 			
-			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunMapper.main(): The last step is to write mapper intermediate value to local file system.");
-			}
-			output.writeToLocal();
+//			if (MapReduce.Core.DEBUG) {
+//				System.out.println("DEBUG RunMapper.main(): The last step is to write mapper intermediate value to local file system.");
+//			}
+//			output.writeToLocal();
 			
 			return;
 		} catch (NumberFormatException e) {
