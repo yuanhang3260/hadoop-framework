@@ -22,7 +22,11 @@ public class runDataNode {
 		}
 		
 		DataNode dataNode = new DataNode(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT, Hdfs.DataNode.DATA_NODE_REGISTRY_PORT);
-		dataNode.init();
+		try {
+			dataNode.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		Thread t1 = new Thread(dataNode);
 		t1.start();
 		

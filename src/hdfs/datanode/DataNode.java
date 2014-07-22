@@ -25,73 +25,92 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private int nameNodePort;
 	private String dataNodeName;
 	private int dataNodePort;
-	private String dirPrefix;
+	private String dataNodeTmpFileDirPrefix;
 	private int chunkBlockPeriod = 3;
+	private NameNodeRemoteInterface nameNodeS;
 	
 	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
 		this.dataNodePort = dataNodePort;
-		this.dirPrefix = "test_tmp/";
 	}
 	
 	/**
 	 * Initialize this Data Node by binding the remote object
+	 * @throws RemoteException 
+	 * @throws NotBoundException 
+	 * @throws UnknownHostException 
 	 */
-	public void init() {
-		try {
-			Registry localRegistry = LocateRegistry.createRegistry(this.dataNodePort);
-			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
-			localRegistry.rebind("DataNode", dataNodeStub);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+	public void init() throws RemoteException, NotBoundException, UnknownHostException {
+		
+		Registry localRegistry = LocateRegistry.createRegistry(this.dataNodePort);
+		DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
+		localRegistry.rebind("DataNode", dataNodeStub);
+		
+		
+		/* join hdfs cluster */
+		Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
+		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
+		this.nameNodeS = nameNodeS;
+		
+		this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
+		
+		this.dataNodeTmpFileDirPrefix = "./" + Hdfs.Core.TEMP_FILE_DIR;
+		
+		File nodeTmpFileFolder = new File(this.dataNodeTmpFileDirPrefix);
+		if (!nodeTmpFileFolder.exists()) {
+			nodeTmpFileFolder.mkdir();
+		} else {
+			nodeTmpFileFolder.delete();
+			nodeTmpFileFolder.mkdir();
+			for (File staleFile : nodeTmpFileFolder.listFiles()) {
+				staleFile.delete();
+			}
 		}
+		
+		this.dataNodeTmpFileDirPrefix +=  "/" + dataNodeName;
+		File dataNodeTmpFileFolder = new File(this.dataNodeTmpFileDirPrefix);
+		if (!dataNodeTmpFileFolder.exists()) {
+			dataNodeTmpFileFolder.mkdir();
+		}
+		
+		System.out.println("PREFIX: " + this.dataNodeTmpFileDirPrefix);
+		
+		
+		List<String> chunkList = formChunkReport(true);
+		
+		if (Hdfs.Core.DEBUG) {
+			System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
+		}
+		
+		this.dataNodeName = this.nameNodeS.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
 	}
 
 	@Override
 	public void run() {
+		
 		try {	
-			
-			/* join hdfs cluster */
-			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
-			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-			
-			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
-			List<String> chunkList = formChunkReport(true);
-			if (Hdfs.Core.DEBUG) {
-				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
-			}
-			
-			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
-			
 			int counter = 1;
-
+			
+			List<String> chunkList = null;
+			
 			while (true) {
 				if (counter % this.chunkBlockPeriod ==  0) {
+					
 					chunkList = formChunkReport(false);
 					if (Hdfs.Core.DEBUG) {
 						System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 					}
-					nameNode.chunkReport(dataNodeName, chunkList);
+					this.nameNodeS.chunkReport(dataNodeName, chunkList);
 				} else {
-					nameNode.heartBeat(dataNodeName);
+					this.nameNodeS.heartBeat(dataNodeName);
 				}
 				counter++;
 				Thread.sleep(10000);
 			}
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			if (Hdfs.Core.DEBUG) {e.printStackTrace();}
 		}
 	}
 
@@ -240,8 +259,13 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 			File chunkFile = new File(chunkNameWrapper(globalChunkName));
 			if (!chunkFile.exists()) {
 				chunkFile = new File(tmpFileWrapper(chunkNameWrapper(globalChunkName)));
+				chunkFile.delete();
+				chunkFile = new File(backupFileWrapper(chunkNameWrapper(globalChunkName)));
+				chunkFile.delete();
 			}
-			System.out.println("Delete file " + chunkFile);
+			if (Hdfs.Core.DEBUG) {
+				System.out.println("Delete file " + chunkFile);
+			}
 			chunkFile.delete();
 		} catch (SecurityException e) {
 			throw new IOException("Cannot delete the chunk");
@@ -250,7 +274,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	}
 	
 	private String chunkNameWrapper(String globalChunkName) {
-		return this.dirPrefix + globalChunkName + "-node-" + this.dataNodeName;
+		return this.dataNodeTmpFileDirPrefix + "/" + globalChunkName + "-node-" + this.dataNodeName;
 	}
 	
 	private String tmpFileWrapper(String name) {
@@ -260,7 +284,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private String chunkNameUnwrapper(String localChunkName, boolean reportTmp) {
 		String[] segs = localChunkName.split("-");
 		if (reportTmp) {
-			if (segs.length == 3 && (segs[2].equals(this.dataNodeName) || segs[2].equals(this.dataNodeName + ".tmp"))) {
+			if (segs.length == 3 && (segs[2].equals(this.dataNodeName) || segs[2].equals(this.dataNodeName + ".tmp") || segs[2].equals(this.dataNodeName + ".backup"))) {
 				return segs[0];
 			}
 		} else {
@@ -273,7 +297,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	
 	public List<String> formChunkReport(boolean withTmp) {
 		List<String> chunkList = new ArrayList<String>();
-		File dfDir = new File(this.dirPrefix);
+		File dfDir = new File(this.dataNodeTmpFileDirPrefix);
 		String[] files = dfDir.list();
 	
 		for (String localFileName : files) {
