@@ -1,11 +1,15 @@
 package hdfs.datanode;
 
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
 import global.Hdfs;
 import global.Parser;
 import global.Parser.ConfOpt;
 
 public class runDataNode {
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 		
 		
 		try {

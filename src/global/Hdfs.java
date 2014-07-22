@@ -24,7 +24,8 @@ public class Hdfs {
 		
 		public static int NAME_NODE_REGISTRY_PORT;
 		
-		public static String TEMP_FILE_DIR = "tmp"; //non-configurable
+		public static String HDFS_TMEP = "tmp";
+
 		
 	}
 	
