@@ -7,11 +7,6 @@ import global.Parser.ConfOpt;
 public class runDataNode {
 	public static void main(String[] args) throws InterruptedException {
 		
-		if (args == null || args.length < 1) {
-			System.out.println("Usage:\t<DatNode Sequential>");
-			System.exit(1);
-		}
-		
 		
 		try {
 			Parser.dataNodeConf();
