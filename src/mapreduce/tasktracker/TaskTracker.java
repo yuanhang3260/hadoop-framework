@@ -519,11 +519,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					ProcessBuilder pb = null;
 					
 					if (task instanceof MapperTask) {
-						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
+						pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
 					} else if (task instanceof ReducerTask) {
 						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarEntry().getLocalPath());
-						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
+						pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
 					}
 					
