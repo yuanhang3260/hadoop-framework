@@ -413,6 +413,7 @@ public class Utility {
 				System.out.println("Total slots: " + info.getNumSlots());
 				System.out.println("Current Status: " + info.getStatus());
 			}
+			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
