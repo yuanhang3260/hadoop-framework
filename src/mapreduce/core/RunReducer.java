@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.URL;
@@ -30,8 +29,8 @@ import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.RecordReconstructor;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.PartitionEntry;
-import mapreduce.task.ReducerTask;
+import mapreduce.message.PartitionEntry;
+import mapreduce.message.ReducerTask;
 import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {

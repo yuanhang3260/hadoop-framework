@@ -6,7 +6,6 @@ import global.Parser.ConfOpt;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NotBoundException;
@@ -22,7 +21,7 @@ import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.KeyValueLineRecordReader;
 import mapreduce.io.writable.Text;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.MapperTask;
+import mapreduce.message.MapperTask;
 import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {

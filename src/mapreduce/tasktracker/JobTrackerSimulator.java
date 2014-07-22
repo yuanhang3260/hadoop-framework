@@ -6,9 +6,6 @@ import global.Parser;
 import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -18,28 +15,22 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import mapreduce.Job;
-import mapreduce.core.Mapper;
-import mapreduce.core.Reducer;
 import mapreduce.io.Split;
-import mapreduce.io.writable.Writable;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
-import mapreduce.task.JarFileEntry;
-import mapreduce.task.MapperTask;
-import mapreduce.task.PartitionEntry;
-import mapreduce.task.ReducerTask;
-import mapreduce.task.Task;
+import mapreduce.message.JarFileEntry;
+import mapreduce.message.MapperTask;
+import mapreduce.message.PartitionEntry;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 
 public class JobTrackerSimulator implements JobTrackerRemoteInterface {

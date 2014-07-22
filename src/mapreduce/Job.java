@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import mapreduce.io.Split;
-import mapreduce.task.JarFileEntry;
+import mapreduce.message.JarFileEntry;
 
 public class Job implements Serializable{
 	private String jobId;

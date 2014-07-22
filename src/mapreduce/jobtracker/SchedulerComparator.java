@@ -2,7 +2,7 @@ package mapreduce.jobtracker;
 
 import java.util.Comparator;
 
-import mapreduce.task.Task;
+import mapreduce.message.Task;
 
 /**
  * This comparator determines the priority of a task when it is added to 

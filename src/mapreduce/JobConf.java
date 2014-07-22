@@ -1,12 +1,6 @@
 package mapreduce;
 
-import global.MapReduce;
-
 import java.io.Serializable;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
-
-import mapreduce.task.JarFileEntry;
 
 public class JobConf implements Serializable {
 

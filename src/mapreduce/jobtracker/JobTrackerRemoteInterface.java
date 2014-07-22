@@ -3,10 +3,8 @@ package mapreduce.jobtracker;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.AbstractMap;
-import java.util.List;
 
 import mapreduce.Job;
-import mapreduce.task.Task;
 
 public interface JobTrackerRemoteInterface extends Remote {
 	/**

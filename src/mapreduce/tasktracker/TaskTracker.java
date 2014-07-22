@@ -31,13 +31,13 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
-import mapreduce.task.CleanerTask;
-import mapreduce.task.JarFileEntry;
-import mapreduce.task.KillerTask;
-import mapreduce.task.MapRedTask;
-import mapreduce.task.MapperTask;
-import mapreduce.task.ReducerTask;
-import mapreduce.task.Task;
+import mapreduce.message.CleanerTask;
+import mapreduce.message.JarFileEntry;
+import mapreduce.message.KillerTask;
+import mapreduce.message.MapRedTask;
+import mapreduce.message.MapperTask;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 public class TaskTracker implements TaskTrackerRemoteInterface {
 	

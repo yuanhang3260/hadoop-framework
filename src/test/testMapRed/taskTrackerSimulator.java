@@ -1,8 +1,6 @@
 package test.testMapRed;
 
 import global.MapReduce;
-import global.Parser;
-import global.Parser.ConfOpt;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -19,9 +17,9 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
-import mapreduce.task.MapperTask;
-import mapreduce.task.ReducerTask;
-import mapreduce.task.Task;
+import mapreduce.message.MapperTask;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 public class taskTrackerSimulator {
 	
