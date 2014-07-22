@@ -297,7 +297,7 @@ public class Utility {
 		System.out.println("Number of reducer tasks in total: " + jobStatusTbl.get(jobId).reduceTaskTotal);
 		WorkStatus status = jobStatusTbl.get(jobId).status;
 		System.out.println("Status: " + status);
-		if (status == WorkStatus.RUNNING) {
+		//if (status == WorkStatus.RUNNING) {
 			/* print out all mapper tasks status */
 			AbstractMap<String, TaskStatus> mapperTbl = jobStatusTbl.get(jobId).mapperStatusTbl;
 			Set<String> mapTaskIds = mapperTbl.keySet();
@@ -316,7 +316,7 @@ public class Utility {
 				String ip = reducerTbl.get(reduceTaskId).taskTrackerIp == null ? "not assigned yet" : reducerTbl.get(reduceTaskId).taskTrackerIp;
 				System.out.println("Reducer task (id = " + reduceTaskId + ") status: " + reducerTbl.get(reduceTaskId).status + ", Task Tracker " + ip);
 			}
-		}
+		//}
 	}
 	
 	private static void submit(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {

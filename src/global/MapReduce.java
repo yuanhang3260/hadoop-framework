@@ -35,7 +35,7 @@ public class MapReduce {
 			public static int TASK_TRACKER_REGISTRY_PORT;
 			public static int TASK_TRACKER_SERVER_PORT;
 			public static int CORE_NUM;
-			public static boolean JAR = false; //non-configurable
+			public static boolean JAR = true; //non-configurable
 		}
 	}
 }
