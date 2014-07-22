@@ -20,15 +20,15 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import mapreduce.io.KeyValueCollection;
 import mapreduce.io.collector.OutputCollector;
-import mapreduce.io.recordreader.RecordReconstructor;
+import mapreduce.io.recordreader.TextIntReconstructor;
+import mapreduce.io.writable.IntWritable;
+import mapreduce.io.writable.Text;
 import mapreduce.io.writable.Writable;
 import mapreduce.message.PartitionEntry;
 import mapreduce.message.ReducerTask;
@@ -69,8 +69,8 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			toFail = taskTrackerS.toFail();
 
 			
-			RecordReconstructor<Writable, Writable> recordReconstructor = 
-					new RecordReconstructor<Writable, Writable>();
+			TextIntReconstructor recordReconstructor = 
+					new TextIntReconstructor ();
 			
 			
 			if (MapReduce.TaskTracker.Common.REDUCER_FAULT_TEST && toFail) {
@@ -108,7 +108,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) reducerClass.getConstructors()[0].newInstance();
 			while (recordReconstructor.hasNext()) {
-				KeyValueCollection<Writable, Writable> nextLine = recordReconstructor.nextKeyValueCollection();
+				KeyValueCollection<Text, IntWritable> nextLine = recordReconstructor.nextKeyValueCollection();
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
 			}
 			
@@ -162,12 +162,8 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 	}
 	
-	public void collectPartition(RecordReconstructor<K1, V1> recordReconstructor) 
-			throws UnknownHostException, IOException, InterruptedException {
-		
-		
-//		List<Thread> threadList = new ArrayList<Thread>();
-		
+	public void collectPartition(TextIntReconstructor reconstructor) 
+			throws UnknownHostException, IOException, InterruptedException, ClassNotFoundException {
 
 		for (PartitionEntry taskEntry : this.task.getEntries()) {
 			
@@ -220,47 +216,12 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				soc.close();
 			}
 			
-			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
-			collectorRunnable.run();
-//				Thread collectorThread = new Thread(collectorRunnable);
-//				collectorThread.start();
-//				threadList.add(collectorThread);
-//			}
+			reconstructor.reconstruct(localFileName);
 		}
-		
-//		for (Thread th : threadList) {
-//			th.join();
-//		}
+
 	}
 	
-	private class Collector<K extends Writable, V extends Writable> implements Runnable {
-		
-		RecordReconstructor<K, V> rr;
-		String fileName;
-		
-		public Collector (RecordReconstructor<K, V> arg, String file) {
-			this.rr = arg;
-			this.fileName = file;
-		}
-		
-		@Override
-		public void run() {
-			System.out.println("RunReducer.Collector.run(): Start to recontsruct file=" + this.fileName);
-			try {
-				this.rr.reconstruct(this.fileName);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				System.exit(12);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(13);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				System.exit(14);
-			}
-		}
-		
-	}
+
 	
 	@SuppressWarnings("unchecked")
 	public Class<Reducer<Writable, Writable, Writable, Writable>> loadClass ()

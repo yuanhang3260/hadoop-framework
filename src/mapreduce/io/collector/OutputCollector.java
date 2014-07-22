@@ -6,6 +6,7 @@ import hdfs.io.HDFSFile;
 import hdfs.io.HDFSOutputStream;
 import hdfs.namenode.NameNodeRemoteInterface;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	List<KeyValue<K, V>> keyvalueList;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
-	ObjectOutputStream[] objOutputStreamArr;
+	BufferedOutputStream[] bufferedOutputStreamArr;
 	Task task;
 	int partitionNum;
 	
@@ -45,7 +46,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		this.partitionNum = ((MapperTask)this.task).getPartitionNum();
 		
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
-		this.objOutputStreamArr = new ObjectOutputStream[this.partitionNum];
+		this.bufferedOutputStreamArr = new BufferedOutputStream[this.partitionNum];
 	}
 	
 	/**
@@ -55,7 +56,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 */
 	public OutputCollector() {
 		this.keyvalueList = new ArrayList<KeyValue<K, V>>();
-		this.objOutputStreamArr = new ObjectOutputStream[1];
+		this.bufferedOutputStreamArr = new BufferedOutputStream[1];
 	}
 	
 	public void writeToLocal() throws IOException {
@@ -65,19 +66,20 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			String tmpFileName = task.localFileNameWrapper(i);
 			File tmpFile = new File(tmpFileName);
 			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
-			this.objOutputStreamArr[i] = new ObjectOutputStream(tmpFOS);
+			this.bufferedOutputStreamArr[i] = new BufferedOutputStream(tmpFOS);
 		}
-		
+
 		while (it.hasNext()) {
 			KeyValue<K, V> keyvalue = it.next();
 			int parNum = partitioner.getPartition(keyvalue.getKey(), keyvalue.getValue(), this.partitionNum);
-			this.objOutputStreamArr[parNum].writeObject(keyvalue);
+			this.bufferedOutputStreamArr[parNum].write(String.format("%s\t%s\n", 
+					keyvalue.getKey().toString(), keyvalue.getValue().toString())
+					.getBytes());
 		}
 		
-		
 		for (int j = 0 ; j < this.partitionNum; j++) {
-			this.objOutputStreamArr[j].flush();
-			this.objOutputStreamArr[j].close();
+			this.bufferedOutputStreamArr[j].flush();
+			this.bufferedOutputStreamArr[j].close();
 		}
 		
 		return;
