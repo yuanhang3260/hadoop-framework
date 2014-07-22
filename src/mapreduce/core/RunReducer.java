@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -172,34 +173,57 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			
 			String localFileName = this.task.localReducerFileNameWrapper(taskEntry.getTID());
 			File localFile = new File(localFileName);
-			FileOutputStream fout = new FileOutputStream(localFile);
 			
-			Socket soc = new Socket(taskEntry.getHost(), taskEntry.getPort());
-			PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-			BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
+			if (taskEntry.getHost().equals((Inet4Address.getLocalHost().getHostAddress()))) { 
+				
+				if (MapReduce.Core.DEBUG) {
+					System.out.println("RunReducer.collectPartition(): Get file from local file system");
+				}
+				
+				String srcFileName = this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID());
+				
+				File srcFile = new File(this.task.getLocalMapperFilePrefix() + "/" + srcFileName);  //Mapper file
+				
+				if (!srcFile.exists()) {
+					throw new IOException("Cannot found mapper file on local");
+				} else {
+					srcFile.renameTo(localFile);
+				}
+				
+			} else {
+				
+				if (MapReduce.Core.DEBUG) {
+					System.out.println("RunReducer.collectPartition(): Get file from other TaskTracker server.");
+				}
+				
+				FileOutputStream fout = new FileOutputStream(localFile);
 			
+				Socket soc = new Socket(taskEntry.getHost(), taskEntry.getPort());
+				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
+				BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
+				
+				String request = String.format("mapper-file\n%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
+				//System.out.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
+				out.write(request.toCharArray());
+				out.flush();
 			
-			String request = String.format("mapper-file\n%s\n", this.task.remoteFileNameWrapper(this.task.getSEQ(), taskEntry.getTID()));
-			//System.out.println("REQUESTING:" + request + "\tIP=" + taskEntry.getHost() + "\tTO:" + this.task.localReducerFileNameWrapper(taskEntry.getTID()));
-			out.write(request.toCharArray());
-			out.flush();
+				byte[] buff = new byte[BUFF_SIZE];
+				int readBytes = 0;
+				
+				while ((readBytes = in.read(buff)) != -1) {
+					fout.write(buff, 0, readBytes);
+				}
+				
+				in.close();
+				out.close();
+				fout.close();
+				soc.close();
 			
-			byte[] buff = new byte[BUFF_SIZE];
-			int readBytes = 0;
-			
-			while ((readBytes = in.read(buff)) != -1) {
-				fout.write(buff, 0, readBytes);
+				Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
+				Thread collectorThread = new Thread(collectorRunnable);
+				collectorThread.start();
+				threadList.add(collectorThread);
 			}
-			
-			in.close();
-			out.close();
-			fout.close();
-			soc.close();
-			
-			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
-			Thread collectorThread = new Thread(collectorRunnable);
-			collectorThread.start();
-			threadList.add(collectorThread);
 		}
 		
 		for (Thread th : threadList) {

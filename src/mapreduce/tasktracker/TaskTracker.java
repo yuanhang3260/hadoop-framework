@@ -288,6 +288,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						
 						} else if (newTask instanceof ReducerTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolderName);
+							((ReducerTask)newTask).setLocalMapperFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
 							TaskTracker.this.syncTaskList.add(newTask);
 							
 						} else if (newTask instanceof CleanerTask){
@@ -519,12 +520,24 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					ProcessBuilder pb = null;
 					
 					if (task instanceof MapperTask) {
-						pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
-						System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
+						if (MapReduce.TaskTracker.Individual.JAR) {
+							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
+						} else {
+							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
+						}
+						if (MapReduce.Core.DEBUG) {
+							System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
+						}
 					} else if (task instanceof ReducerTask) {
-						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarEntry().getLocalPath());
-						pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
-						System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
+						if (MapReduce.TaskTracker.Individual.JAR) {
+							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
+						} else {
+							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
+						}
+//						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarEntry().getLocalPath());
+						if (MapReduce.Core.DEBUG) {
+							System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
+						}
 					}
 					
 					try {
