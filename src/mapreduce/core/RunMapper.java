@@ -162,7 +162,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			throws IOException, ClassNotFoundException {
 		
 		/* Load Jar file */
-		String jarFilePath = this.task.getJarLocalPath();
+		String jarFilePath = this.task.getJarEntry().getLocalPath();
 		JarFile jarFile = new JarFile(jarFilePath);
 		Enumeration<JarEntry> e = jarFile.entries();
 		

@@ -50,22 +50,10 @@ public class MapperTask extends Task implements MapRedTask{
 		return this.jarEntry;
 	}
 	
-	public void setTaskTrackerLocalJarPath(String localPath) {
-		
-		this.jarEntry.setLocalPath(localPath);
-
-	}
 	
 	public String getMapperClassName() {
 		return this.mapperClassName;
 	}
-	
 
-	@Override
-	public String getJarLocalPath() {
-
-		return this.jarEntry.getLocalPath();
-	
-	}
 
 }
