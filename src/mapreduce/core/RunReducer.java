@@ -166,7 +166,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			throws UnknownHostException, IOException, InterruptedException {
 		
 		
-		List<Thread> threadList = new ArrayList<Thread>();
+//		List<Thread> threadList = new ArrayList<Thread>();
 		
 
 		for (PartitionEntry taskEntry : this.task.getEntries()) {
@@ -218,17 +218,19 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				out.close();
 				fout.close();
 				soc.close();
-			
-				Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
-				Thread collectorThread = new Thread(collectorRunnable);
-				collectorThread.start();
-				threadList.add(collectorThread);
 			}
+			
+			Collector<K1, V1> collectorRunnable = new Collector<K1, V1>(recordReconstructor, localFileName);
+			collectorRunnable.run();
+//				Thread collectorThread = new Thread(collectorRunnable);
+//				collectorThread.start();
+//				threadList.add(collectorThread);
+//			}
 		}
 		
-		for (Thread th : threadList) {
-			th.join();
-		}
+//		for (Thread th : threadList) {
+//			th.join();
+//		}
 	}
 	
 	private class Collector<K extends Writable, V extends Writable> implements Runnable {
