@@ -145,6 +145,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		if (close) {
 			this.bout.close();
 			File tmpFile = new File(this.reducerTmpFile);
+			
 			tmpFile.delete();
 		}
 	}
