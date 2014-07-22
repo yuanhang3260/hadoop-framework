@@ -1,5 +1,6 @@
 package mapreduce.jobtracker;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import mapreduce.message.Task;
@@ -11,7 +12,9 @@ import mapreduce.message.Task;
  * first; c. earlier taskId goes first
  * 
  */
-public class SchedulerComparator implements Comparator<Task>{
+public class SchedulerComparator implements Comparator<Task>, Serializable{
+
+	private static final long serialVersionUID = -5398685035241499479L;
 
 	@Override
 	public int compare(Task t1, Task t2) {

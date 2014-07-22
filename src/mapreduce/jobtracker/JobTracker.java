@@ -923,6 +923,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							int size = tasks.size();
 							while (size != 0) {
 								Task task = tasks.poll();
+								
+								if (Hdfs.Core.DEBUG) {
+									System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task " + task.getTaskId() + " in job " + task.getJobId() + " out of tasktracker queue");
+								}
+								
 								if (task instanceof MapperTask) {
 									JobTracker.this.jobScheduler.addMapTask((MapperTask) task);
 								} else if (task instanceof ReducerTask) {
