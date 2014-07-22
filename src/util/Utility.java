@@ -3,9 +3,9 @@ package util;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
 import hdfs.io.HDFSBufferedOutputStream;
+import hdfs.io.HDFSFile;
 import hdfs.io.HDFSInputStream;
 import hdfs.io.HDFSOutputStream;
 

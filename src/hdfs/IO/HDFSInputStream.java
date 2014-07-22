@@ -2,8 +2,6 @@ package hdfs.io;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.DataStructure.DataNodeEntry;
-import hdfs.DataStructure.HDFSChunk;
 
 import java.io.IOException;
 import java.io.Serializable;

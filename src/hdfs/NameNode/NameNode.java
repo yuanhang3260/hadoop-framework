@@ -2,9 +2,9 @@ package hdfs.NameNode;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.DataStructure.DataNodeEntry;
-import hdfs.DataStructure.HDFSChunk;
-import hdfs.DataStructure.HDFSFile;
+import hdfs.io.DataNodeEntry;
+import hdfs.io.HDFSChunk;
+import hdfs.io.HDFSFile;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;

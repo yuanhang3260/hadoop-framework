@@ -3,8 +3,8 @@ package mapreduce.jobtracker;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.DataStructure.DataNodeEntry;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.DataNodeEntry;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;

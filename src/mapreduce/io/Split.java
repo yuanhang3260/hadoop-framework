@@ -1,6 +1,6 @@
 package mapreduce.io;
 
-import hdfs.DataStructure.HDFSFile;
+import hdfs.io.HDFSFile;
 
 import java.io.Serializable;
 

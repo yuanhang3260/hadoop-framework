@@ -3,9 +3,9 @@ package mapreduce;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.DataStructure.HDFSChunk;
-import hdfs.DataStructure.HDFSFile;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSChunk;
+import hdfs.io.HDFSFile;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
