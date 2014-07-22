@@ -2,6 +2,9 @@ package mapreduce.tasktracker;
 
 import global.Hdfs;
 import global.MapReduce;
+import hdfs.io.HDFSFile;
+import hdfs.io.HDFSInputStream;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -505,6 +508,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							if (MapReduce.Core.DEBUG) {
 								e.printStackTrace();
 								task.failedTask();
+								System.out.println("RUNNING?");
 								continue;
 							}
 						}
@@ -514,7 +518,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					System.out.println("TaskTracker.StartTask.run(): Before set JarFilePath:" + (TaskTracker.
 							this.taskJarFolder.getAbsolutePath() + "/" + 
 							task.getJobId() + ".jar"));
-					((MapRedTask) task).setTaskTrackerLocalJarPath(TaskTracker.
+					((MapRedTask) task).getJarEntry().setLocalPath(TaskTracker.
 							this.taskJarFolder.getAbsolutePath() + "/" + 
 							task.getJobId() + ".jar");
 					
@@ -524,7 +528,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
 					} else if (task instanceof ReducerTask) {
-						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarLocalPath());
+						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarEntry().getLocalPath());
 						pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
 						System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
 					}
@@ -552,36 +556,31 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		
 		private void downloadJar (MapRedTask task, String jid) throws IOException {
 			try {
+				
+				Registry NameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+				NameNodeRemoteInterface NameNodeS = (NameNodeRemoteInterface) NameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
+				HDFSFile jarFile = NameNodeS.open(task.getJarEntry().getFullPath());
+				
+				HDFSInputStream in = jarFile.getInputStream();
+				
 				File localFile = new File(TaskTracker.this.taskJarFolder.getAbsolutePath() + "/" + jid + ".jar");
 				FileOutputStream fout = new FileOutputStream(localFile);
 				
 				JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
 				
-				System.out.println("TaskTracker IP for downloading jar : " + jarEntry.getTaskTrackerIp() + ":" + jarEntry.getServerPort());
-				
-				Socket soc = new Socket(jarEntry.getTaskTrackerIp(),
-						jarEntry.getServerPort());
-				
-				PrintWriter out = new PrintWriter(soc.getOutputStream(), true);
-				BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
-				
-				
-				String request = String.format("jar-file\n%s\n", jarEntry.getFullPath());
-				
-				out.write(request.toCharArray());
-				out.flush();
-				
-				byte[] buff = new byte[BUFF_SIZE];
-				int len = 0;
-				
-				while ((len = in.read(buff)) != -1) {
-					fout.write(buff, 0, len);
+				if (MapReduce.Core.DEBUG) {
+					System.out.println("DEBUG TaskTracker IP for downloading jar : " 
+								+ jarEntry.getTaskTrackerIp() + ":" + jarEntry.getServerPort());
 				}
 				
-				in.close();
-				out.close();
+				byte[] buff = new byte[Hdfs.Core.READ_BUFF_SIZE];
+				int len = -1;
+				
+				while ((len = in.read(buff)) != 0) {
+					fout.write(buff, 0, len);
+				}
+
 				fout.close();
-				soc.close();
 
 			} catch (Exception e) {
 				throw new IOException("Failed to download Jar file", e);
@@ -642,6 +641,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				/* Receive requested file */
 				String fileName = in.readLine();
 				
+				/* Responde mapper-file */
 				if (reqType.equals("mapper-file")) {
 					
 					String mapperFileFullPath = 
@@ -651,23 +651,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					if (MapReduce.Core.DEBUG) {
 						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
 								+ "respond file:" + mapperFileFullPath);
-					}
-					
-					fin = new FileInputStream(file);
-					byte[] buff = new byte[BUFF_SIZE];
-					int readBytes = 0;
-					while((readBytes = fin.read(buff)) != -1) {
-						out.write(buff, 0, readBytes);
-					}
-				} else if (reqType.equals("jar-file")) {
-					
-					String jarFileFullPath = fileName;
-					
-					File file = new File(jarFileFullPath);
-					
-					if (MapReduce.Core.DEBUG) {
-						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
-								+ "respond file:\\" + jarFileFullPath);
 					}
 					
 					fin = new FileInputStream(file);

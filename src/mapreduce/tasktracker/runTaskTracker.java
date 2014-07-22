@@ -12,12 +12,6 @@ import java.rmi.RemoteException;
 public class runTaskTracker {
 	public static void main(String[] args) {
 		
-		if (args == null || args.length < 1) {
-			System.out.println("Usage:\t<TaskTracker Sequential>");
-			System.exit(1);
-		}
-		
-		
 		try {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
