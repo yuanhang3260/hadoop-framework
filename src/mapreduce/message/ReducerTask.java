@@ -12,6 +12,7 @@ public class ReducerTask extends Task implements MapRedTask {
 	private PartitionEntry[] partitionEntry;
 	private String outputPath;
 	private JarFileEntry jarEntry;
+	private String localMapperFilePrefix;
 
 	public ReducerTask(String jobId, String tid, int level, int reducerSEQ, String theClassName, PartitionEntry[] partitionEntry, String path, JarFileEntry jarEntry) {
 		super(jobId, tid, level);
@@ -49,6 +50,14 @@ public class ReducerTask extends Task implements MapRedTask {
 	
 	public JarFileEntry getJarEntry() {
 		return this.jarEntry;
+	}
+	
+	public void setLocalMapperFilePrefix(String prefix) {
+		this.localMapperFilePrefix = prefix;
+	}
+	
+	public String getLocalMapperFilePrefix() {
+		return this.localMapperFilePrefix;
 	}
 
 
