@@ -1,8 +1,9 @@
 package mapreduce.io.recordreader;
 
+import hdfs.io.HDFSInputStream;
+
 import java.io.IOException;
 
-import hdfs.IO.HDFSInputStream;
 import mapreduce.io.KeyValue;
 import mapreduce.io.Split;
 import mapreduce.io.writable.Text;

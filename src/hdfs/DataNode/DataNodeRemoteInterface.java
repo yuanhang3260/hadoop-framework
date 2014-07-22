@@ -1,6 +1,6 @@
-package hdfs.DataNode;
+package hdfs.datanode;
 
-import hdfs.IO.HDFSLineFeedCheck;
+import hdfs.io.HDFSLineFeedCheck;
 
 import java.io.IOException;
 import java.rmi.Remote;

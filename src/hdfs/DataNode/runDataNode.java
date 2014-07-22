@@ -1,4 +1,4 @@
-package hdfs.DataNode;
+package hdfs.datanode;
 
 import global.Hdfs;
 import global.Parser;
@@ -12,10 +12,9 @@ public class runDataNode {
 			System.exit(1);
 		}
 		
-		int dataNodeSEQ = Integer.parseInt(args[0]);
 		
 		try {
-			Parser.dataNodeConf(dataNodeSEQ);
+			Parser.dataNodeConf();
 			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
 		} catch (Exception e) {
 			e.printStackTrace();

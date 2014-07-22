@@ -1,10 +1,10 @@
 package mapreduce.io.collector;
 
 import global.Hdfs;
-import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSBufferedOutputStream;
-import hdfs.IO.HDFSOutputStream;
-import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSBufferedOutputStream;
+import hdfs.io.HDFSFile;
+import hdfs.io.HDFSOutputStream;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,8 +21,8 @@ import java.util.List;
 import mapreduce.io.KeyValue;
 import mapreduce.io.Partitioner;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.MapperTask;
-import mapreduce.task.Task;
+import mapreduce.message.MapperTask;
+import mapreduce.message.Task;
 
 public class OutputCollector<K extends Writable, V extends Writable> {
 	

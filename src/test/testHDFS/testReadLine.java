@@ -2,8 +2,8 @@ package test.testHDFS;
 
 import global.Hdfs;
 import global.Parser;
-import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.IO.HDFSLineFeedCheck;
+import hdfs.datanode.DataNodeRemoteInterface;
+import hdfs.io.HDFSLineFeedCheck;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -14,7 +14,7 @@ public class testReadLine {
 		
 		try {
 			Parser.hdfsCoreConf();
-			Parser.dataNodeConf(0);
+			Parser.dataNodeConf();
 			
 			String chunkName = "1405889958420";
 			

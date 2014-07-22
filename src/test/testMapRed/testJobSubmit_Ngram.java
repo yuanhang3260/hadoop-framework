@@ -1,9 +1,7 @@
 package test.testMapRed;
 
-import mapreduce.JobClient;
-import mapreduce.JobConf;
-import example.Ngram.NgramMapper;
-import example.Ngram.NgramReducer;
+import mapreduce.client.JobClient;
+import mapreduce.client.JobConf;
 
 public class testJobSubmit_Ngram {
 	public static void main(String[] args) {

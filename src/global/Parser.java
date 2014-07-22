@@ -16,20 +16,20 @@ import org.xml.sax.SAXException;
 public class Parser {
 	
 	public static void main (String[] args) throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {
-//		hdfsCoreConf();
-//		dataNodeConf(1);
-//		printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
+		hdfsCoreConf();
+		dataNodeConf();
+		printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
 		
-//		mapreduceCoreConf();
-//		printConf(new ConfOpt[] {ConfOpt.MAPREDCORE});
-//		
-//		mapreduceJobTrackerConf();
-//		printConf(new ConfOpt[] {ConfOpt.JOBTACKER});
+		mapreduceCoreConf();
+		printConf(new ConfOpt[] {ConfOpt.MAPREDCORE});
 		
-//		mapreduceTaskTrackerCommonConf();
-//		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERCOMMON});
+		mapreduceJobTrackerConf();
+		printConf(new ConfOpt[] {ConfOpt.JOBTACKER});
 		
-		mapreduceTaskTrackerIndividualConf(0);
+		mapreduceTaskTrackerCommonConf();
+		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERCOMMON});
+		
+		mapreduceTaskTrackerIndividualConf();
 		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERINDIVIDUAL});
 		
 		
@@ -144,7 +144,7 @@ public class Parser {
 		}
 	}
 	
-	public static void dataNodeConf(int dataNodeSEQ) throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {
+	public static void dataNodeConf() throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {
 		
 		hdfsCoreConf();
 		
@@ -156,10 +156,7 @@ public class Parser {
 		
 		NodeList nList = doc.getElementsByTagName("datanode");
 		
-		if (dataNodeSEQ >= nList.getLength()) {
-			throw new ConfFormatException(String.format("DataNode %d cannot be found."));
-		}
-		Node nNode = nList.item(dataNodeSEQ);
+		Node nNode = nList.item(0);
  
 		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 			
@@ -329,7 +326,7 @@ public class Parser {
 		}
 	}
 	
-	public static void mapreduceTaskTrackerIndividualConf(int tasktrackerSEQ) throws ParserConfigurationException, 
+	public static void mapreduceTaskTrackerIndividualConf() throws ParserConfigurationException, 
 	SAXException, IOException, ConfFormatException, NumberFormatException {
 		
 		File fXmlFile = new File("./conf/mapreduce.xml");
@@ -348,11 +345,7 @@ public class Parser {
 			
 			NodeList individualList = eElement.getElementsByTagName("individual");
 			
-			if (tasktrackerSEQ >= individualList.getLength()) {
-				throw new ConfFormatException(String.format("TaskTracker %d cannot be found.", tasktrackerSEQ));
-			}
-			
-			Node objectiveIndividualNode = individualList.item(tasktrackerSEQ);
+			Node objectiveIndividualNode = individualList.item(0);
 			
 			if (objectiveIndividualNode.getNodeType() == Node.ELEMENT_NODE) {
 				
@@ -486,6 +479,11 @@ public class Parser {
 	
 	public static class ConfFormatException extends Exception {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8494918500253529934L;
+
 		public ConfFormatException(String message) {
 			super(message);
 		}

@@ -31,13 +31,13 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
-import mapreduce.task.CleanerTask;
-import mapreduce.task.JarFileEntry;
-import mapreduce.task.KillerTask;
-import mapreduce.task.MapRedTask;
-import mapreduce.task.MapperTask;
-import mapreduce.task.ReducerTask;
-import mapreduce.task.Task;
+import mapreduce.message.CleanerTask;
+import mapreduce.message.JarFileEntry;
+import mapreduce.message.KillerTask;
+import mapreduce.message.MapRedTask;
+import mapreduce.message.MapperTask;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 public class TaskTracker implements TaskTrackerRemoteInterface {
 	
@@ -715,6 +715,19 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 
 			for (String mapperFileName : this.task.getMapperFile()) {
 				
+				String jarFileFullPath = String.format("%s//%s.jar", TaskTracker.this.taskJarFolder.getAbsolutePath(), task.getJobId());
+				
+				File jarFile = new File(jarFileFullPath);
+				
+				if (MapReduce.Core.DEBUG) {
+					System.out.println("DEBUG TaskTracker.CleanJob.run()\tclean up " +
+							jarFileFullPath + " with status " + jarFile.delete());
+				} else {
+					jarFile.delete();
+				}
+				
+				
+				
 				for (int i = 0; i < task.getPartitionNum(); i++) {
 					
 					String fileFullPath = String.format("%s/%s-%d", 
@@ -743,7 +756,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				if (MapReduce.Core.DEBUG) {
 					System.out.println("DEBUG TaskTracker.CleanJob.run()\tclean up " 
-							+ fileFullPath + "with status " + reducerTmpFile.delete());
+							+ fileFullPath + " with status " + reducerTmpFile.delete());
 				} else {
 					reducerTmpFile.delete();
 				}

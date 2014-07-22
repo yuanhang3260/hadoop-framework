@@ -18,7 +18,4 @@
 		<port>1150</port>
 	</datanode>
 
-	<datanode>
-		<port>1151</port>
-	</datanode>
 </hdfs>

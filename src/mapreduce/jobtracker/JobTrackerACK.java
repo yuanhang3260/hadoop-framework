@@ -3,7 +3,7 @@ package mapreduce.jobtracker;
 import java.io.Serializable;
 import java.util.List;
 
-import mapreduce.task.Task;
+import mapreduce.message.Task;
 
 /**
  * A JobTrackerACK is used as a return value of heartBeat, it assigns new tasks

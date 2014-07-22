@@ -1,7 +1,7 @@
-package hdfs.NameNode;
+package hdfs.namenode;
 
-import hdfs.DataStructure.DataNodeEntry;
-import hdfs.DataStructure.HDFSFile;
+import hdfs.io.DataNodeEntry;
+import hdfs.io.HDFSFile;
 
 import java.io.IOException;
 import java.rmi.Remote;

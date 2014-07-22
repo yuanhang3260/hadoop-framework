@@ -3,11 +3,11 @@ package util;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSBufferedOutputStream;
-import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSOutputStream;
-import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSBufferedOutputStream;
+import hdfs.io.HDFSFile;
+import hdfs.io.HDFSInputStream;
+import hdfs.io.HDFSOutputStream;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.Inet4Address;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NotBoundException;
@@ -32,10 +31,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import mapreduce.JobClient;
-import mapreduce.JobConf;
-import mapreduce.core.Mapper;
-import mapreduce.io.writable.Writable;
+import mapreduce.client.JobClient;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
@@ -49,7 +45,7 @@ public class Utility {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
-			Parser.mapreduceTaskTrackerIndividualConf(1);
+			Parser.mapreduceTaskTrackerIndividualConf();
 		} catch (Exception e) {
 			
 			e.printStackTrace();

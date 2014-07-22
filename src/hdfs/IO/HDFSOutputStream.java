@@ -1,11 +1,8 @@
-package hdfs.IO;
+package hdfs.io;
 
 import global.Hdfs;
-import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.DataStructure.DataNodeEntry;
-import hdfs.DataStructure.HDFSChunk;
-import hdfs.DataStructure.HDFSFile;
-import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.datanode.DataNodeRemoteInterface;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.IOException;
 import java.io.OutputStream;

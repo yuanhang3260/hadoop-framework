@@ -6,7 +6,6 @@ import global.Parser.ConfOpt;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.NotBoundException;
@@ -22,7 +21,7 @@ import mapreduce.io.collector.OutputCollector;
 import mapreduce.io.recordreader.KeyValueLineRecordReader;
 import mapreduce.io.writable.Text;
 import mapreduce.io.writable.Writable;
-import mapreduce.task.MapperTask;
+import mapreduce.message.MapperTask;
 import mapreduce.tasktracker.TaskTrackerRemoteInterface;
 
 public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {
@@ -79,7 +78,8 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			/*------------------ Prepare input records ----------------*/
 			
 			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunMapper.main(): RunMapper retrived task and start to prepare records");
+				System.out.println("DEBUG RunMapper.main(): "
+						+ "RunMapper retrived task and start to prepare records");
 			}
 			KeyValueLineRecordReader recordReader = new KeyValueLineRecordReader(rm.task.split);
 			recordReader.parseRecords();
@@ -88,7 +88,8 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			/*------------------ Map Phase ----------------*/
 			
 			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunMapper.main(): All input records are ready and now move to map phase.");
+				System.out.println("DEBUG RunMapper.main(): "
+						+ "All input records are ready and now move to map phase.");
 			}
 			
 			//STEP 1: Load mapper class
@@ -156,6 +157,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		
 	}	
 	
+	@SuppressWarnings("unchecked")
 	public Class<Mapper<Writable, Writable, Writable, Writable>> loadClass ()
 			throws IOException, ClassNotFoundException {
 		

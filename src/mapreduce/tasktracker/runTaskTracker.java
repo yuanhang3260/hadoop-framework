@@ -12,20 +12,17 @@ import java.rmi.RemoteException;
 public class runTaskTracker {
 	public static void main(String[] args) {
 		
-		int tasktrackerSEQ;
-		
 		if (args == null || args.length < 1) {
 			System.out.println("Usage:\t<TaskTracker Sequential>");
 			System.exit(1);
 		}
 		
-		tasktrackerSEQ = Integer.parseInt(args[0]);
 		
 		try {
 			Parser.hdfsCoreConf();
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
-			Parser.mapreduceTaskTrackerIndividualConf(tasktrackerSEQ);
+			Parser.mapreduceTaskTrackerIndividualConf();
 			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.MAPREDCORE, ConfOpt.TASKTRACKERCOMMON, ConfOpt.TASKTRACKERINDIVIDUAL});
 		} catch (Exception e) {
 			e.printStackTrace();

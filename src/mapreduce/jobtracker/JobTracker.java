@@ -3,8 +3,8 @@ package mapreduce.jobtracker;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.DataStructure.DataNodeEntry;
-import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.DataNodeEntry;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -25,14 +25,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import mapreduce.Job;
 import mapreduce.io.Split;
-import mapreduce.task.CleanerTask;
-import mapreduce.task.KillerTask;
-import mapreduce.task.MapperTask;
-import mapreduce.task.PartitionEntry;
-import mapreduce.task.ReducerTask;
-import mapreduce.task.Task;
+import mapreduce.message.CleanerTask;
+import mapreduce.message.Job;
+import mapreduce.message.KillerTask;
+import mapreduce.message.MapperTask;
+import mapreduce.message.PartitionEntry;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 public class JobTracker implements JobTrackerRemoteInterface {
 	
