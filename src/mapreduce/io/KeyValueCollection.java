@@ -1,24 +1,24 @@
 package mapreduce.io;
 
-import java.util.Iterator;
+import java.util.List;
 
 import mapreduce.io.writable.Writable;
 
 public class KeyValueCollection<K extends Writable, V extends Writable> {
 	private K key;
-	private Iterator<V> valueIterator;
+	private List<V> valueList;
 	
-	public KeyValueCollection(K key, Iterator<V> valueI) {
+	public KeyValueCollection(K key, List<V> valueList) {
 		this.key = key;
-		this.valueIterator = valueI;
+		this.valueList = valueList;
 	}
 	
 	public K getKey() {
 		return this.key;
 	}
 	
-	public Iterator<V> getValues() {
-		return this.valueIterator;
+	public List<V> getValues() {
+		return this.valueList;
 	}
 	
 }

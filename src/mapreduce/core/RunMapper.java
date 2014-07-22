@@ -108,7 +108,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 				rm.mapper.map(nextLine.getKey(), nextLine.getValue(), output);
 			}
 			
-			output.flush();
+			output.flushToLocal();
 			
 			/*------------------ Sort intermediate values and write ----------------*/
 			

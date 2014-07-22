@@ -78,20 +78,14 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			}
 			
 			/*------ Collect partitions -----*/
-			rr.collectPartition(recordReconstructor);
+			rr.collectPartition();
 
 			
 			/*------ Sort -----*/
 			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Start to sort");
 			}
-			recordReconstructor.sort();
-			
-			/*------- Merge the value with the same key -------*/
-			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunReducer.main(): Finish sorting and start to merge");
-			}
-			recordReconstructor.merge();
+			recordReconstructor.sort(rr.task);
 			
 			
 			/*---------- Reduce ------------*/
@@ -105,11 +99,13 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 					rr.loadClass();
 			
 			//STEP 2: Run mapper
-			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>();
+			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rr.task.getOutputPath());
+			
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) reducerClass.getConstructors()[0].newInstance();
+			
 			while (recordReconstructor.hasNext()) {
 				KeyValueCollection<Text, IntWritable> nextLine = recordReconstructor.nextKeyValueCollection();
-				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues(), output);
+				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues().iterator(), output);
 			}
 			
 			/*----------- Sort Output by key -----------*/
@@ -122,7 +118,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			if (MapReduce.Core.DEBUG) {
 				System.out.println("DEBUG RunReducer.main(): Finish sorting and start write to HDFS");
 			}
-			output.writeToHDFS(rr.task.getOutputPath());
+			output.flushToHDFS(true);;
 			
 		} catch (RemoteException e) {
 			if (MapReduce.Core.DEBUG) { e.printStackTrace(); }
@@ -162,7 +158,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 	}
 	
-	public void collectPartition(TextIntReconstructor reconstructor) 
+	public void collectPartition() 
 			throws UnknownHostException, IOException, InterruptedException, ClassNotFoundException {
 
 		for (PartitionEntry taskEntry : this.task.getEntries()) {
@@ -215,8 +211,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				fout.close();
 				soc.close();
 			}
-			
-			reconstructor.reconstruct(localFileName);
 		}
 
 	}

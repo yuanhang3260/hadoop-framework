@@ -10,7 +10,6 @@ import hdfs.namenode.NameNodeRemoteInterface;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import mapreduce.message.Task;
 public class OutputCollector<K extends Writable, V extends Writable> {
 	
 	private Queue<KeyValue<K, V>> keyvalueQueue;
+	private boolean forMapper;
 	File[] fileArr;
 	FileOutputStream[] fileOutputStreamArr;
 	BufferedOutputStream[] bufferedOutputStreamArr;
@@ -40,6 +40,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	
 	private int fileCounter = 0;
 	private final int FILE_MAX_LINES = MapReduce.Core.FILE_MAX_LINES;
+	private HDFSBufferedOutputStream bout;
 	
 	
 	/**
@@ -54,71 +55,45 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 		this.keyvalueQueue = new PriorityQueue<KeyValue<K, V>>();
 		this.bufferedOutputStreamArr = new BufferedOutputStream[this.partitionNum];
+		this.forMapper = true;
 	}
 	
 	/**
 	 * OutputCollector constructor: This is for reducers, which
 	 * merges same partitions collected from different mappers
 	 * to a file on HDFS.
+	 * @throws NotBoundException 
+	 * @throws IOException 
 	 */
-	public OutputCollector() {
+	public OutputCollector(String filename) throws NotBoundException, IOException {
 		this.keyvalueQueue = new PriorityQueue<KeyValue<K, V>>();
 		this.bufferedOutputStreamArr = new BufferedOutputStream[1];
-	}
-	
-//	public void writeToLocal() throws IOException {
-//		Partitioner<K> partitioner = new Partitioner<K>();
-//		OutputCollectorIterator<K, V> it = this.iterator(); 
-//		for (int i = 0 ; i < this.partitionNum; i++) {
-//			String tmpFileName = task.localFileNameWrapper(i);
-//			File tmpFile = new File(tmpFileName);
-//			FileOutputStream tmpFOS = new FileOutputStream(tmpFile);
-//			this.bufferedOutputStreamArr[i] = new BufferedOutputStream(tmpFOS);
-//		}
-//
-//		while (it.hasNext()) {
-//			KeyValue<K, V> keyvalue = it.next();
-//			int parNum = partitioner.getPartition(keyvalue.getKey(), this.partitionNum);
-//			this.bufferedOutputStreamArr[parNum].write(String.format("%s\t%s\n", 
-//					keyvalue.getKey().toString(), keyvalue.getValue().toString())
-//					.getBytes());
-//		}
-//		
-//		for (int j = 0 ; j < this.partitionNum; j++) {
-//			this.bufferedOutputStreamArr[j].flush();
-//			this.bufferedOutputStreamArr[j].close();
-//		}
-//		
-//		return;
-//		
-//	}
-	
-	public void writeToHDFS(String filename) throws NotBoundException, IOException {
+		this.forMapper = false;
+		
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		System.out.println("dst ip:" + Hdfs.Core.NAME_NODE_IP + "\t dst port:" + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
-		System.err.println("dst ip:" + Hdfs.Core.NAME_NODE_IP + "\t dst port:" + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeS.create(filename);
 		HDFSOutputStream out = file.getOutputStream();
-		HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(out);
+		this.bout = new HDFSBufferedOutputStream(out);
 		
-		for (KeyValue<K, V> pair : this.keyvalueQueue) {
-			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
-			bout.write(content);
-		}
-		bout.close();
 	}
+	
 	
 	public void collect(K key, V value) throws IOException {
 		
 		this.keyvalueQueue.offer(new KeyValue<K, V>(key, value));	
 
 		if ((this.keyvalueQueue.size()) % this.FILE_MAX_LINES == 0) { //write to temp file
-			flush();
+			if (this.forMapper) {
+				flushToLocal();
+			} else {
+				flushToHDFS(false);
+			}
 		}
  	}
 	
-	public void flush() throws IOException {
+	public void flushToLocal() throws IOException {
 		String filePrefix = task.getFilePrefix();
 		String filename = String.format("%s/%s-%s-tmp-%d.tmp", 
 				filePrefix, this.task.getJobId(), this.task.getTaskId(), this.fileCounter++);
@@ -134,6 +109,18 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		bout.flush();
 		bout.close();
 		this.keyvalueQueue = new PriorityQueue<KeyValue<K, V>>();
+	}
+	
+	public void flushToHDFS(boolean close) throws IOException {
+		while (!this.keyvalueQueue.isEmpty()) {
+			KeyValue<K, V> pair = this.keyvalueQueue.poll();
+			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
+			this.bout.write(content);
+		}
+		
+		if (close) {
+			this.bout.close();
+		}
 	}
 	
 	public OutputCollectorIterator<K, V> iterator() {
@@ -232,6 +219,8 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			return it.next();
 		}
 	}
+
+	
 	
 	private class FileKeyValue implements Comparable<FileKeyValue> {
 		
