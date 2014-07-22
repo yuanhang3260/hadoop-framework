@@ -36,6 +36,7 @@ import mapreduce.message.JarFileEntry;
 import mapreduce.message.KillerTask;
 import mapreduce.message.MapRedTask;
 import mapreduce.message.MapperTask;
+import mapreduce.message.PartitionEntry;
 import mapreduce.message.ReducerTask;
 import mapreduce.message.Task;
 
@@ -399,9 +400,27 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 										+ "Task<jid=%s, tid=%s, type=%s> failed with CODE %d\n",
 										task.getJobId(), task.getTaskId(), type, exitVal);
 									
-									byte[] errBuff = new byte[1024];
-									int c = 0;
+									/* remove tmp file */
+									if (task instanceof MapperTask) {
+										
+										for (int i = 0; i < ((MapperTask)task).getPartitionNum(); i++) {
+											File tmpFile = new File(String.format("%s-%s-%d", task.getJobId(), task.getTaskId(), i));
+											tmpFile.delete();
+										}
+										
+									} else if (task instanceof ReducerTask) {
+										
+										PartitionEntry[] entries = ((ReducerTask)task).getEntries();
+										for (int i = 0; i < entries.length; i++) {
+											File tmpFile = new File(String.format("%s-%s-%s", task.getJobId(), task.getTaskId(), entries[i].getTID()));
+											tmpFile.delete();
+										}
+										
+									}
+									
 									try {
+										byte[] errBuff = new byte[1024];
+										int c = 0;
 										while ( (c = task.getErrInputStream().read(errBuff)) != -1) {
 											System.out.print(new String(errBuff, 0 ,c));
 										}
