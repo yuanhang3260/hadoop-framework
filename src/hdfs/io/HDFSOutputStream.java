@@ -100,9 +100,18 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 							this.chunk_offset, this.chunk_offset + written + towrite);
 				}
 				
+				int successWrites = 0;
 				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
-					writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
+					try {
+						writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
 							getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
+						successWrites++;
+					} catch (IOException e) {
+						if (Hdfs.Core.DEBUG) { e.printStackTrace();}
+					}
+				}
+				if (successWrites < 1) {
+					throw new IOException("Unable to write to any of DataNodes.");
 				}
 				
 				this.chunk_offset += towrite;

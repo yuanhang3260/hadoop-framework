@@ -80,7 +80,16 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 	}
 	
-	
+	/**
+	 * This method collect the output of Mappers and Reducers.
+	 * In order to prevent running out of memory, the output
+	 * collector flush the key value pair to files. And an 
+	 * external sorting is used later if needed.
+	 * 
+	 * @param key The output key.
+	 * @param value The output value
+	 * @throws IOException 
+	 */
 	public void collect(K key, V value) throws IOException {
 		
 		this.keyvalueQueue.offer(new KeyValue<K, V>(key, value));	
@@ -94,7 +103,12 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		}
  	}
 	
-	public void flushToLocal() throws IOException {
+	
+	/**
+	 * Flush the buffer of OutputCollector to local files.
+	 * @throws IOException
+	 */
+	private void flushToLocal() throws IOException {
 		String filePrefix = task.getFilePrefix();
 		String filename = String.format("%s/%s-%s-tmp-%d.tmp", 
 				filePrefix, this.task.getJobId(), this.task.getTaskId(), this.fileCounter++);
@@ -104,7 +118,8 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 		while (!this.keyvalueQueue.isEmpty()) {
 			KeyValue<K, V> pair = this.keyvalueQueue.poll();
-			String pairString = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString());
+			String pairString = String.format("%s\t%s\n", 
+					pair.getKey().toString(), pair.getValue().toString());
 			bout.write(pairString.getBytes());
 		}
 		bout.flush();
@@ -112,10 +127,18 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		this.keyvalueQueue = new PriorityQueue<KeyValue<K, V>>();
 	}
 	
-	public void flushToHDFS(boolean close) throws IOException {
+	
+	/**
+	 * Flush the buffer of OutputCollector to HDFS.
+	 * 
+	 * @param close if 
+	 * @throws IOException
+	 */
+	private void flushToHDFS(boolean close) throws IOException {
 		while (!this.keyvalueQueue.isEmpty()) {
 			KeyValue<K, V> pair = this.keyvalueQueue.poll();
-			byte[] content = String.format("%s\t%s\n", pair.getKey().toString(), pair.getValue().toString()).getBytes();
+			byte[] content = String.format("%s\t%s\n", 
+					pair.getKey().toString(), pair.getValue().toString()).getBytes();
 			this.bout.write(content);
 		}
 		
