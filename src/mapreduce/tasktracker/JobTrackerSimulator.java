@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import mapreduce.io.Split;
 import mapreduce.jobtracker.JobStatus;
@@ -192,6 +193,13 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 
 	@Override
 	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AbstractMap<String, Queue<Task>> getScheduleTbl()
 			throws RemoteException {
 		// TODO Auto-generated method stub
 		return null;

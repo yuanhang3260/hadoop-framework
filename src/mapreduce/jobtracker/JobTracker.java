@@ -321,6 +321,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				
 				if (taskStatus.status == WorkStatus.FAILED 
 						|| taskStatus.status == WorkStatus.SUCCESS) {
+					
 					ackTasks.add(taskStatus);
 				}
 			}
@@ -412,6 +413,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				} else {
 					System.out.println(" reduce task");
 					jobStatus.reduceTaskLeft--;
+					
 					/* if job finished, check if all reducers are SUCCESS,
 					 * otherwise restart the whole job */
 					if (jobStatus.reduceTaskLeft == 0 ) {
@@ -774,6 +776,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()
 			throws RemoteException {
 		return this.taskTrackerTbl;
+	}
+	
+	@Override
+	public AbstractMap<String, Queue<Task>> getScheduleTbl() {
+		return this.jobScheduler.taskScheduleTbl;
 	}
 	
 	/* JobScheduler */

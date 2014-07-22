@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Queue;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -39,6 +40,10 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerInfo;
 import mapreduce.jobtracker.WorkStatus;
+import mapreduce.message.KillerTask;
+import mapreduce.message.MapperTask;
+import mapreduce.message.ReducerTask;
+import mapreduce.message.Task;
 
 public class Utility {
 	
@@ -264,7 +269,46 @@ public class Utility {
 				return;
 			}
 			lstt(args);
+		} else if (args[2].equals("lsschedule")) {
+			if (args.length != 3) {
+				printLsscheduleUsage();
+			}
+			lsschedule();
 		}
+	}
+	
+	private static void lsschedule() {
+		Registry jobTrackerRegistry;
+		try {
+			jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, 
+															MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			
+			JobTrackerRemoteInterface jobTrackerStub = 
+					(JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
+			
+			AbstractMap<String, Queue<Task>> scheduleTbl = jobTrackerStub.getScheduleTbl();
+			Set<String> taskTrackerIps = scheduleTbl.keySet();
+			for (String taskTrackerIp : taskTrackerIps) {
+				System.out.println("---------------------------------");
+				System.out.println("Task Tracker: " + taskTrackerIp);
+				for (Task task : scheduleTbl.get(taskTrackerIp)) {
+					System.out.print("Task " + task.getTaskId() + " in job " + task.getJobId());
+					if (task instanceof MapperTask) {
+						System.out.println(" mapper task");
+					} else if (task instanceof ReducerTask) {
+						System.out.println(" reducer task");
+					} else if (task instanceof KillerTask) {
+						System.out.println(" killer task");
+					} else {
+						System.out.println(" cleaner task");
+					}
+				}
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}	
 	}
 
 	private static void lsjob() {
@@ -437,5 +481,9 @@ public class Utility {
 	
 	private static void printLsttUsage() {
 		System.out.println("lstt:\tList all task trackers' concurrent status\nUsage:\thadoop\tmapred\tlstt");	
+	}
+	
+	private static void printLsscheduleUsage() {
+		System.out.println("lsschedule:\tList concurrent scheduling queue for each task trackers\nUsage:\thadoop\tmapred\tlsschedule");
 	}
 }
