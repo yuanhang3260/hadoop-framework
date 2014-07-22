@@ -65,8 +65,8 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
 			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
 					.lookup(MapReduce.TaskTracker.Common.TASK_TRACKER_SERVICE_NAME);
-			rr.task = (ReducerTask) taskTrackerS.getTask(args[1]);
-			toFail = taskTrackerS.toFail();
+			rr.task = (ReducerTask) taskTrackerS.getTask(args[1], args[2]);
+
 
 			
 			TextIntReconstructor recordReconstructor = 
@@ -108,11 +108,11 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 				rr.reducer.reduce(nextLine.getKey(), nextLine.getValues().iterator(), output);
 			}
 			
-			/*----------- Sort Output by key -----------*/
-			if (MapReduce.Core.DEBUG) {
-				System.out.println("DEBUG RunReducer.main(): Finish reducing and start to sort output");
-			}
-			output.sort(); //TODO: check the necessity of sort again
+//			/*----------- Sort Output by key -----------*/
+//			if (MapReduce.Core.DEBUG) {
+//				System.out.println("DEBUG RunReducer.main(): Finish reducing and start to sort output");
+//			}
+//			output.sort(); //TODO: check the necessity of sort again
 			
 			/*------------ Write to HDFS ---------------*/
 			if (MapReduce.Core.DEBUG) {

@@ -66,7 +66,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 			Registry taskTrackerR = LocateRegistry.getRegistry("localhost", Integer.parseInt(args[0]));
 			TaskTrackerRemoteInterface taskTrackerS = (TaskTrackerRemoteInterface) taskTrackerR
 					.lookup(MapReduce.TaskTracker.Common.TASK_TRACKER_SERVICE_NAME);
-			rm.task = (MapperTask) taskTrackerS.getTask(args[1]);
+			rm.task = (MapperTask) taskTrackerS.getTask(args[1], args[2]);
 			
 			
 			

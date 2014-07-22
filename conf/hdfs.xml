@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <hdfs>
 	<core>		
-		<replica-factor> 2 </replica-factor>
+		<replica-factor>2</replica-factor>
 		
 		<chunk-size unit="MB">5</chunk-size>
 		

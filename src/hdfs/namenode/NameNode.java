@@ -80,9 +80,13 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	@Override
 	public String join(String ip, int port, List<String> chunkNameList) throws RemoteException {
+		
 		String dataNodeName = ip + ":" + port;  //TODO: change the naming method
+		
 		DataNodeAbstract dataNodeInfo = new DataNodeAbstract(ip, port, dataNodeName);
+		
 		Registry dataNodeRegistry = LocateRegistry.getRegistry(ip, port);
+		
 		try {
 			DataNodeRemoteInterface dataNodeStub= (DataNodeRemoteInterface)dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
 			this.dataNodeStubTbl.put(dataNodeName, dataNodeStub);
@@ -134,7 +138,12 @@ public class NameNode implements NameNodeRemoteInterface{
 		if (file == null) {
 			return;
 		}
+		
+		boolean caughtException = false;
+		Exception e1 = null;
+		
 		for (HDFSChunk chunk : file.getChunkList()) {
+			
 			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
 				try {
 					Registry dataNodeRegistry = LocateRegistry.getRegistry(dataNode.dataNodeRegistryIP, dataNode.dataNodeRegistryPort);
@@ -142,15 +151,19 @@ public class NameNode implements NameNodeRemoteInterface{
 					dataNodeStub.deleteChunk(chunk.getChunkName());
 				} catch (RemoteException e) {
 					this.fileTbl.remove(path);
-					throw new IOException("Cannot connect to DataNode");
+					e1 = e;
+					caughtException = true;
 				} catch (NotBoundException e) {
-					this.fileTbl.remove(path);
-					throw new IOException("Cannot connect to DataNode");
+					e1 = e;
+					caughtException = true;
 				} catch (IOException e) {
-					this.fileTbl.remove(path);
-					throw new IOException("Cannot delete chunk(name:" + chunk.getChunkName() + ")");
+					e1 = e;
+					caughtException = true;
 				}
 			}
+		}
+		if (caughtException) {
+			throw new IOException("Caught exception while delete chunk.", e1);
 		}
 		this.fileTbl.remove(path);
 	}

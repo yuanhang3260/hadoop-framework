@@ -183,48 +183,75 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 	
 	private void rmTask(String jid, String tid) {
 		
+		Task[] taskArray = null;
+		
 		synchronized (this.syncTaskList) {
+			taskArray = this.syncTaskList.toArray(new Task[0]);
+		}
+		
+		if (taskArray == null || taskArray.length < 1) {
+			return;
+		}
+		
+		Task objTask = null;
+		
+		for (int i = 0; i < taskArray.length; i++) {
 			
-			for (Task task : this.syncTaskList) {
+			Task task = taskArray[i];
+			
+			if (task.getJobId().equals(jid) && task.getTaskId().equals(tid)) {
 				
-				if (task.getJobId().equals(jid) && task.getTaskId().equals(tid)) {
-					
-					this.syncTaskList.remove(task);
-					
-					if (MapReduce.Core.DEBUG) {
-						System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
-								task.getJobId(), task.getTaskId());
-					}
-					
-					break;
-				}
+				objTask = task;
+				break;
+
 			}
 		}
+		
+		if (objTask != null) {
+			synchronized (this.syncTaskList) {
+				this.syncTaskList.remove(objTask);
+			}
+			
+			if (MapReduce.Core.DEBUG) {
+				System.out.format("DEBUG TaskTracker.init(): The task(<jid:%s,tid:%s>) is ACKed by JobTracker.\n",
+						objTask.getJobId(), objTask.getTaskId());
+			}
+		}
+		
+		
+
 	}
 	
 	/*--------------------RMI-----------------------*/
 	
 	@Override
-	public Task getTask(String taskID) throws RemoteException {
+	public Task getTask(String jid, String tid) throws RemoteException {
+		Task[] taskArray = null;
 		synchronized (this.syncTaskList) {
-			for (int i = this.syncTaskList.size() - 1; i >= 0; i--) {
-				Task taskRecord = this.syncTaskList.get(i);
-				if (String.format("%s-%s", taskRecord.getJobId(), taskRecord.getTaskId()).equals(taskID)) {
-					return taskRecord;
-				}
+			taskArray = this.syncTaskList.toArray(new Task[0]);
+		}
+		
+		if (taskArray == null) {
+			return null;
+		}
+		for (int i = this.syncTaskList.size() - 1; i >= 0; i--) {
+			Task taskOnTaskTracker = this.syncTaskList.get(i);
+			if (taskOnTaskTracker.getJobId().equals(jid) && taskOnTaskTracker.getTaskId().equals(tid)) {
+				return taskOnTaskTracker;
 			}
 		}
 		return null;
 	}
-	
-	@Override
-	public boolean toFail()  {
-		return (failureTimes++ < MapReduce.TaskTracker.Common.REDUCER_FAILURE_TIMES);
-	}
+
 	
 	
 	/*-----------------Nested Class---------------*/
-	
+	/**
+	 * This runnable class is the routine thread 
+	 * for heartbeat.
+	 * @author Jeremy Fu and Kim Wei
+	 *
+	 */
 	private class HeartBeat implements Runnable {
 
 		@Override
@@ -256,27 +283,12 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					continue;
 				}
 				
-//				if (ack == null) {
-//					continue;
-//				}
-				
-				
-				
 				/* remove the acknowledged tasks */
 				for (TaskStatus ackTask : ack.rcvTasks) {
 					TaskTracker.this.rmTask(ackTask.jobId, ackTask.taskId);
 				}
 				
 				if (ack.newAddedTasks != null && ack.newAddedTasks.size() > 0) {
-					
-					
-					//TODO: Remove the following line (for fault tolerance test)
-					TaskTracker.this.taskCounter += ack.newAddedTasks.size();
-					
-					//TODO: Remove the following line (for fault tolerance test)
-//					if (TaskTracker.this.taskCounter == 5) {
-//						System.exit(190);
-//					}
 					
 					List<Task> cleanTaskList = new ArrayList<Task>();
 					List<Task> killJobTaskList = new ArrayList<Task>();
@@ -306,6 +318,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						} 
 					}
 					
+					
+					/* ack.newAddedTasks is a local variable, 
+					 * it doesn't share with other thread */
 					for (Task cleanTask : cleanTaskList) {
 						ack.newAddedTasks.remove(cleanTask);
 					}
@@ -335,18 +350,28 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			int runningCounter = 0;
 			
 			/* Obtain the status for each task */
+			Task[] taskArray = null;
 			synchronized (TaskTracker.this.syncTaskList) {
-				for (Task task : TaskTracker.this.syncTaskList) {
-					if (task.getTaskStatus() == WorkStatus.RUNNING) {
-						runningCounter++;
-					}
-					taskStatusList.add(
-							new TaskStatus(task.getJobId(), 
-									task.getTaskId(), 
-									task.getTaskStatus(), 
-									TaskTracker.this.taskTrackerIp, 
-									TaskTracker.this.registryPort));
+				taskArray = TaskTracker.this.syncTaskList.toArray(new Task[0]);
+			}
+			
+			if (taskArray == null) {
+				TaskTrackerReport report = new TaskTrackerReport(TaskTracker.this.taskTrackerIp, 
+						MapReduce.TaskTracker.Individual.CORE_NUM - runningCounter, taskStatusList);
+				return report;
+			}
+			
+			for (int i = 0; i < taskArray.length; i++) {
+				Task task = taskArray[i];
+				if (task.getTaskStatus() == WorkStatus.RUNNING) {
+					runningCounter++;
 				}
+				taskStatusList.add(
+						new TaskStatus(task.getJobId(), 
+								task.getTaskId(), 
+								task.getTaskStatus(), 
+								TaskTracker.this.taskTrackerIp, 
+								TaskTracker.this.registryPort));
 			}
 			
 			/* Create report for JobTracker */
@@ -437,11 +462,11 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 									byte[] buff = new byte[512];
 									int c = 0;
 									try {
-										System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK SYSO (" + task.getTaskId() + ")");
+										System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK STDOUT (" + task.getTaskId() + ")");
 										while ((c = tmpInputStream.read(buff)) != -1) {
 											System.out.print(new String(buff, 0, c));
 										}
-										System.out.println("<<<<<<<<<<<<<<<<<<<<<<Finish TASK (" + task.getTaskId() + ")");
+										System.out.println("<<<<<<<<<<<<<<<<<<<<<<GET TASK STDOUT (" + task.getTaskId() + ")");
 									} catch (IOException e1) {
 										e1.printStackTrace();
 									}
@@ -481,11 +506,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 	
-			synchronized (TaskTracker.this.syncTaskList) {  //TODO: check the necessity of synchronization
+//			synchronized (TaskTracker.this.syncTaskList) {  //TODO: check the necessity of synchronization
 				
 				for (Task task : taskList) {
-					
-					String taskID = String.format("%s-%s", task.getJobId(), task.getTaskId());
 					
 					/* Check jar file availability */
 					boolean foundJar = false;
@@ -521,22 +544,22 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					if (task instanceof MapperTask) {
 						if (MapReduce.TaskTracker.Individual.JAR) {
-							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
+							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						} else {
-							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", taskID);
+							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						}
 						if (MapReduce.Core.DEBUG) {
 							System.out.println("TaskTrakcer.StartTask.run(): Start to run mapper");
 						}
 					} else if (task instanceof ReducerTask) {
 						if (MapReduce.TaskTracker.Individual.JAR) {
-							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
+							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						} else {
-							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", taskID);
+							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						}
-//						System.out.println("TaskTracker.StartTask.run(): Before RunReducer, JarFilePath:" + ((MapRedTask)task).getJarEntry().getLocalPath());
+
 						if (MapReduce.Core.DEBUG) {
-							System.out.println("TaskTrakcer.StartTask.run(): Start to run reducer");
+							System.out.format("TaskTrakcer.StartTask.run(): Start to run reducer<jid = %s, tid = %s>", task.getJobId(), task.getTaskId());
 						}
 					}
 					
@@ -557,7 +580,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				}
 				
 
-			}
+//			}
 			
 		}
 		
