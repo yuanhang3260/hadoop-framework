@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -41,6 +40,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	private int fileCounter = 0;
 	private final int FILE_MAX_LINES = MapReduce.Core.FILE_MAX_LINES;
 	private HDFSBufferedOutputStream bout;
+	private String reducerTmpFile;
 	
 	
 	/**
@@ -76,6 +76,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		HDFSFile file = nameNodeS.create(filename);
 		HDFSOutputStream out = file.getOutputStream();
 		this.bout = new HDFSBufferedOutputStream(out);
+		this.reducerTmpFile = filename;
 		
 	}
 	
@@ -120,11 +121,9 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 		if (close) {
 			this.bout.close();
+			File tmpFile = new File(this.reducerTmpFile);
+			tmpFile.delete();
 		}
-	}
-	
-	public OutputCollectorIterator<K, V> iterator() {
-		return new OutputCollectorIterator<K, V>(this.keyvalueQueue.iterator());
 	}
 	
 	public void sort() throws IOException {
@@ -200,27 +199,6 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			System.out.format("%d\t%s-%s\n",i,kv.getKey().toString(), kv.getValue().toString());	
 		}
 	}
-	
-	
-
-	
-	private class OutputCollectorIterator<KEY1 extends Writable, VALUE1 extends Writable> {
-		Iterator<KeyValue<KEY1, VALUE1>> it;
-		
-		public OutputCollectorIterator(Iterator<KeyValue<KEY1, VALUE1>> it) {
-			this.it = it;
-		}
-		
-		public boolean hasNext() {
-			return it.hasNext();
-		}
-		
-		public KeyValue<KEY1, VALUE1> next() {
-			return it.next();
-		}
-	}
-
-	
 	
 	private class FileKeyValue implements Comparable<FileKeyValue> {
 		

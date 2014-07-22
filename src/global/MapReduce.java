@@ -11,7 +11,7 @@ public class MapReduce {
 		
 		public static String JOB_TRACKER_SERVICE_NAME = "JobTracker";  //non-configurable
 		
-		public static int FILE_MAX_LINES = 1024 * 20; //non-configurable
+		public static int FILE_MAX_LINES = 1024 * 200; //non-configurable
 	}
 	
 	public static class JobTracker {
