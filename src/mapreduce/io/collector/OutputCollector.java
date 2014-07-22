@@ -108,7 +108,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 * Flush the buffer of OutputCollector to local files.
 	 * @throws IOException
 	 */
-	private void flushToLocal() throws IOException {
+	public void flushToLocal() throws IOException {
 		String filePrefix = task.getFilePrefix();
 		String filename = String.format("%s/%s-%s-tmp-%d.tmp", 
 				filePrefix, this.task.getJobId(), this.task.getTaskId(), this.fileCounter++);
@@ -134,7 +134,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 * @param close if 
 	 * @throws IOException
 	 */
-	private void flushToHDFS(boolean close) throws IOException {
+	public void flushToHDFS(boolean close) throws IOException {
 		while (!this.keyvalueQueue.isEmpty()) {
 			KeyValue<K, V> pair = this.keyvalueQueue.poll();
 			byte[] content = String.format("%s\t%s\n", 
