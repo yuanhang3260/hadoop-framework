@@ -23,6 +23,7 @@ import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerACK;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
+import mapreduce.jobtracker.TaskTrackerInfo;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.message.JarFileEntry;
@@ -187,6 +188,13 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	public void terminateJob(String jobId) throws RemoteException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

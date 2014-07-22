@@ -1,13 +1,16 @@
 package mapreduce.jobtracker;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import mapreduce.message.Task;
 
-public class TaskTrackerInfo {
+public class TaskTrackerInfo implements Serializable {
 	
+	private static final long serialVersionUID = 775740096383175892L;
+
 	private String registryIp;
 	
 	private int registryPort;
