@@ -23,9 +23,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -406,7 +408,8 @@ public class Utility {
 				System.out.println("--------------------------------------");
 				System.out.println("Task Tracker: " + ip);
 				TaskTrackerInfo info = taskTrackerTbl.get(ip);
-				System.out.println("Latest HeartBeat: " + info.getTimeStamp());
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
+				System.out.println("Latest HeartBeat: " + dateFormat.format(new Date(info.getTimeStamp())));
 				System.out.println("Total slots: " + info.getNumSlots());
 				System.out.println("Current Status: " + info.getStatus());
 			}
