@@ -2,14 +2,11 @@ package mapreduce.io.recordreader;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -50,7 +47,7 @@ public class TextIntReconstructor {
 		Queue<FileKeyValue> heap = new PriorityQueue<FileKeyValue>();  //*
 		
 		/* External sort */
-		for (int i = 0; i < task.getEntries().length; i++) {  //TODO: check null pointer
+		for (int i = 0; i < task.getEntries().length; i++) {
 			String line = inputArray[i].readLine();
 			if (line != null) {
 				String[] comp = line.split("\t");
@@ -103,29 +100,6 @@ public class TextIntReconstructor {
 			this.nextFeed = null;
 		}
 	}
-	
-//	public void printList() {
-//		int i  = 1;
-//		for (KeyValue<Text, IntWritable> pair : this.list) {
-//			System.out.format("%d\tkey:%s\tvalue:%s\n", i, pair.getKey().toString(), pair.getValue().getHashValue());
-//			i++;
-//		}
-//	}
-//	
-//	public void printFinalList() {
-//		int i = 1;
-//		for (KeyValueCollection<Text, IntWritable> collection : this.finalList) {
-//			System.out.format("%d\tkey:%s\tvalue:", i, collection.getKey().toString());
-//			Iterator<IntWritable> it = collection.getValues();
-//			while(it.hasNext()) {
-//				System.out.format("%s\t", it.next().toString());
-//				i++;
-//			}
-//			System.out.println();
-//		}
-//	}
-	
-
 
 	public KeyValueCollection<Text, IntWritable> nextKeyValueCollection() throws IOException {
 		
@@ -142,8 +116,6 @@ public class TextIntReconstructor {
 			}
 			
 			String[] comp = line.split("\t");
-			
-			Text currKey = new Text(comp[0]);
 			
 			if (comp[0].equals(this.nextFeed.getKey().toString())) { //merge to the list
 				this.nextFeed.getValues().add(new IntWritable(comp[1]));
@@ -175,7 +147,7 @@ private class FileKeyValue implements Comparable<FileKeyValue> {
 		
 		public FileKeyValue (int seq, Text key, IntWritable value) {
 			this.fileSEQ = seq;
-			this.pair = new KeyValue(key, value);
+			this.pair = new KeyValue<Text, IntWritable>(key, value);
 		}
 		
 		public int getFileSEQ() {
