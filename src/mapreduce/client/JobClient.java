@@ -3,10 +3,16 @@ package mapreduce.client;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
+import hdfs.io.HDFSBufferedOutputStream;
 import hdfs.io.HDFSChunk;
 import hdfs.io.HDFSFile;
+import hdfs.io.HDFSOutputStream;
 import hdfs.namenode.NameNodeRemoteInterface;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.Inet4Address;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -37,6 +43,39 @@ public class JobClient {
 			System.exit(1);
 		}
 		
+		Registry nameNodeR = null;
+		NameNodeRemoteInterface nameNodeStub = null;
+		String jarFileNameOnHDFS = null;
+		if (jarPath != null) {
+			try {
+				nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+				nameNodeStub = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
+				
+				File jarFile = new File(jarPath);
+				FileInputStream fileIn = new FileInputStream(jarFile);
+				String jarFileName = jarFile.getName();
+				jarFileNameOnHDFS = jarFileName + "-" + Inet4Address.getLocalHost().getHostAddress() + "-" + System.currentTimeMillis();
+				HDFSFile file = nameNodeStub.create(jarFileNameOnHDFS);
+				HDFSBufferedOutputStream bout = new HDFSBufferedOutputStream(file.getOutputStream());
+				
+				
+				byte[] buf = new byte[2048];
+				int len = 0;
+				while ((len = fileIn.read(buf)) != -1) {
+					bout.write(buf, 0, len);
+				}
+				fileIn.close();
+				bout.close();
+				
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (NotBoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		String jobId = null;
 		try {
 			Registry jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);	
@@ -45,7 +84,7 @@ public class JobClient {
 			Job jobToSubmit = new Job(conf);
 			List<Split> splits = splitFile(conf.getInputPath());
 			jobToSubmit.setSplit(splits);
-			jobToSubmit.setJarFileEntry(jarPath);
+			jobToSubmit.setJarFileEntry(jarFileNameOnHDFS);
 			jobId = jobTrackerStub.submitJob(jobToSubmit);
 			
 			if (Hdfs.Core.DEBUG) {
@@ -109,6 +148,16 @@ public class JobClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		try {
+			nameNodeStub.delete(jarFileNameOnHDFS);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
 		return jobId;
 	}
 	

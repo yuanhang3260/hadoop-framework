@@ -770,6 +770,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		return this.jobStatusTbl;
 	}
 	
+	@Override
+	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()
+			throws RemoteException {
+		return this.taskTrackerTbl;
+	}
+	
 	/* JobScheduler */
 	private class JobScheduler {
 		

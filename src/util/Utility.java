@@ -35,6 +35,7 @@ import mapreduce.client.JobClient;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;
+import mapreduce.jobtracker.TaskTrackerInfo;
 import mapreduce.jobtracker.WorkStatus;
 
 public class Utility {
@@ -254,8 +255,13 @@ public class Utility {
 				printKillUsage();
 				return;
 			}
-			
 			kill(args);
+		} else if (args[2].equals("lstt")) {//list task tracker
+			if (args.length != 3) {
+				printLsttUsage();
+				return;
+			}
+			lstt(args);
 		}
 	}
 
@@ -384,6 +390,35 @@ public class Utility {
 
 	}
 	
+	private static void lstt(String[] args) {
+		Registry jobTrackerRegistry = null;
+		try {
+			jobTrackerRegistry = LocateRegistry.getRegistry(MapReduce.Core.JOB_TRACKER_IP, 
+					MapReduce.Core.JOB_TRACKER_REGISTRY_PORT);
+			
+			JobTrackerRemoteInterface jobTrackerStub = 
+					(JobTrackerRemoteInterface) jobTrackerRegistry.lookup(MapReduce.Core.JOB_TRACKER_SERVICE_NAME);
+			
+			AbstractMap<String, TaskTrackerInfo> taskTrackerTbl = jobTrackerStub.getTaskTrackerStatus();
+			
+			Set<String> taskTrackerIps = taskTrackerTbl.keySet();
+			for (String ip : taskTrackerIps) {
+				System.out.println("--------------------------------------");
+				System.out.println("Task Tracker: " + ip);
+				TaskTrackerInfo info = taskTrackerTbl.get(ip);
+				System.out.println("Latest HeartBeat: " + info.getTimeStamp());
+				System.out.println("Total slots: " + info.getNumSlots());
+				System.out.println("Current Status: " + info.getStatus());
+			}
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private static void printKillUsage() {
 		System.out.println("kill:\tKill a job\nUsage: hadoop mapred kill <jobId>");
 	}
@@ -394,5 +429,9 @@ public class Utility {
 	
 	private static void printLsjobUsage() {
 		System.out.println("lsjob:\tList all jobs' status on Job Tracker\nUsage:\thadoop\tmapred\tlsjob");
+	}
+	
+	private static void printLsttUsage() {
+		System.out.println("lstt:\tList all task trackers' concurrent status\nUsage:\thadoop\tmapred\tlstt");	
 	}
 }

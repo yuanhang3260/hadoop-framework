@@ -63,4 +63,6 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * @throws RemoteException
 	 */
 	public void terminateJob(String jobId) throws RemoteException;
+	
+	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus() throws RemoteException;
 }
