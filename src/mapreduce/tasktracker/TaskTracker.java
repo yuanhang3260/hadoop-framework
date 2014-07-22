@@ -6,7 +6,6 @@ import hdfs.io.HDFSFile;
 import hdfs.io.HDFSInputStream;
 import hdfs.namenode.NameNodeRemoteInterface;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -94,7 +92,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 			tmpFolder.mkdir();
 		}
 		
-
+		
 		this.ProcessList = new ArrayList<Process>();
 		this.syncTaskList = Collections.synchronizedList(new ArrayList<Task>());
 
@@ -118,7 +116,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		this.taskTrackerIp = Inet4Address.getLocalHost().getHostAddress();
 		this.name = 
 			this.jobTrackerStub.join( this.taskTrackerIp,
-				this.registryPort, this.serverPort, this.slots);
+				this.registryPort, this.serverPort, MapReduce.TaskTracker.Individual.CORE_NUM);
 		
 		/* Finish the TaskTracker temporary folder */
 		this.taskTrackerTmpFolder += "/" + this.name;
@@ -287,28 +285,24 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						if (newTask instanceof MapperTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerMapperFolderName);
 							TaskTracker.this.syncTaskList.add(newTask);
-							System.out.println("Mapper Task");
 						
 						} else if (newTask instanceof ReducerTask) {
 							newTask.setFilePrefix(TaskTracker.this.taskTrackerReducerFolderName);
 							TaskTracker.this.syncTaskList.add(newTask);
-							System.out.println("Reducer Task");
 							
 						} else if (newTask instanceof CleanerTask){
 							cleanTaskList.add(newTask);
 							CleanJob cleanJob = new CleanJob((CleanerTask)newTask);
 							Thread cleanJobTh = new Thread(cleanJob);
 							cleanJobTh.start();
-							System.out.println("Cleaner Task");
+
 						} else if (newTask instanceof KillerTask) {
 							killJobTaskList.add(newTask);
 							KillJob killJob = new KillJob((KillerTask) newTask);
 							Thread killJobTh = new Thread(killJob);
 							killJobTh.start();
-							System.out.println("Killer Task");
-						} else {
-							System.out.println("UNknown task");
-						}
+
+						} 
 					}
 					
 					for (Task cleanTask : cleanTaskList) {
@@ -649,7 +643,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					File file = new File(mapperFileFullPath);
 					
 					if (MapReduce.Core.DEBUG) {
-						System.out.println("DEBUG TaskTracker.PartitionResponser.run():\t "
+						System.out.println("DEBUG TaskTracker.PartitionResponser.run(): "
 								+ "respond file:" + mapperFileFullPath);
 					}
 					
@@ -722,7 +716,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				File jarFile = new File(jarFileFullPath);
 				
 				if (MapReduce.Core.DEBUG) {
-					System.out.println("DEBUG TaskTracker.CleanJob.run()\tclean up " +
+					System.out.println("DEBUG TaskTracker.CleanJob.run(): clean up " +
 							jarFileFullPath + " with status " + jarFile.delete());
 				} else {
 					jarFile.delete();
