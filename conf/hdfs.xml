@@ -5,8 +5,8 @@
 		
 		<chunk-size unit="MB">5</chunk-size>
 		
-		<read-buff-size unit="KB">512</read-buff-size>
-		<write-buff-size unit="KB">512</write-buff-size>
+		<read-buff-size unit="B">512</read-buff-size>
+		<write-buff-size unit="B">512</write-buff-size>
 		
 		<partition-tolerance unit="sec">120</partition-tolerance>
 		

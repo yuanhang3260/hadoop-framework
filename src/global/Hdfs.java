@@ -24,6 +24,8 @@ public class Hdfs {
 		
 		public static int NAME_NODE_REGISTRY_PORT;
 		
+		public static String HDFS_TMEP = "tmp";
+		
 	}
 	
 	public static class DataNode {

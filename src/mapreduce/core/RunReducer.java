@@ -99,7 +99,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 					rr.loadClass();
 			
 			//STEP 2: Run mapper
-			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rr.task.getOutputPath());
+			OutputCollector<Writable, Writable> output = new OutputCollector<Writable, Writable>(rr.task.getOutputPath(), recordReconstructor.getReducerTempFile());
 			
 			rr.reducer = (Reducer<Writable, Writable, Writable, Writable>) reducerClass.getConstructors()[0].newInstance();
 			

@@ -43,6 +43,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	private String reducerTmpFile;
 	
 	
+	
 	/**
 	 * OutputCollector constructor: This is for mappers, which
 	 * write the outputs to different partition files on local
@@ -65,18 +66,17 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 * @throws NotBoundException 
 	 * @throws IOException 
 	 */
-	public OutputCollector(String filename) throws NotBoundException, IOException {
+	public OutputCollector(String filename, String tmpFile) throws NotBoundException, IOException {
 		this.keyvalueQueue = new PriorityQueue<KeyValue<K, V>>();
 		this.bufferedOutputStreamArr = new BufferedOutputStream[1];
 		this.forMapper = false;
 		
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
-		System.out.println("dst ip:" + Hdfs.Core.NAME_NODE_IP + "\t dst port:" + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 		HDFSFile file = nameNodeS.create(filename);
 		HDFSOutputStream out = file.getOutputStream();
 		this.bout = new HDFSBufferedOutputStream(out);
-		this.reducerTmpFile = filename;
+		this.reducerTmpFile = tmpFile;
 		
 	}
 	

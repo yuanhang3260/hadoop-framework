@@ -167,4 +167,8 @@ private class FileKeyValue implements Comparable<FileKeyValue> {
 		
 	}
 
+	public String getReducerTempFile () {
+		return this.reducer_tmp_filename;
+	}
+
 }

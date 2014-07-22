@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataNode implements DataNodeRemoteInterface, Runnable{
+
 	//TODO:Use XML to configure
 	private String nameNodeIp;
 	private int nameNodePort;
@@ -27,43 +28,63 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 	private int dataNodePort;
 	private String dirPrefix;
 	private int chunkBlockPeriod = 3;
+	private NameNodeRemoteInterface nameNodeS = null;
 	
 	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
 		this.dataNodePort = dataNodePort;
-		this.dirPrefix = "test_tmp/";
+		this.dirPrefix = Hdfs.Core.HDFS_TMEP;
 	}
 	
 	/**
 	 * Initialize this Data Node by binding the remote object
+	 * @throws RemoteException 
+	 * @throws NotBoundException 
+	 * @throws UnknownHostException 
 	 */
-	public void init() {
-		try {
-			Registry localRegistry = LocateRegistry.createRegistry(this.dataNodePort);
-			DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
-			localRegistry.rebind("DataNode", dataNodeStub);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+	public void init() throws RemoteException, NotBoundException, UnknownHostException {
+		
+		Registry localRegistry = LocateRegistry.createRegistry(this.dataNodePort);
+		DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
+		localRegistry.rebind(Hdfs.Core.DATA_NODE_SERVICE_NAME, dataNodeStub);
+		
+		
+		
+		Registry nameNodeR = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
+		this.nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
+		
+		this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
+
+		
+		File nodeTmpFile = new File(this.dirPrefix);
+		if (!nodeTmpFile.exists()) {
+			nodeTmpFile.mkdir();
 		}
+		
+		File dataNodeTmpFile = new File(this.dirPrefix + "/" + this.dataNodeName);
+		if (!dataNodeTmpFile.exists()) {
+			dataNodeTmpFile.mkdir();
+		} else {
+			dataNodeTmpFile.delete();
+			dataNodeTmpFile.mkdir();
+		}
+		
+		this.dirPrefix += "/" + this.dataNodeName;
+		
 	}
 
 	@Override
 	public void run() {
 		try {	
 			
-			/* join hdfs cluster */
-			Registry registryOnNameNode = LocateRegistry.getRegistry(nameNodeIp, nameNodePort);
-			NameNodeRemoteInterface nameNode = (NameNodeRemoteInterface) registryOnNameNode.lookup("NameNode");
-			
-			this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":" + this.dataNodePort;
 			List<String> chunkList = formChunkReport(true);
 			if (Hdfs.Core.DEBUG) {
 				System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 			}
 			
-			this.dataNodeName = nameNode.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
+			this.dataNodeName = this.nameNodeS.join(InetAddress.getLocalHost().getHostAddress(), this.dataNodePort, chunkList);
 			
 			int counter = 1;
 
@@ -73,25 +94,19 @@ public class DataNode implements DataNodeRemoteInterface, Runnable{
 					if (Hdfs.Core.DEBUG) {
 						System.out.println("DEBUG DataNode.run(): " + dataNodeName + " is reporting chunks " + chunkList.toString());
 					}
-					nameNode.chunkReport(dataNodeName, chunkList);
+					this.nameNodeS.chunkReport(dataNodeName, chunkList);
 				} else {
-					nameNode.heartBeat(dataNodeName);
+					nameNodeS.heartBeat(dataNodeName);
 				}
 				counter++;
 				Thread.sleep(10000);
 			}
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 		}
 	}
 
