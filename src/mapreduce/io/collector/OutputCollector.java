@@ -196,6 +196,14 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 			outputArray[i].close();
 		}
 		
+		/* delete temp file */
+		for (int i = 0; i < this.fileCounter; i++) {
+			String filename = String.format("%s/%s-%s-tmp-%d.tmp",
+					task.getFilePrefix(), task.getJobId(), task.getTaskId(), i);
+			File tmpFile = new File(filename);
+			tmpFile.delete();
+		}
+		
 	}
 	
 	public void printOutputCollector() {
