@@ -884,19 +884,20 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		@Override
 		public void run() {
 			while (true) {
-//				if (Hdfs.DEBUG) {
-//					System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTrackerCheck start running");
-//				}
 				Set<String> taskTrackers = JobTracker.this.taskTrackerTbl.keySet();
+				
 				for (String taskTrackerIp : taskTrackers) {
 					TaskTrackerInfo taskTrackerInfo = JobTracker.this.taskTrackerTbl.get(taskTrackerIp);
 					long lastHeartBeat = taskTrackerInfo.getTimeStamp();
+					
 					if (taskTrackerInfo.getStatus() == TaskTrackerInfo.Status.RUNNING 
 							&& System.currentTimeMillis() - lastHeartBeat >= MapReduce.JobTracker.TASK_TRACKER_EXPIRATION) {
+						
 						if (Hdfs.Core.DEBUG) {
 							System.out.println("DEBUG JobTracker.TaskTrackerCheck.run(): TaskTracker " + taskTrackerIp + " not available now, reschedule all relate tasks");
 						}
-						/* mark the TaskTracker as unavailable so that further tasks
+						
+						/* disable the TaskTracker so that further tasks
 						 * will not be scheduled into its task queue */
 						synchronized(taskTrackerInfo) {
 							taskTrackerInfo.disable();
@@ -938,9 +939,11 @@ public class JobTracker implements JobTrackerRemoteInterface {
 							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(jobId);
 
 							if (taskToSchedule instanceof MapperTask) {
+								
 								if (jobStatus.status != WorkStatus.RUNNING) {
 									continue;
 								}
+								
 								if (jobStatus.mapperStatusTbl.get(taskId).status
 										== WorkStatus.SUCCESS) {
 									jobStatus.mapTaskLeft++;
@@ -949,7 +952,9 @@ public class JobTracker implements JobTrackerRemoteInterface {
 								if (Hdfs.Core.DEBUG) {
 									System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task(map) " + taskId + " in job " + taskToSchedule.getJobId() + " out of tasktracker history");
 								}
+								
 								JobTracker.this.jobScheduler.addMapTask((MapperTask) taskToSchedule);
+								
 								/* renew the reducerStatusTlb, all previous reducers should be discarded
 								 * because new reducer tasks will be assigned once mapperLeft count is 
 								 * zero */
@@ -957,20 +962,25 @@ public class JobTracker implements JobTrackerRemoteInterface {
 								jobIds.add(jobStatus.jobId);
 								
 							} else if (taskToSchedule instanceof ReducerTask) {
+								
 								if (jobStatus.status != WorkStatus.RUNNING) {
 									continue;
 								}
+								
 								/* if a mapper task of the same job has been re-scheduled, this reducer
 								 * does not need to re-schedule, it will be upon all mappers finished */
 								reducerTaskIds.add(taskToSchedule.getTaskId());
 								
 							} else if (taskToSchedule instanceof CleanerTask) {
+								
 								JobTracker.this.jobScheduler.addCleanTask((CleanerTask) taskToSchedule);
 								
 							} else if (taskToSchedule instanceof KillerTask) {
+								
 								if (jobStatus.status != WorkStatus.RUNNING) {
 									continue;
 								}
+								
 								JobTracker.this.jobScheduler.addKillerTask((KillerTask) taskToSchedule);
 							}
 						}
@@ -978,23 +988,31 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						/* re-schedule neccessary reducer tasks: those of which
 						 * mapper tasks are not re-scheduled now */
 						for (String reducerId : reducerTaskIds) {
+							
 							Task taskToSchedule = JobTracker.this.taskTbl.get(reducerId);
+							
 							JobStatus jobStatus = JobTracker.this.jobStatusTbl.get(taskToSchedule.getJobId());
+							
 							if (!jobIds.contains(jobStatus.jobId)) {
+								
 								if (jobStatus.reducerStatusTbl.get(reducerId).status
-										== WorkStatus.RUNNING) {						
+										== WorkStatus.RUNNING) {	
+									
 									if (Hdfs.Core.DEBUG) {
 										System.out.println("DEBUG TaskTrackerCheck.run(): re-schedule task(reduce) " + reducerId + " in job " + taskToSchedule.getJobId() + " out of tasktracker history");
 									}
+									
 									/* no mapper of this job being re-scheduled in previous step, re-schedule this reducer */
 									JobTracker.this.jobScheduler.addReduceTask((ReducerTask) taskToSchedule);
 								}
 							}
 						}
+						
 						/* clean task record on this taskTracker's info since all have been re-scheduled */
 						JobTracker.this.taskTrackerTbl.get(taskTrackerIp).cleanTasks();
 					}
 				}
+				
 				try {
 					Thread.sleep(1000 * 20);
 				} catch (InterruptedException e) {
