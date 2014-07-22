@@ -134,4 +134,8 @@ public class Task implements Serializable {
 	public void printInfo() {
 		System.out.format("task:\t$JID=%s $TID=%s $ProcRef=%s $filePrefix=%s\n", this.jobId, this.tid, (this.procRef != null), this.filePrefix);
 	}
+	
+	public String getFilePrefix() {
+		return this.filePrefix;
+	}
 }

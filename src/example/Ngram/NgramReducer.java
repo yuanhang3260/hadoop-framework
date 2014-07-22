@@ -1,5 +1,6 @@
 package example.Ngram;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import mapreduce.core.Reducer;
@@ -11,7 +12,7 @@ public class NgramReducer extends Reducer<Text, IntWritable, Text, IntWritable>{
 
 	@Override
 	public void reduce(Text key, Iterator<IntWritable> values,
-			OutputCollector<Text, IntWritable> output) {
+			OutputCollector<Text, IntWritable> output) throws IOException {
 		int sum = 0;
 		while (values.hasNext()) {
 			sum++;

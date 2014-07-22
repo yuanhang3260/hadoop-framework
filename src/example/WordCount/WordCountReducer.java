@@ -1,5 +1,6 @@
 package example.WordCount;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import mapreduce.core.Reducer;
@@ -11,7 +12,7 @@ public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritab
 
 	@Override
 	public void reduce(Text key, Iterator<IntWritable> values,
-			OutputCollector<Text, IntWritable> output) {
+			OutputCollector<Text, IntWritable> output) throws IOException {
 		int sum = 0;
 		while (values.hasNext()) {
 			sum += values.next().getValue();
