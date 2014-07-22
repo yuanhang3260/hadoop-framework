@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import mapreduce.Job;
 import mapreduce.io.Split;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerACK;
@@ -27,6 +26,7 @@ import mapreduce.jobtracker.TaskStatus;
 import mapreduce.jobtracker.TaskTrackerReport;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.message.JarFileEntry;
+import mapreduce.message.Job;
 import mapreduce.message.MapperTask;
 import mapreduce.message.PartitionEntry;
 import mapreduce.message.ReducerTask;
@@ -35,10 +35,10 @@ import mapreduce.message.Task;
 
 public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	
-	private String taskTrackerIp;
-	private int taskTrackerRegistryPort;
-	private int taskTrackerServerPort;
-	private int counter = 0;
+//	private String taskTrackerIp;
+//	private int taskTrackerRegistryPort;
+//	private int taskTrackerServerPort;
+//	private int counter = 0;
 
 	private List<Task> taskList = Collections.synchronizedList(new LinkedList<Task>());
 	
@@ -119,9 +119,9 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 	public String join(String ip, int port, int serverPort, int mapSlots)
 			throws RemoteException {
 		
-		this.taskTrackerIp = ip;
-		this.taskTrackerRegistryPort = port;
-		this.taskTrackerServerPort = MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT; //TODO: change to join argument
+//		this.taskTrackerIp = ip;
+//		this.taskTrackerRegistryPort = port;
+//		this.taskTrackerServerPort = MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT; //TODO: change to join argument
 		System.out.println("Target task tracker joins.");
 		
 		return "TaskTracker-001";

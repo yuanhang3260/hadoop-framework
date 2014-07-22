@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import mapreduce.JobClient;
+import mapreduce.client.JobClient;
 import mapreduce.jobtracker.JobStatus;
 import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.TaskStatus;

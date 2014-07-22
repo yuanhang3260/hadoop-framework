@@ -16,18 +16,18 @@ import org.xml.sax.SAXException;
 public class Parser {
 	
 	public static void main (String[] args) throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {
-//		hdfsCoreConf();
-//		dataNodeConf(1);
-//		printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
+		hdfsCoreConf();
+		dataNodeConf();
+		printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
 		
-//		mapreduceCoreConf();
-//		printConf(new ConfOpt[] {ConfOpt.MAPREDCORE});
-//		
-//		mapreduceJobTrackerConf();
-//		printConf(new ConfOpt[] {ConfOpt.JOBTACKER});
+		mapreduceCoreConf();
+		printConf(new ConfOpt[] {ConfOpt.MAPREDCORE});
 		
-//		mapreduceTaskTrackerCommonConf();
-//		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERCOMMON});
+		mapreduceJobTrackerConf();
+		printConf(new ConfOpt[] {ConfOpt.JOBTACKER});
+		
+		mapreduceTaskTrackerCommonConf();
+		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERCOMMON});
 		
 		mapreduceTaskTrackerIndividualConf();
 		printConf(new ConfOpt[] {ConfOpt.TASKTRACKERINDIVIDUAL});
@@ -479,6 +479,11 @@ public class Parser {
 	
 	public static class ConfFormatException extends Exception {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8494918500253529934L;
+
 		public ConfFormatException(String message) {
 			super(message);
 		}

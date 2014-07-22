@@ -29,6 +29,7 @@ public class RecordReconstructor<K extends Writable, V extends Writable> {
 		
 		try {
 			while (true) {
+				@SuppressWarnings("unchecked")
 				KeyValue<K, V> tmp = (KeyValue<K,V>)in.readObject();
 				synchronized (this.syncMutex) {
 					list.add(tmp);

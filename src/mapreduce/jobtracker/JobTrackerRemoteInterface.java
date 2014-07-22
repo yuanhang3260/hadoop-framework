@@ -4,7 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.AbstractMap;
 
-import mapreduce.Job;
+import mapreduce.message.Job;
 
 public interface JobTrackerRemoteInterface extends Remote {
 	/**

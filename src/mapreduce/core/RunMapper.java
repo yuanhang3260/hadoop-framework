@@ -157,6 +157,7 @@ public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writ
 		
 	}	
 	
+	@SuppressWarnings("unchecked")
 	public Class<Mapper<Writable, Writable, Writable, Writable>> loadClass ()
 			throws IOException, ClassNotFoundException {
 		

@@ -1,7 +1,7 @@
 package test.testMapRed;
 
-import mapreduce.JobClient;
-import mapreduce.JobConf;
+import mapreduce.client.JobClient;
+import mapreduce.client.JobConf;
 
 public class testJobSubmit_WordCount {
 	public static void main(String[] args) {

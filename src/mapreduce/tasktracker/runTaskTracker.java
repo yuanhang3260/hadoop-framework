@@ -12,8 +12,6 @@ import java.rmi.RemoteException;
 public class runTaskTracker {
 	public static void main(String[] args) {
 		
-		int tasktrackerSEQ;
-		
 		if (args == null || args.length < 1) {
 			System.out.println("Usage:\t<TaskTracker Sequential>");
 			System.exit(1);

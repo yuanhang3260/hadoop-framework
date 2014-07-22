@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import mapreduce.Job;
 import mapreduce.io.Split;
 import mapreduce.message.CleanerTask;
+import mapreduce.message.Job;
 import mapreduce.message.KillerTask;
 import mapreduce.message.MapperTask;
 import mapreduce.message.PartitionEntry;

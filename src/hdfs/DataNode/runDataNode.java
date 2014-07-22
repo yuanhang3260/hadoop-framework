@@ -12,7 +12,6 @@ public class runDataNode {
 			System.exit(1);
 		}
 		
-		int dataNodeSEQ = Integer.parseInt(args[0]);
 		
 		try {
 			Parser.dataNodeConf();
