@@ -625,6 +625,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		if (Hdfs.Core.DEBUG) {
 			System.out.println("DEBUG JobTracker.terminateJob(): do cleaning work for job " + jobId);
 		}
+		
 		cleanUp(jobId);
 	}
 	
@@ -643,6 +644,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				this.jobStatusTbl.get(jobId).mapperStatusTbl;
 		
 		Set<String> mapTaskIds = mapperStatusTbl.keySet();
+		
 		for (String mapTaskId : mapTaskIds) {
 			TaskStatus taskStatus = mapperStatusTbl.get(mapTaskId);
 			
@@ -706,7 +708,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		
 		for (String hostIp : hostIps) {
 			
-			CleanerTask cleanerTask = createCleanerTask(hostIp, jobId, reduceTaskIds.size());
+			CleanerTask cleanerTask = createCleanerTask(hostIp, jobId, this.jobTbl.get(jobId).getJobConf().getNumReduceTasks());
 			
 			cleanerTask.addMapperFile(mapClean.get(hostIp));
 			
