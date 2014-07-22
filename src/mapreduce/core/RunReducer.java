@@ -190,6 +190,7 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 			while ((readBytes = in.read(buff)) != -1) {
 				fout.write(buff, 0, readBytes);
 			}
+			
 			in.close();
 			out.close();
 			fout.close();
