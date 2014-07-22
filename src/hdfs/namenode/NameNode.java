@@ -162,9 +162,9 @@ public class NameNode implements NameNodeRemoteInterface{
 				}
 			}
 		}
-		if (caughtException) {
-			throw new IOException("Caught exception while delete chunk.", e1);
-		}
+//		if (caughtException) {
+//			throw new IOException("Caught exception while delete chunk.", e1);
+//		}
 		this.fileTbl.remove(path);
 	}
 	
