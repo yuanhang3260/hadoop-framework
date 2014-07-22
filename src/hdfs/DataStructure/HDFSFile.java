@@ -1,8 +1,8 @@
 package hdfs.DataStructure;
 
-import hdfs.IO.HDFSInputStream;
-import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSInputStream;
+import hdfs.io.HDFSOutputStream;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;

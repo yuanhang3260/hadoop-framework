@@ -3,8 +3,8 @@ package test.testHDFS;
 import global.Hdfs;
 import global.Parser;
 import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSOutputStream;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;

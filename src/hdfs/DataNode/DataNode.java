@@ -1,8 +1,8 @@
 package hdfs.DataNode;
 
 import global.Hdfs;
-import hdfs.IO.HDFSLineFeedCheck;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSLineFeedCheck;
 
 import java.io.File;
 import java.io.FileNotFoundException;

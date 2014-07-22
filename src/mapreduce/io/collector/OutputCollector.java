@@ -2,9 +2,9 @@ package mapreduce.io.collector;
 
 import global.Hdfs;
 import hdfs.DataStructure.HDFSFile;
-import hdfs.IO.HDFSBufferedOutputStream;
-import hdfs.IO.HDFSOutputStream;
 import hdfs.NameNode.NameNodeRemoteInterface;
+import hdfs.io.HDFSBufferedOutputStream;
+import hdfs.io.HDFSOutputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;

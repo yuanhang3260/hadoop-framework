@@ -3,7 +3,7 @@ package test.testHDFS;
 import global.Hdfs;
 import global.Parser;
 import hdfs.DataNode.DataNodeRemoteInterface;
-import hdfs.IO.HDFSLineFeedCheck;
+import hdfs.io.HDFSLineFeedCheck;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;

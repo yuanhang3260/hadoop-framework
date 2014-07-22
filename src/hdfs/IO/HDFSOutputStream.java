@@ -1,4 +1,4 @@
-package hdfs.IO;
+package hdfs.io;
 
 import global.Hdfs;
 import hdfs.DataNode.DataNodeRemoteInterface;
