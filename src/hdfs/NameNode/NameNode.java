@@ -1,7 +1,7 @@
-package hdfs.NameNode;
+package hdfs.namenode;
 
 import global.Hdfs;
-import hdfs.DataNode.DataNodeRemoteInterface;
+import hdfs.datanode.DataNodeRemoteInterface;
 import hdfs.io.DataNodeEntry;
 import hdfs.io.HDFSChunk;
 import hdfs.io.HDFSFile;

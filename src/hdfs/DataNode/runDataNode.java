@@ -1,4 +1,4 @@
-package hdfs.DataNode;
+package hdfs.datanode;
 
 import global.Hdfs;
 import global.Parser;

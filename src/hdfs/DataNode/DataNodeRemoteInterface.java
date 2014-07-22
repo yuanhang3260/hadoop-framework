@@ -1,4 +1,4 @@
-package hdfs.DataNode;
+package hdfs.datanode;
 
 import hdfs.io.HDFSLineFeedCheck;
 

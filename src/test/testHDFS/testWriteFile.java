@@ -1,8 +1,8 @@
 package test.testHDFS;
 
-import hdfs.NameNode.NameNodeRemoteInterface;
 import hdfs.io.HDFSFile;
 import hdfs.io.HDFSOutputStream;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;

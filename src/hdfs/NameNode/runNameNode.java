@@ -1,4 +1,4 @@
-package hdfs.NameNode;
+package hdfs.namenode;
 
 import global.Hdfs;
 import global.Parser;

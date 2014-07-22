@@ -3,8 +3,8 @@ package mapreduce.tasktracker;
 import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
-import hdfs.NameNode.NameNodeRemoteInterface;
 import hdfs.io.HDFSFile;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;

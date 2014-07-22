@@ -1,9 +1,9 @@
 package test.testHDFS;
 
 import global.Hdfs;
-import hdfs.NameNode.NameNodeRemoteInterface;
 import hdfs.io.HDFSFile;
 import hdfs.io.HDFSOutputStream;
+import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.File;
 import java.io.FileInputStream;
