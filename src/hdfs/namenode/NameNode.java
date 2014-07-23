@@ -1,6 +1,7 @@
 package hdfs.namenode;
 
 import global.Hdfs;
+import global.MapReduce;
 import hdfs.datanode.DataNodeRemoteInterface;
 import hdfs.io.DataNodeEntry;
 import hdfs.io.HDFSChunk;
@@ -47,9 +48,6 @@ public class NameNode implements NameNodeRemoteInterface{
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Initialize the NameNode to start the service.
 	 * @throws RemoteException Default remote exception.
@@ -75,6 +73,9 @@ public class NameNode implements NameNodeRemoteInterface{
 		DataNodeAbstract dataNodeInfo = dataNodeTbl.get(dataNodeName);
 		if (dataNodeInfo != null) {
 			dataNodeInfo.latestHeartBeat = new Date();
+		}
+		if (!dataNodeInfo.isAvailable()) {
+			dataNodeInfo.enableDataNode();
 		}
 	}
 	
@@ -224,17 +225,34 @@ public class NameNode implements NameNodeRemoteInterface{
 			for (HDFSChunk chunk : totalChunkList) {
 
 				if (Hdfs.Core.DEBUG) {
-					System.out.format("DEBUG NameNode.commitFile(): location num= %d \n", chunk.getAllLocations().size());
+					System.out.format("DEBUG NameNode.commitFile(): location num = %d \n", chunk.getAllLocations().size());
 				}
-				for (DataNodeEntry dn : chunk.getAllLocations()) {
-					if (Hdfs.Core.DEBUG) {
-						System.out.format("DEBUG NameNode.commitFile(): locations:%s\n", dn.getNodeName());
+				
+				boolean commitAtLeastOnce = false;
+				try {
+					for (DataNodeEntry dn : chunk.getAllLocations()) {
+						if (Hdfs.Core.DEBUG) {
+							System.out.format("DEBUG NameNode.commitFile(): locations:%s\n", dn.getNodeName());
+						}
+						
+						if (validChunkList.contains(chunk)) {
+							this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
+							this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), true, false);
+						} else {
+							this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), false, false);
+						}
+						commitAtLeastOnce = true;
 					}
-					if (validChunkList.contains(chunk)) {
-						this.dataNodeTbl.get(dn.getNodeName()).chunkList.add(chunk.getChunkName());
-						this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), true, false);
+				} catch (RemoteException e) {
+					
+				}
+				
+				if (!commitAtLeastOnce) {
+					if (chunk.getAllLocations() != null && chunk.getAllLocations().size() > 0) {
+						throw new RemoteException("ConnectException: Connection refused to host: "
+								+ chunk.getAllLocations().get(0).dataNodeRegistryIP);
 					} else {
-						this.dataNodeStubTbl.get(dn.getNodeName()).commitChunk(chunk.getChunkName(), false, false);
+						throw new RemoteException("No DataNode available.");
 					}
 				}
 			}
@@ -295,7 +313,6 @@ public class NameNode implements NameNodeRemoteInterface{
 		 * If the NameNode receives DataNode's heart beat when the network
 		 * partition has gone, the DataNode is enabled again.
 		 */
-		//TODO: enable the datanode.
 		private void enableDataNode() {
 			this.available = true;
 		}
@@ -325,6 +342,8 @@ public class NameNode implements NameNodeRemoteInterface{
 		public void run() {
 			do {
 				synchronized (NameNode.this.sysCheckSync) {
+					
+					/*--------------- Initialization -------------*/
 					HashMap<String, ChunkStatisticsForDataNode> chunkAbstractFromDataNode
 						= new HashMap<String, ChunkStatisticsForDataNode>();
 					HashMap<String, ChunkStatisticsForNameNode> chunkAbstractFromNameNode
@@ -335,7 +354,7 @@ public class NameNode implements NameNodeRemoteInterface{
 						System.out.println("DEBUG NameNode.SystemCheck.run(): Start SystemCheck.");
 					}
 					
-					/* Check availability of DataNode */
+					/*------------ Check availability of DataNode --------------*/
 					Date now = new Date();
 					for (String dataNode : NameNode.this.dataNodeTbl.keySet()) {
 						DataNodeAbstract dataNodeInfo = NameNode.this.dataNodeTbl.get(dataNode);
@@ -462,7 +481,7 @@ public class NameNode implements NameNodeRemoteInterface{
 					System.out.println("DEBUG NameNode.SystemCheck.run(): Finish SystemCheck.");
 				}
 				try {
-					Thread.sleep(1000 * 60);
+					Thread.sleep(Hdfs.Core.SYSTEM_CHECK_PERIOD);
 				} catch (InterruptedException e) {
 					if (Hdfs.Core.DEBUG) {
 						e.printStackTrace();

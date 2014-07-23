@@ -27,14 +27,29 @@ import mapreduce.io.writable.Writable;
 import mapreduce.message.MapperTask;
 import mapreduce.message.Task;
 
+/**
+ * The OutputCollector is used for collecting the output
+ * results of the Mapper and Reducer. 
+ * 
+ * @author JeremyFu and KimWei
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class OutputCollector<K extends Writable, V extends Writable> {
 	
-	private Queue<KeyValue<K, V>> keyvalueQueue;
+	private Queue<KeyValue<K, V>> keyvalueQueue; 
+	
 	private boolean forMapper;
+	
 	File[] fileArr;
+	
 	FileOutputStream[] fileOutputStreamArr;
+	
 	BufferedOutputStream[] bufferedOutputStreamArr;
+	
 	Task task;
+	
 	int partitionNum;
 	
 	private int fileCounter = 0;
@@ -150,6 +165,12 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		}
 	}
 	
+	/**
+	 * This sort() method performs an external sort. The size of
+	 * output <key, value> pair is unpredictable. External sort 
+	 * can prevent memory from running out.
+	 * @throws IOException
+	 */
 	public void sort() throws IOException {
 		
 		Partitioner<Text> partitioner = new Partitioner<Text>();
@@ -216,14 +237,15 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 	}
 	
-	public void printOutputCollector() {
-		int i = 0;
-		for (KeyValue<K, V> kv : this.keyvalueQueue) {
-			i++;
-			System.out.format("%d\t%s-%s\n",i,kv.getKey().toString(), kv.getValue().toString());	
-		}
-	}
 	
+	/**
+	 * This private nested class is used for tracking the relationship
+	 * between file and KeyValue pair.
+	 * 
+	 * 
+	 * @author JeremyFu and Kim Wei
+	 *
+	 */
 	private class FileKeyValue implements Comparable<FileKeyValue> {
 		
 		private int fileSEQ;
@@ -231,7 +253,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 		
 		public FileKeyValue (int seq, Text key, IntWritable value) {
 			this.fileSEQ = seq;
-			this.pair = new KeyValue(key, value);
+			this.pair = new KeyValue<Text, IntWritable>(key, value);
 		}
 		
 		public int getFileSEQ() {

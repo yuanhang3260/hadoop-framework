@@ -25,7 +25,10 @@ public class Hdfs {
 		public static int NAME_NODE_REGISTRY_PORT;
 		
 		public static String HDFS_TMEP = "tmp";
-
+		
+		public static long SYSTEM_CHECK_PERIOD = 1000 * 20; //non-configurable
+		
+		public static long HEART_BEAT_FREQ = 1000 * 2;
 		
 	}
 	

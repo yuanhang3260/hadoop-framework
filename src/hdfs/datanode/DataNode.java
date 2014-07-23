@@ -123,7 +123,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 					this.nameNodeS.heartBeat(dataNodeName);
 				}
 				counter++;
-				Thread.sleep(10000);
+				Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
 			}
 		} catch (Exception e) {
 			if (Hdfs.Core.DEBUG) {
@@ -295,7 +295,9 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 				File chunkFile = new File(
 						backupFileWrapper(chunkNameWrapper(globalChunkName)));
 				if (!chunkFile.exists()) {
-					System.err.println("chunk doesn't exists");
+					if (Hdfs.Core.DEBUG) {
+						System.out.println("DEBUG DataNode.commitChunk(): The committed chunk doesn't exists");
+					}
 				}
 				if (Hdfs.Core.DEBUG) {
 					System.out

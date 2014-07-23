@@ -1,6 +1,5 @@
 package global;
 
-/* Registry port range: 1201 - 1250, Server port range: 8000 - 8050*/
 public class MapReduce {
 	
 	public static class Core {
