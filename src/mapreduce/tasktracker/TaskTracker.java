@@ -334,7 +334,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					/* Allocate a thread to start new added tasks */
 					StartTask st = new StartTask(ack.newAddedTasks);
-//					Thread startTaskTh = new Thread(st);
 					st.run();
 				}
 				try {
@@ -462,7 +461,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 								if (task instanceof ReducerTask) {
 									
 									InputStream tmpInputStream = task.getInputStream();
-									byte[] buff = new byte[512];
+									byte[] buff = new byte[128];
 									int c = 0;
 									try {
 										System.out.println(">>>>>>>>>>>>>>>>>>>>>>WAIT FOR TASK STDOUT (" + task.getTaskId() + ")");
@@ -509,7 +508,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		@Override
 		public void run() {
 	
-//			synchronized (TaskTracker.this.syncTaskList) {  //TODO: check the necessity of synchronization
+			synchronized (TaskTracker.this.syncTaskList) {  //TODO: check the necessity of synchronization
 				
 				for (Task task : taskList) {
 					
@@ -584,9 +583,8 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					}
 					
 				}
-				
 
-//			}
+			}
 			
 		}
 		
@@ -595,7 +593,15 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				Registry NameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 				NameNodeRemoteInterface NameNodeS = (NameNodeRemoteInterface) NameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
-				HDFSFile jarFile = NameNodeS.open(task.getJarEntry().getFullPath());
+				HDFSFile jarFile = null;
+				try {
+					jarFile = NameNodeS.open(task.getJarEntry().getFullPath());
+				} catch (IOException e) {
+					if (MapReduce.Core.DEBUG) {
+						e.printStackTrace();
+					}
+					throw e;
+				}
 				
 				HDFSInputStream in = jarFile.getInputStream();
 				

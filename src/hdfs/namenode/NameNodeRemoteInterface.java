@@ -48,7 +48,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * null is returned.
 	 * @throws RemoteException
 	 */
-	public HDFSFile open(String filePath) throws RemoteException;
+	public HDFSFile open(String filePath) throws RemoteException, IOException;
 
 	/**
 	 * Delete the file on HDFS.

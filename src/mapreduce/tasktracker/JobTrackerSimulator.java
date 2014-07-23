@@ -6,6 +6,7 @@ import global.Parser;
 import hdfs.io.HDFSFile;
 import hdfs.namenode.NameNodeRemoteInterface;
 
+import java.io.IOException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -72,7 +73,13 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		/* Open file */
 		Registry nameNodeR = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		NameNodeRemoteInterface nameNodeS = (NameNodeRemoteInterface) nameNodeR.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
-		HDFSFile file1 = nameNodeS.open("hello");
+		HDFSFile file1 = null;
+		try {
+			file1 = nameNodeS.open("hello");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		
 		Thread.sleep(1000 * 3);
 		
