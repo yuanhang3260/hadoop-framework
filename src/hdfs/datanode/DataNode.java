@@ -38,7 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A DataNode is the one who stores data as chunks in local file system
+ * A DataNode is the one who stores data as chunks in local file system, the
+ * DataNode has no idea which file does a chunk belong to
  *
  */
 public class DataNode implements DataNodeRemoteInterface, Runnable {
@@ -140,7 +141,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		}
 	}
 
-	@Override
 	/**
 	 * This is the routine thread for DataNode periodically pings NameNode
 	 */
@@ -168,7 +168,12 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 
 	}
 	
-	
+	/**
+	 * Send heartBeat message to NameNode via RMI
+	 * @param reportChunk Whether should the DataNode report its chunks' info
+	 * 		  to NameNode
+	 * @return
+	 */
 	private Message sendHeartBeat(boolean reportChunk) {
 		
 		Message message = null;
