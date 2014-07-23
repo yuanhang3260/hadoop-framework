@@ -409,7 +409,6 @@ public class Utility {
 	    
 	    String[] newArgs = new String[args.length - 6];
 	    newArgs = Arrays.copyOfRange(args, 6, args.length);
-	    System.out.println("DEBUG Utility.subit(): newArgs = " + Arrays.toString(newArgs));
 	    m.invoke(null, new Object[] { newArgs });
 		
 	}

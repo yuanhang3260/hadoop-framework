@@ -87,9 +87,9 @@ public class JobClient {
 			jobToSubmit.setJarFileEntry(jarFileNameOnHDFS);
 			jobId = jobTrackerStub.submitJob(jobToSubmit);
 			
-			if (Hdfs.Core.DEBUG) {
-				System.out.println("DEBUG JobClient.runJob(): Job already submitted, job Id = " + jobId);
-			}
+			
+			System.out.println("Job already submitted, job Id = " + jobId);
+			
 			
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
 			int mapTotal = splits.size();

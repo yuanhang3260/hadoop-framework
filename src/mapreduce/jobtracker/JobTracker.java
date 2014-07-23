@@ -313,9 +313,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	private void initReduceTasks(Job job) {
 		int numOfReducer = job.getJobConf().getNumReduceTasks();
-		if (Hdfs.Core.DEBUG) {
-			System.out.println("DEBUG JobTracker.initReduceTasks() numReduceTasks = " + numOfReducer);
-		}
+		
 		AbstractMap<String, TaskStatus> mapperStatusTbl = this.jobStatusTbl.get(job.getJobId()).mapperStatusTbl;
 		Set<String> mapIdSet = mapperStatusTbl.keySet();	
 		
@@ -457,15 +455,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 					System.out.print("DEBUG JobTracker.updateTaskStatus(): Task " + taskStatus.taskId + " in job " + taskStatus.jobId + " SUCCESS, on TaskTracker " + taskStatus.taskTrackerIp);
 				}
 				if (isMapper) {
-					System.out.println(" map task");
 					jobStatus.mapTaskLeft--;
 					if (jobStatus.mapTaskLeft == 0) {
-						System.out.println("DEBUG schedule reducer task");
 						/* schedule corresponding reducer task */
 						initReduceTasks(taskStatus.jobId);
 					}
 				} else {
-					System.out.println(" reduce task");
 					jobStatus.reduceTaskLeft--;
 					
 					/* if job finished, check if all reducers are SUCCESS,
@@ -670,21 +665,12 @@ public class JobTracker implements JobTrackerRemoteInterface {
 			
 			/* push killer tasks */
 			Set<String> taskTrackerIps = taskTrackerMap.keySet();
-			if (Hdfs.Core.DEBUG) {
-				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-				System.out.println("DEBUG JobTracker.terminateJob(): killerTasks To job " + jobId);
-				
-			}
+
 			for (String ip : taskTrackerIps) {
 				List<String> taskIds = taskTrackerMap.get(ip);
-				if (Hdfs.Core.DEBUG) {
-					System.out.println("DEBUG JobTracker.terminateJob(): killer task for taskTracker " + ip + " taskIds: " + Arrays.toString(taskIds.toArray()));
-				}
+
 				KillerTask task = createKillerTask(ip, jobId, taskIds);
 				this.jobScheduler.addKillerTask(task);
-			}
-			if (Hdfs.Core.DEBUG) {
-				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 			}
 			
 		}	
@@ -799,24 +785,6 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				cleanTaskTbl.get(hostIp).addReducerFile(reduceClean.get(hostIp));
 			}
 		}
-		
-		/* print out to check */
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		
-		Set<String> hosts = cleanTaskTbl.keySet();
-		
-		for (String host : hosts) {
-			System.out.println("CleanerTask for TaskTracker " + host);
-			CleanerTask task = cleanTaskTbl.get(host);
-			/* add tasks to the specific TaskTracker's queue */
-			this.jobScheduler.addCleanTask(task);
-			
-			System.out.println("Job id = " + task.getJobId() + " partitionNum = " + task.getPartitionNum());
-			System.out.println("MapperFileName: " + Arrays.toString(task.getMapperFile().toArray()));
-			System.out.println("ReducerFileName: " + Arrays.toString(task.getReducerFile().toArray()));
-		}
-		
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	}
 	
 	@Override

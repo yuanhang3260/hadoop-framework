@@ -20,8 +20,5 @@ public class runJobTracker {
 		
 		JobTracker jt = new JobTracker();
 		jt.init();
-		if (MapReduce.Core.DEBUG) {
-			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
-		}
 	}
 }
