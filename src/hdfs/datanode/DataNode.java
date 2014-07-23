@@ -300,7 +300,25 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	 * @return a byte array with the chunk data, at most Hdfs.client.readBufSize
 	 */
 	public byte[] read(String chunkName, int offSet) throws IOException {
+		
 		File chunkFile = new File(chunkNameWrapper(chunkName));
+		
+		for (int i = 0; i < Hdfs.Core.INCONSISTENCY_LATENCY / Hdfs.Core.HEART_BEAT_FREQ; i++) {
+			if (!chunkFile.exists()) {
+				try {
+					Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
+				} catch (InterruptedException e) {
+					if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+				}
+			} else {
+				break;
+			}
+		}
+		
+		if (!chunkFile.exists()) {
+			throw new FileNotFoundException(String.format("Chunk cannot be open: chunk name:%s", chunkFile.getName()));
+		}
+		
 		long chunkSize = chunkFile.length();
 
 		if (offSet >= chunkSize) {
@@ -308,28 +326,9 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		}
 		RandomAccessFile in = null;
 		byte[] readBuf = null;
-		
-		for (int i = 0; i < Hdfs.Core.INCONSISTENCY_LATENCY / Hdfs.Core.HEART_BEAT_FREQ; i++) {
-			try {
-				in = new RandomAccessFile(chunkFile, "r");
-				break;
-			} catch (FileNotFoundException e) {
-				if (Hdfs.Core.DEBUG) { 
-					e.printStackTrace(); 
-					System.out.println("DEBUG Datanode.read(): Failed to open the file. Wait for a heart beat");
-					}
-			}
-			try {
-				Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		if (in == null) {
-			throw new FileNotFoundException(String.format("Chunk cannot be open: chunk name:%s", chunkFile.getName()));
-		}
+
+		in = new RandomAccessFile(chunkFile, "r");
+
 
 		if (offSet + Hdfs.Core.READ_BUFF_SIZE <= chunkSize) {
 			readBuf = new byte[Hdfs.Core.READ_BUFF_SIZE];
@@ -338,21 +337,10 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 			readBuf = new byte[(int) (chunkSize - offSet)];
 		}
 
-		try {
-			in.seek(offSet);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			in.read(readBuf);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		in.seek(offSet);
+		in.read(readBuf);
+		in.close();
 
 		System.out.println("DEBUG DataNode.read(): chunkName = " + chunkName
 				+ " offSet = " + offSet + " return buffer size = "
