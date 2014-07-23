@@ -595,10 +595,9 @@ public class NameNode implements NameNodeRemoteInterface{
 		public void run() {
 			
 			while(true) {
+				
 				check();
-				if (Hdfs.Core.DEBUG) {
-					System.out.println("DEBUG NameNode.SystemCheck.run(): Finish SystemCheck.");
-				}
+
 				try {
 					Thread.sleep(Hdfs.Core.SYSTEM_CHECK_PERIOD);
 				} catch (InterruptedException e) {

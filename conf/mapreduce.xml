@@ -12,7 +12,7 @@
 
 	<tasktracker>
 		<common>
-			<heartbeat-freq unit="sec"> 2 </heartbeat-freq>
+			<heartbeat-freq unit="sec"> 1 </heartbeat-freq>
 			<tmp-dir> /usr/tmp </tmp-dir>
 		</common>
 

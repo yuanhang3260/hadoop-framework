@@ -8,7 +8,10 @@
 		<read-buff-size unit="KB">512</read-buff-size>
 		<write-buff-size unit="KB">512</write-buff-size>
 		
-		<partition-tolerance unit="sec">10</partition-tolerance>
+		<heartbeat-freq unit="sec"> 2 </heartbeat-freq>
+		<system-check unit="sec"> 20 </system-check>
+		
+		<partition-tolerance unit="sec"> 10 </partition-tolerance>
 		
 		<ip>128.237.222.59</ip>
 		<port>1099</port>
