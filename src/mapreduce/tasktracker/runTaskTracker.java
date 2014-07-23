@@ -17,7 +17,9 @@ public class runTaskTracker {
 			Parser.mapreduceCoreConf();
 			Parser.mapreduceTaskTrackerCommonConf();
 			Parser.mapreduceTaskTrackerIndividualConf();
-			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.MAPREDCORE, ConfOpt.TASKTRACKERCOMMON, ConfOpt.TASKTRACKERINDIVIDUAL});
+			if (MapReduce.Core.DEBUG) {
+				Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.MAPREDCORE, ConfOpt.TASKTRACKERCOMMON, ConfOpt.TASKTRACKERINDIVIDUAL});
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("The TaskTracker rountine cannot read configuration info.\n"

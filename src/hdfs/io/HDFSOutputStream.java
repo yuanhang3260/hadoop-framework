@@ -1,3 +1,7 @@
+
+
+
+
 package hdfs.io;
 
 import global.Hdfs;
@@ -101,7 +105,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 				}
 				
 				int successWrites = 0;
-				System.out.println("RF:" + getCurrentChunk().getReplicaNumber());
+
 				for (int i = 0; i < getCurrentChunk().getReplicaNumber(); i++) {
 					try {
 						writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 

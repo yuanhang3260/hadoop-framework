@@ -308,6 +308,9 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 							CleanJob cleanJob = new CleanJob((CleanerTask)newTask);
 							Thread cleanJobTh = new Thread(cleanJob);
 							cleanJobTh.start();
+							if (MapReduce.Core.DEBUG) {
+								System.out.println("DEBUG TaskTracker HeartBeat:\treceived clean job.");
+							}
 
 						} else if (newTask instanceof KillerTask) {
 							killJobTaskList.add(newTask);
@@ -533,9 +536,12 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					}
 					
 					
-					System.out.println("TaskTracker.StartTask.run(): Before set JarFilePath:" + (TaskTracker.
-							this.taskJarFolder.getAbsolutePath() + "/" + 
-							task.getJobId() + ".jar"));
+					if (MapReduce.Core.DEBUG) {
+						System.out.println("TaskTracker.StartTask.run(): Before set JarFilePath:" + (TaskTracker.
+								this.taskJarFolder.getAbsolutePath() + "/" + 
+								task.getJobId() + ".jar"));
+					}
+					
 					((MapRedTask) task).getJarEntry().setLocalPath(TaskTracker.
 							this.taskJarFolder.getAbsolutePath() + "/" + 
 							task.getJobId() + ".jar");
@@ -623,7 +629,6 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 		ServerSocket serverSoc;
 		
 		public PartitionServer(int port) throws IOException {
-			System.out.println("PartitionServer is listening at:" + port);
 			this.serverSoc = new ServerSocket(port);
 		}
 
