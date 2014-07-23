@@ -776,7 +776,10 @@ public class NameNode implements NameNodeRemoteInterface{
 						List<Task> taskList = NameNode.this.dataNodeTaskTbl.get(entry.getNodeName());
 						String tid = (new Date()).getTime() + "";
 						Task task = new CopyChunkTask(tid, chunkOnNameNode, srcDataNodeIp,srcDatanodeServerPort, chunkAbstractFromNameNode.get(chunkOnNameNode).filePath);
-						System.out.format("DEBUG NameNode.SystemCheck.run(): Created CopyChunkTask<%s> from file<%s>\n", ((CopyChunkTask)task).getFileName(),chunkAbstractFromNameNode.get(chunkOnNameNode).filePath);
+						if (Hdfs.Core.DEBUG) {
+							System.out.format("DEBUG NameNode.SystemCheck.run(): Created CopyChunkTask<%s> from file<%s>\n", 
+									((CopyChunkTask)task).getFileName(),chunkAbstractFromNameNode.get(chunkOnNameNode).filePath);
+						}
 						taskList.add(task);
 					}
 					
