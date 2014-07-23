@@ -33,7 +33,7 @@ public class HDFSChunk implements Serializable {
 	}
 	
 	
-	public int getReplicaFactor() {
+	public int getReplicaNumber() {
 		return this.locations.size();
 	}
 	
@@ -51,6 +51,12 @@ public class HDFSChunk implements Serializable {
 	
 	public int getChunkSize() {
 		return this.chunk_size;
+	}
+	
+	public void removeDataNodeEntry(DataNodeEntry entry) {
+		
+		this.locations.remove(entry);
+		
 	}
 	
 }

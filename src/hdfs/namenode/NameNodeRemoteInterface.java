@@ -2,12 +2,13 @@ package hdfs.namenode;
 
 import hdfs.io.DataNodeEntry;
 import hdfs.io.HDFSFile;
+import hdfs.message.Message;
 
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public interface NameNodeRemoteInterface extends Remote{
 	
@@ -18,7 +19,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * joins the cluster.
 	 * @throws RemoteException
 	 */
-	public void heartBeat(String dataNodeName) throws RemoteException;
+	public Message heartBeat(String dataNodeName) throws RemoteException;
 	
 	/**
 	 * Join RMI by which DataNode joins joins the HDFS cluster.
@@ -30,7 +31,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * @return The DataNode's name given by NameNode.
 	 * @throws RemoteException
 	 */
-	public String join(String ip, int port, List<String> chunkNameList) throws RemoteException;
+	public Message join(String ip, int registryPort, int serverPort, List<String> chunkNameList) throws RemoteException;
 	
 	/**
 	 * Request to create a file on HDFS.
@@ -65,7 +66,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * @param chunkList The names of chunks on this DataNode.
 	 * @throws RemoteException
 	 */
-	public void chunkReport(String dataNodeName, List<String> chunkList)
+	public Message chunkReport(String dataNodeName, List<String> chunkList)
 			throws RemoteException;
 	
 	/**
@@ -99,5 +100,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * @return
 	 * @throws RemoteException
 	 */
-	public ArrayList<String> listFiles() throws RemoteException;
+	public PriorityQueue<String> listFiles() throws RemoteException;
+	
+	public String listFileTbl() throws RemoteException;
 }

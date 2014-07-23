@@ -25,10 +25,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -101,7 +101,15 @@ public class Utility {
 		} else if (args[1].equals("ls")) {
 			listFiles();
 			return;
-		} else if (args[1].equals("mapred")) {
+		} else if (args[1].equals("hdfs")) {
+			
+			if (args[2].equals("lsft")) { //List NameNode File Table
+				printNameNodeFileTbl();
+			}
+			
+		}
+		
+		else if (args[1].equals("mapred")) {
 			mapredUtility(args);
 		} else {
 			printUsage();
@@ -180,6 +188,7 @@ public class Utility {
 			bout.close();
 			in.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Error! Failed to put file to HDFS.");
 			System.exit(-1);
 		}
@@ -206,7 +215,7 @@ public class Utility {
 		try {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
-			ArrayList<String> rst = nameNodeStub.listFiles();
+			PriorityQueue<String> rst = nameNodeStub.listFiles();
 			int i = 1;
 			for (String fileName : rst) {
 				System.out.format("%d\t%s\n", i, fileName);
@@ -224,6 +233,20 @@ public class Utility {
 		}
 	}
 	
+
+	private static void printNameNodeFileTbl() {
+		try {
+			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
+			String fileTbl = nameNodeStub.listFileTbl();
+			System.out.println(fileTbl);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+		
+		
+	
 	public static void printUsage() {
 		System.out.println("Usage:\thadoop <op> \n<op>:\n\tput\n\tget");
 	}
@@ -239,6 +262,8 @@ public class Utility {
 	private static void printRmUsage() {
 		System.out.println("Usage:\thadoop\tdelete\t<obj file name>");
 	}
+	
+	
 	
 	/* -------------------- MapReduce utility area --------------------- */
 	
@@ -486,4 +511,5 @@ public class Utility {
 	private static void printLsscheduleUsage() {
 		System.out.println("lsschedule:\tList concurrent scheduling queue for each task trackers\nUsage:\thadoop\tmapred\tlsschedule");
 	}
+	
 }

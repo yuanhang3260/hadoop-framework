@@ -39,7 +39,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 			if (Hdfs.Core.DEBUG && this.DEBUG) {
 				System.out.format("[continue %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
 			}
-			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+			for (int i = 0; i < getCurrentChunk().getReplicaNumber(); i++) {
 				writeToDataNode(new byte[] {(byte) arg0}, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
 			}
 			this.chunk_offset++;
@@ -49,7 +49,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 			if (Hdfs.Core.DEBUG && this.DEBUG) {
 				System.out.format("[new chunk %s]: %s\n", getCurrentChunk().getChunkName(), arg0);
 			}
-			for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+			for (int i = 0; i < getCurrentChunk().getReplicaNumber(); i++) {
 				writeToDataNode(new byte[] {(byte) arg0}, getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
 			}
 			this.chunk_offset++;
@@ -101,7 +101,8 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 				}
 				
 				int successWrites = 0;
-				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+				System.out.println("RF:" + getCurrentChunk().getReplicaNumber());
+				for (int i = 0; i < getCurrentChunk().getReplicaNumber(); i++) {
 					try {
 						writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
 							getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
@@ -128,7 +129,7 @@ public class HDFSOutputStream extends OutputStream implements Serializable {
 							this.chunk_offset, this.chunk_offset + towrite);
 				}
 				
-				for (int i = 0; i < getCurrentChunk().getReplicaFactor(); i++) {
+				for (int i = 0; i < getCurrentChunk().getReplicaNumber(); i++) {
 					writeToDataNode(Arrays.copyOfRange(b, offset + written, offset + written + towrite), 
 							getCurrentChunk().getDataNode(i), getCurrentChunk().getChunkName());
 				}
