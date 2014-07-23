@@ -10,7 +10,9 @@ public class runNameNode {
 	public static void main(String[] args) {
 		try {
 			Parser.hdfsCoreConf();
-			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+			if (Hdfs.Core.DEBUG) {
+				Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			

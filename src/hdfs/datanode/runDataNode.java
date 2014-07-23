@@ -14,7 +14,9 @@ public class runDataNode {
 		
 		try {
 			Parser.dataNodeConf();
-			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
+			if (Hdfs.Core.DEBUG) {
+				Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE, ConfOpt.DATANODE});
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			

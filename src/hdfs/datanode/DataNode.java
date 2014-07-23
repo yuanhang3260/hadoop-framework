@@ -61,8 +61,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		this.nameNodePort = nameNodePort;
 		this.dataNodeRegistryPort = dataNodeRegistryPort;
 		this.dataNodeServerPort = dataNodeServerPort;
-		System.out.println("REIGSITRY PORT: " + dataNodeRegistryPort);
-		System.out.println("SERVER PORT:" + dataNodeServerPort);
 	}
 
 	/**
@@ -237,7 +235,27 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	}
 
 	public String readChunk(String chunkName) throws IOException {
+		
+		File chunkFile = new File(chunkNameWrapper(chunkName));
+		
+		for (int i = 0; i < Hdfs.Core.INCONSISTENCY_LATENCY / Hdfs.Core.HEART_BEAT_FREQ; i++) {
+			if (!chunkFile.exists()) {
+				try {
+					Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
+				} catch (InterruptedException e) {
+					if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+				}
+			} else {
+				break;
+			}
+		}
+		
+		if (!chunkFile.exists()) {
+			throw new FileNotFoundException(String.format("File doesn't exist:%s", chunkFile.getName()));
+		}
+		
 		FileReader in = null;
+		
 		StringBuilder sb = new StringBuilder();
 		try {
 			in = new FileReader(chunkNameWrapper(chunkName));
@@ -259,6 +277,27 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 
 	public String readLines(String chunkName, long pos, int numLine)
 			throws IOException {
+		
+		File chunkFile = new File(chunkNameWrapper(chunkName));
+		
+		for (int i = 0; i < Hdfs.Core.INCONSISTENCY_LATENCY / Hdfs.Core.HEART_BEAT_FREQ; i++) {
+			if (!chunkFile.exists()) {
+				try {
+					Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
+				} catch (InterruptedException e) {
+					if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+				}
+			} else {
+				break;
+			}
+		}
+		
+		if (!chunkFile.exists()) {
+			throw new FileNotFoundException(String.format("File doesn't exist:%s\n", chunkFile.getName()));
+		}
+		
+		
+		
 		RandomAccessFile file = new RandomAccessFile(
 				chunkNameWrapper(chunkName), "r");
 		long fileSize = file.length();
@@ -316,7 +355,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		}
 		
 		if (!chunkFile.exists()) {
-			throw new FileNotFoundException(String.format("Chunk cannot be open: chunk name:%s", chunkFile.getName()));
+			throw new FileNotFoundException(String.format("File doesn't exist:%s\n", chunkFile.getName()));
 		}
 		
 		long chunkSize = chunkFile.length();
@@ -342,9 +381,12 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		in.read(readBuf);
 		in.close();
 
-		System.out.println("DEBUG DataNode.read(): chunkName = " + chunkName
-				+ " offSet = " + offSet + " return buffer size = "
-				+ readBuf.length);
+		if (Hdfs.Core.DEBUG) {
+			System.out.println("DEBUG DataNode.read(): chunkName = " + chunkName
+					+ " offSet = " + offSet + " return buffer size = "
+					+ readBuf.length);
+		}
+		
 		return readBuf;
 	}
 
@@ -391,7 +433,8 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	@Override
 	public HDFSLineFeedCheck readLine(String chunkName) throws RemoteException,
 			IOException {
-
+		
+		
 		RandomAccessFile in = new RandomAccessFile(
 				tmpFileWrapper(chunkNameWrapper(chunkName)), "rw");
 
@@ -585,7 +628,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		public Server(int port) throws IOException {
 			
 			this.serverPort = port;
-			System.out.println("Server port:" + this.serverPort);
 			this.serverSoc = new ServerSocket(this.serverPort);
 			
 		}
