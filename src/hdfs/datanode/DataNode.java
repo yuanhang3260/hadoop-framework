@@ -2,14 +2,32 @@ package hdfs.datanode;
 
 import global.Hdfs;
 import hdfs.io.HDFSLineFeedCheck;
+import hdfs.message.CommitBackupTask;
+import hdfs.message.CopyChunkTask;
+import hdfs.message.DeleteChunkTask;
+import hdfs.message.DeleteOrphanTask;
+import hdfs.message.DeleteTempTask;
+import hdfs.message.Message;
+import hdfs.message.Task;
 import hdfs.namenode.NameNodeRemoteInterface;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -24,35 +42,45 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	// TODO:Use XML to configure
 	private String nameNodeIp;
 	private int nameNodePort;
+	
 	private String dataNodeName;
-	private int dataNodePort;
+	private int dataNodeRegistryPort;
+	private int dataNodeServerPort;
+	
+	private String dirPrefix = Hdfs.Core.HDFS_TMEP;
 	private String dataNodeTmpFileDirPrefix;
+	
 	private int chunkBlockPeriod = 3;
 	private NameNodeRemoteInterface nameNodeS = null;
-	private String dirPrefix = Hdfs.Core.HDFS_TMEP;
+	
+	
 
-	public DataNode(String nameNodeIp, int nameNodePort, int dataNodePort) {
+	public DataNode(String nameNodeIp, int nameNodePort, int dataNodeRegistryPort, int dataNodeServerPort) {
 		/* Name Node's RMI registry's address */
 		this.nameNodeIp = nameNodeIp;
 		this.nameNodePort = nameNodePort;
-		this.dataNodePort = dataNodePort;
+		this.dataNodeRegistryPort = dataNodeRegistryPort;
+		this.dataNodeServerPort = dataNodeServerPort;
+		System.out.println("REIGSITRY PORT: " + dataNodeRegistryPort);
+		System.out.println("SERVER PORT:" + dataNodeServerPort);
 	}
 
 	/**
 	 * Initialize this Data Node by binding the remote object
 	 * 
-	 * @throws RemoteException
 	 * @throws NotBoundException
-	 * @throws UnknownHostException
+	 * @throws IOException 
 	 */
-	public void init() throws RemoteException, NotBoundException,
-			UnknownHostException {
+	public void init() throws NotBoundException,
+			IOException {
 
 		/*-------------- Export and bind NameNode --------------*/
 		Registry localRegistry = LocateRegistry
-				.createRegistry(this.dataNodePort);
-		DataNodeRemoteInterface dataNodeStub = (DataNodeRemoteInterface) UnicastRemoteObject
-				.exportObject(this, 0);
+				.createRegistry(this.dataNodeRegistryPort);
+		
+		DataNodeRemoteInterface dataNodeStub = 
+				(DataNodeRemoteInterface) UnicastRemoteObject.exportObject(this, 0);
+		
 		localRegistry.rebind(Hdfs.Core.DATA_NODE_SERVICE_NAME, dataNodeStub);
 
 		/*-------------- Get NameNode Stub --------------*/
@@ -62,7 +90,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 				.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 
 		this.dataNodeName = InetAddress.getLocalHost().getHostAddress() + ":"
-				+ this.dataNodePort;
+				+ this.dataNodeRegistryPort;
 
 		/*-------------- Initiate Temp Directory --------------*/
 		File nodeTmpFile = new File(this.dirPrefix);
@@ -82,7 +110,14 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		this.dirPrefix += "/" + this.dataNodeName;
 
 		this.dataNodeTmpFileDirPrefix = this.dirPrefix;
-
+		
+		
+		/*----------- Initiate DataNode Server port ------------*/
+		Server server = new Server(this.dataNodeServerPort);
+		Thread serverTh = new Thread(server);
+		serverTh.start();
+		
+		
 		/*----------- Report Current Files in Folder -----------*/
 		List<String> chunkList = formChunkReport(true);
 		if (Hdfs.Core.DEBUG) {
@@ -91,9 +126,17 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		}
 
 		/*-------------- Join the cluster --------------*/
-		this.dataNodeName = this.nameNodeS.join(InetAddress.getLocalHost()
-				.getHostAddress(), this.dataNodePort, chunkList);
+		Message message = this.nameNodeS.join(InetAddress.getLocalHost()
+				.getHostAddress(), this.dataNodeRegistryPort, this.dataNodeServerPort, chunkList);
+		
+		for (Task task : message.getTaskList()) {
+			
+			if (task instanceof DeleteOrphanTask) {
 
+				deleteOrphanTaskHandler((DeleteOrphanTask) task);
+				
+			} 
+		}
 	}
 
 	@Override
@@ -101,64 +144,95 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	 * This is the routine thread for DataNode periodically pings NameNode
 	 */
 	public void run() {
+		
+		int counter = 1;
 
-		List<String> chunkList = null;
+		while (true) {
+					
+			/*------------ DataNode sends chunk report every 3 heart beat -----------*/
+			
+			Message message = sendHeartBeat(counter++ % this.chunkBlockPeriod == 0);
+			
+			for (Task task : message.getTaskList()) {
+				taskHandler(task);
+			}
 
-		try {
-			int counter = 1;
-
-			while (true) {
-
-				/*------------ DataNode sends chunk report every 30 sec -----------*/
-				if (counter % this.chunkBlockPeriod == 0) {
-
-					chunkList = formChunkReport(false);
-					if (Hdfs.Core.DEBUG) {
-						System.out.println("DEBUG DataNode.run(): "
-								+ dataNodeName + " is reporting chunks "
-								+ chunkList.toString());
-					}
-					this.nameNodeS.chunkReport(dataNodeName, chunkList);
-				} else {
-					this.nameNodeS.heartBeat(dataNodeName);
-				}
-				counter++;
+			try {
 				Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
+			} catch (InterruptedException e) {
+				if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 			}
-		} catch (Exception e) {
-			if (Hdfs.Core.DEBUG) {
-				e.printStackTrace();
-			}
+			
 		}
+
+	}
+	
+	
+	private Message sendHeartBeat(boolean reportChunk) {
+		
+		Message message = null;
+		
+		try {
+			if (reportChunk) {
+	
+				List<String> chunkList = formChunkReport(false);
+				if (Hdfs.Core.DEBUG) {
+					System.out.print("DataNode.sendHeartBeat(): Report chunk: ");
+					for (String chunkName : chunkList) {
+						System.out.print("\t" + chunkName);
+					}
+					System.out.println();
+				}
+				message = this.nameNodeS.chunkReport(dataNodeName, chunkList);
+				
+			} else {
+				
+				message = this.nameNodeS.heartBeat(dataNodeName);
+				
+			}
+			
+		} catch (Exception e) {
+			
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+			
+		}
+		
+		return message;
 	}
 
 	@Override
-	public void writeToLocal(byte[] b, String chunkName, int offset)
-			throws RemoteException {
+	public void writeToLocal(byte[] b, String chunkName, int offset) throws IOException {
+		
 		File chunkFile = new File(tmpFileWrapper(chunkNameWrapper(chunkName)));
+		
 		if (!chunkFile.exists()) {
+			
 			try {
 				chunkFile.createNewFile();
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
 		}
+		
 		RandomAccessFile out = null;
+		
 		try {
 			out = new RandomAccessFile(chunkFile, "rws");
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
+			if (Hdfs.Core.DEBUG) { e.printStackTrace();}
+			throw new IOException("Cannot open the file.", e);
 		}
+		
 		try {
 			out.seek(offset);
 			out.write(b);
 			out.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+			throw new IOException("Failed to write.", e);
 		}
+		
 		return;
 	}
 
@@ -225,7 +299,7 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	 * 
 	 * @return a byte array with the chunk data, at most Hdfs.client.readBufSize
 	 */
-	public byte[] read(String chunkName, int offSet) throws RemoteException {
+	public byte[] read(String chunkName, int offSet) throws IOException {
 		File chunkFile = new File(chunkNameWrapper(chunkName));
 		long chunkSize = chunkFile.length();
 
@@ -234,11 +308,27 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 		}
 		RandomAccessFile in = null;
 		byte[] readBuf = null;
-		try {
-			in = new RandomAccessFile(chunkFile, "r");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		for (int i = 0; i < Hdfs.Core.INCONSISTENCY_LATENCY / Hdfs.Core.HEART_BEAT_FREQ; i++) {
+			try {
+				in = new RandomAccessFile(chunkFile, "r");
+				break;
+			} catch (FileNotFoundException e) {
+				if (Hdfs.Core.DEBUG) { 
+					e.printStackTrace(); 
+					System.out.println("DEBUG Datanode.read(): Failed to open the file. Wait for a heart beat");
+					}
+			}
+			try {
+				Thread.sleep(Hdfs.Core.HEART_BEAT_FREQ);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if (in == null) {
+			throw new FileNotFoundException(String.format("Chunk cannot be open: chunk name:%s", chunkFile.getName()));
 		}
 
 		if (offSet + Hdfs.Core.READ_BUFF_SIZE <= chunkSize) {
@@ -268,79 +358,6 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 				+ " offSet = " + offSet + " return buffer size = "
 				+ readBuf.length);
 		return readBuf;
-	}
-
-	@Override
-	public void commitChunk(String globalChunkName, boolean valid,
-			boolean forSysCheck) throws RemoteException {
-
-		if (forSysCheck) {
-			File chunkFile = new File(
-					tmpFileWrapper(chunkNameWrapper(globalChunkName)));
-			if (!chunkFile.exists()) {
-				if (Hdfs.Core.DEBUG) {
-					System.err.println("chunk doesn't exists");
-				}
-				return;
-			}
-			if (Hdfs.Core.DEBUG) {
-				System.out
-						.format("DEBUG DataNode.commitChunk(): Called by NameNode.SysCheck. Commit chunk (%s)\n",
-								chunkNameWrapper(globalChunkName));
-			}
-			chunkFile.setWritable(false, false);
-			chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
-		} else {
-			if (valid) {
-				File chunkFile = new File(
-						backupFileWrapper(chunkNameWrapper(globalChunkName)));
-				if (!chunkFile.exists()) {
-					if (Hdfs.Core.DEBUG) {
-						System.out.println("DEBUG DataNode.commitChunk(): The committed chunk doesn't exists");
-					}
-				}
-				if (Hdfs.Core.DEBUG) {
-					System.out
-							.format("DEBUG DataNode.commitChunk(): Called by NameNode.CommitFile(). Commit chunk (%s)\n",
-									backupFileWrapper(chunkNameWrapper(globalChunkName)));
-				}
-				chunkFile.setWritable(false, false);
-				chunkFile.renameTo(new File(chunkNameWrapper(globalChunkName)));
-			} else {
-				if (Hdfs.Core.DEBUG) {
-					System.out
-							.format("DEBUG DataNode.commitChunk(): Called by NameNode.CommitFile(). Delete chunk (%s)\n",
-									tmpFileWrapper(chunkNameWrapper(globalChunkName)));
-				}
-				File chunkFile = new File(
-						tmpFileWrapper(chunkNameWrapper(globalChunkName)));
-				chunkFile.delete();
-			}
-		}
-		return;
-	}
-
-	@Override
-	public void deleteChunk(String globalChunkName) throws RemoteException,
-			IOException {
-		try {
-			File chunkFile = new File(chunkNameWrapper(globalChunkName));
-			if (!chunkFile.exists()) {
-				chunkFile = new File(
-						tmpFileWrapper(chunkNameWrapper(globalChunkName)));
-				chunkFile.delete();
-				chunkFile = new File(
-						backupFileWrapper(chunkNameWrapper(globalChunkName)));
-				chunkFile.delete();
-			}
-			if (Hdfs.Core.DEBUG) {
-				System.out.println("Delete file " + chunkFile);
-			}
-			chunkFile.delete();
-		} catch (SecurityException e) {
-			throw new IOException("Cannot delete the chunk");
-		}
-
 	}
 
 	private String chunkNameWrapper(String globalChunkName) {
@@ -440,5 +457,191 @@ public class DataNode implements DataNodeRemoteInterface, Runnable {
 	private String backupFileWrapper(String fileName) {
 		return fileName + ".backup";
 	}
+	
+	
+	private void taskHandler(Task task) {
+		
+		if (task instanceof CommitBackupTask) {
+			commitBackupTaskHandler((CommitBackupTask)task);
+		} 
+		
+		else if (task instanceof CopyChunkTask) {
+			copyChunkTaskHandler((CopyChunkTask)task);
+		}
+		
+		else if (task instanceof DeleteChunkTask) {
+			deleteChunkTaskHandler((DeleteChunkTask)task);
+		}
+		
+		else if (task instanceof DeleteOrphanTask) {
+			deleteOrphanTaskHandler((DeleteOrphanTask)task);
+		}  
+		
+		else if (task instanceof DeleteTempTask) {
+			deleteTempTaskHandler((DeleteTempTask)task);
+		} 
+		
+	}
+	private void deleteOrphanTaskHandler (DeleteOrphanTask task) {
+		
+		String orphanChunkName = task.getChunkName();
+		
+		File orphanChunk = new File(chunkNameWrapper(orphanChunkName));
+		orphanChunk.delete();
+		
+		orphanChunk = new File(tmpFileWrapper(chunkNameWrapper(orphanChunkName)));
+		orphanChunk.delete();
+		
+		orphanChunk = new File(backupFileWrapper(chunkNameWrapper(orphanChunkName)));
+		orphanChunk.delete();
+	}
+	
+	private void commitBackupTaskHandler (CommitBackupTask task) {
+		
+		String committedChunkName = chunkNameWrapper((task.getChunkName()));
+		File committedChunk = new File(committedChunkName);
+		
+		String backupChunkName = backupFileWrapper(chunkNameWrapper(task.getChunkName()));
+		File backupChunk = new File(backupChunkName);
+		
+		backupChunk.renameTo(committedChunk);
+		backupChunk.setWritable(false, false);
+	}
+	
+	private void deleteTempTaskHandler(DeleteTempTask task) {
+		
+		String tmpFileName = chunkNameWrapper(task.getChunkName());
+		File tmpFile = new File(tmpFileName);
+		tmpFile.delete();
 
+	}
+	
+	private void copyChunkTaskHandler(CopyChunkTask task) {
+		
+		String dataNodeIp = null;
+		try {
+			dataNodeIp = Inet4Address.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			if (Hdfs.Core.DEBUG) {e.printStackTrace();}
+			return;
+		}
+		
+		if (dataNodeIp.equals(task.getSrcDataNodeIp()) && this.dataNodeServerPort == task.getSrcDataNodeServerPort()) {
+			
+			if (Hdfs.Core.DEBUG) {
+				System.out.println("DataNoe.copyChunkTaskHandler(): NameNode requires DataNode to copy chunk from itself. ");
+			}
+			
+			return;
+		}
+		
+		if (Hdfs.Core.DEBUG) {
+			System.out.println("DataNoe.copyChunkTaskHandler(): Start copy chunk task.");
+		}
+		
+		
+		String chunkFileName = chunkNameWrapper(task.getChunkName());
+		File chunkFile = new File(chunkFileName);
+		
+		if (chunkFile.exists()) {
+			return;
+		}
+		
+		try {
+			Socket soc = new Socket(task.getSrcDataNodeIp(), task.getSrcDataNodeServerPort());
+			
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(soc.getOutputStream()));
+			BufferedInputStream in = new BufferedInputStream(soc.getInputStream());
+			BufferedOutputStream fin =
+					new BufferedOutputStream(new FileOutputStream(chunkFile));
+			
+			out.println(task.getChunkName());
+			out.flush();
+			
+			byte[] buff = new byte[Hdfs.Core.WRITE_BUFF_SIZE];
+			int len = 0;
+			
+			while ((len = in.read(buff)) != -1) {
+				fin.write(buff, 0, len);
+			}
+			
+			out.close();
+			in.close();
+			fin.close();
+			
+		} catch (UnknownHostException e) {
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+		} catch (IOException e) {
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
+		}
+		
+		if (Hdfs.Core.DEBUG) {
+			System.out.println("DataNoe.copyChunkTaskHandler(): Finish Copy");
+		}
+		chunkFile.setWritable(false, false);
+	}
+	
+	private void deleteChunkTaskHandler(DeleteChunkTask task) {
+		
+		String deleteChunkName = chunkNameWrapper(task.getChunkName());
+		File deleteChunk = new File(deleteChunkName);
+		deleteChunk.delete();
+		
+	}
+	
+	private class Server implements Runnable {
+		
+		int serverPort;
+		ServerSocket serverSoc;
+		
+		public Server(int port) throws IOException {
+			
+			this.serverPort = port;
+			System.out.println("Server port:" + this.serverPort);
+			this.serverSoc = new ServerSocket(this.serverPort);
+			
+		}
+		
+		@Override
+		public void run() {
+			
+			while (true) {
+				try {
+					respond();
+				} catch (IOException e) {
+					if (Hdfs.Core.DEBUG) {e.printStackTrace();}
+				}
+			}
+			
+		}
+		
+		private void respond() throws IOException {
+			Socket soc = this.serverSoc.accept();
+			
+			/* Set up */
+			BufferedReader in = new BufferedReader(
+					new InputStreamReader(soc.getInputStream()));
+			
+			BufferedOutputStream out = new BufferedOutputStream(soc.getOutputStream());
+			
+			String request = in.readLine();
+			
+			File chunkFile = new File(chunkNameWrapper(request));
+			BufferedInputStream fin = new BufferedInputStream(new FileInputStream(chunkFile));
+			
+			byte[] buff = new byte[Hdfs.Core.READ_BUFF_SIZE];
+			int len = 0;
+			
+			while ((len = fin.read(buff)) != -1) {
+				
+				out.write(buff, 0, len);
+				
+			}
+			
+			in.close();
+			out.close();
+			fin.close();
+		}
+		
+	}
 }

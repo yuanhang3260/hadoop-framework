@@ -129,7 +129,7 @@ public class HDFSInputStream implements Serializable{
 		return data;
 	}
 	
-	public int read(byte[] b) throws RemoteException {
+	public int read(byte[] b) throws IOException {
 		if (b == null || b.length == 0) {
 			return 0;
 		}

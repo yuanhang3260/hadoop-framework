@@ -1,10 +1,12 @@
 package hdfs.io;
 
+import global.Hdfs;
 import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HDFSFile implements Serializable {
@@ -18,6 +20,7 @@ public class HDFSFile implements Serializable {
 	private boolean available; //TODO: define the semantics
 	private HDFSOutputStream newOutputStream = null;
 	private NameNodeRemoteInterface nameNodeStub;
+	private Date commitTime;
 
 	
 	/**
@@ -43,10 +46,17 @@ public class HDFSFile implements Serializable {
 		List<DataNodeEntry> locations = null;
 		try {
 			chunkName = this.nameNodeStub.nameChunk();
+			System.out.println("DEBUG HDFSFile.addChunk(): chunk name:" + chunkName);
+			
 			locations = this.nameNodeStub.select(this.replicaFactor);
+			
+			int i = 0;
+			System.out.format("DEBUG HDFSFile.addChunk(): Locations\n");
+			for (DataNodeEntry entry: locations) {
+				System.out.format("\tIP=%s\t%s\n", entry.dataNodeRegistryIP, entry.dataNodeRegistryPort);
+			}
 		} catch (RemoteException e) {
-			//TODO: deal with name node naming exception
-			e.printStackTrace();
+			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 		}
 		HDFSChunk newChunk = new HDFSChunk(chunkName, locations);
 		this.chunkList.add(newChunk);
@@ -106,6 +116,14 @@ public class HDFSFile implements Serializable {
 	
 	public List<HDFSChunk> getTotalChunkList() {
 		return this.totalChunkList;
+	}
+	
+	public void setCommitTime(Date time) {
+		this.commitTime = time;
+	}
+	
+	public Date getCommitTime() {
+		return this.commitTime;
 	}
 }
 

@@ -30,10 +30,15 @@ public class Hdfs {
 		
 		public static long HEART_BEAT_FREQ = 1000 * 2;
 		
+		public static long INCONSISTENCY_LATENCY = 3 * HEART_BEAT_FREQ;  //6s
+		
 	}
 	
 	public static class DataNode {
+		
 		public static int DATA_NODE_REGISTRY_PORT;
+		
+		public static int DATA_NODE_SERVER_PORT = 6002;  //TODO: CHANGE TO CONFIGURABLE
 	}
 
 }
