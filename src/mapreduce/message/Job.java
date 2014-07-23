@@ -10,10 +10,12 @@ import java.util.List;
 import mapreduce.client.JobConf;
 import mapreduce.io.Split;
 
+/**
+ * An abstraction of a specific job, JobClient submits a job to JobTracker
+ *
+ */
 public class Job implements Serializable{
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -280531931740408893L;
 	private String jobId;
 	private JarFileEntry jarFileEntry;

@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * TaskTracker heatbeat JobTracker periodically by collecting current tasks'
+ * status on it, available slots and form a TaskTrackerReport, JobTracker
+ * update each task's status according to TaskTracker's report
+ *
+ */
 public class TaskTrackerReport implements Serializable {
 
 	private static final long serialVersionUID = 6483495489789811905L;

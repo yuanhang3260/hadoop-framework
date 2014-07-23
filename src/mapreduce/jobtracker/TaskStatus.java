@@ -2,10 +2,12 @@ package mapreduce.jobtracker;
 
 import java.io.Serializable;
 
+/**
+ * Indicates the status of a specific task
+ *
+ */
 public class TaskStatus implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 8889285369480650292L;
 	public String jobId;
 	public String taskId;

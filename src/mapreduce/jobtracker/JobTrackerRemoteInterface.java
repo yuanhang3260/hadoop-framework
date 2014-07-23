@@ -28,6 +28,14 @@ public interface JobTrackerRemoteInterface extends Remote {
 	
 	/**
 	 * Periodically heatBeat and get tasks assignment from job tracker
+	 * 	
+	 * Each Task Tracker periodically calls this method to send a report to
+	 * Job Tracker. The report includes the status of all tasks currently on
+	 * the specific Task Tracker, the Job Tracker updates associative 
+	 * information and sends acknowledgement of SUCCESS / FAILED tasks back to
+	 * Task Tracker (so they will not be in the report next time), along with 
+	 * some new task assignments, if there are available slots
+	 * 
 	 * @param report
 	 * @return
 	 */

@@ -5,11 +5,12 @@ import java.io.Serializable;
 
 import mapreduce.jobtracker.WorkStatus;
 
-
+/**
+ * Super calss of all tasks that JobTracker assigns to TaskTrackers
+ *
+ */
 public class Task implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -6752330217052972746L;
 	private String jobId;
 	private String tid;
