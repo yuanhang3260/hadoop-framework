@@ -103,8 +103,6 @@ public class JobClient {
 			System.out.println("INFO: Number of Reduce task = " + reduceTotal);
 			while (true) {
 				Thread.sleep(1000 * 3);
-//				int numMapIncomplete = jobTrackerStub.checkMapProgress(jobId);
-//				int numReduceIncomplete = jobTrackerStub.checkReduceProgress(jobId);
 				JobStatus jobStatus = jobTrackerStub.getJobStatus(jobId);
 				int numMapIncomplete = jobStatus.mapTaskLeft;
 				int numReduceIncomplete = jobStatus.reduceTaskLeft;

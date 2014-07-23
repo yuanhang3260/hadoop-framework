@@ -46,12 +46,17 @@ public class HDFSFile implements Serializable {
 		List<DataNodeEntry> locations = null;
 		try {
 			chunkName = this.nameNodeStub.nameChunk();
-			System.out.println("DEBUG HDFSFile.addChunk(): chunk name:" + chunkName);
-			
+			if (Hdfs.Core.DEBUG) {
+				System.out.println("DEBUG HDFSFile.addChunk(): chunk name:" + chunkName);
+			}
+				
 			locations = this.nameNodeStub.select(this.replicaFactor);
 			
 			int i = 0;
-			System.out.format("DEBUG HDFSFile.addChunk(): Locations\n");
+			if (Hdfs.Core.DEBUG) {
+				System.out.format("DEBUG HDFSFile.addChunk(): Locations\n");
+			}
+			
 			for (DataNodeEntry entry: locations) {
 				System.out.format("\tIP=%s\t%s\n", entry.dataNodeRegistryIP, entry.dataNodeRegistryPort);
 			}

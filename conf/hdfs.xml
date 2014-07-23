@@ -10,7 +10,7 @@
 		
 		<partition-tolerance unit="sec">10</partition-tolerance>
 		
-		<ip>128.237.213.225</ip>
+		<ip>128.237.222.59</ip>
 		<port>1099</port>
 	</core>
 

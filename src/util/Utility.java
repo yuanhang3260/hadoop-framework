@@ -394,8 +394,6 @@ public class Utility {
 		String type = args[3];
 		String jarPath = args[4];
 		String mainClassName = args[5];
-		String intputPath = args[6];
-		String outoutPath = args[7];
 		
 		JobClient.jarPath = jarPath;
 		
