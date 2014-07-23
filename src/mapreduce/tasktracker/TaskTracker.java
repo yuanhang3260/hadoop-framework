@@ -331,8 +331,8 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					/* Allocate a thread to start new added tasks */
 					StartTask st = new StartTask(ack.newAddedTasks);
-					Thread startTaskTh = new Thread(st);
-					startTaskTh.start();
+//					Thread startTaskTh = new Thread(st);
+					startTaskTh.run;
 				}
 				try {
 					Thread.sleep(MapReduce.TaskTracker.Common.HEART_BEAT_FREQ);
