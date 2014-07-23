@@ -34,7 +34,7 @@ public class Hdfs {
 		
 		public static long HEART_BEAT_FREQ;
 		
-		public static long INCONSISTENCY_LATENCY = 5 * HEART_BEAT_FREQ;  //non-configurable
+		public static long INCONSISTENCY_LATENCY;  //non-configurable
 		
 	}
 	

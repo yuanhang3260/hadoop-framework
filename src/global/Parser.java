@@ -119,6 +119,7 @@ public class Parser {
 					throw new ConfFormatException ("heart beat frequency cannot be non-positive");
 				}
 				
+				Hdfs.Core.INCONSISTENCY_LATENCY = Hdfs.Core.HEART_BEAT_FREQ * 6;
 				
 				/* Parse system check freq */
 				Hdfs.Core.SYSTEM_CHECK_PERIOD =
