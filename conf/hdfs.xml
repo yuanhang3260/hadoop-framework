@@ -15,7 +15,8 @@
 	</core>
 
 	<datanode>
-		<port>1150</port>
+		<registry-port>1200</registry-port>
+		<server-port>3000</server-port>
 	</datanode>
 
 </hdfs>

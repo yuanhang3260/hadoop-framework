@@ -165,7 +165,15 @@ public class Parser {
 			/* parse the DataNode port num */
 			try {
 				Hdfs.DataNode.DATA_NODE_REGISTRY_PORT =
-						Integer.parseInt(eElement.getElementsByTagName("port")
+						Integer.parseInt(eElement.getElementsByTagName("registry-port")
+								.item(0).getTextContent().trim());
+			} catch (NumberFormatException e) {
+				throw e;
+			}
+			
+			try {
+				Hdfs.DataNode.DATA_NODE_SERVER_PORT =
+						Integer.parseInt(eElement.getElementsByTagName("server-port")
 								.item(0).getTextContent().trim());
 			} catch (NumberFormatException e) {
 				throw e;
