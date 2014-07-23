@@ -1,7 +1,3 @@
-
-
-
-
 package hdfs.io;
 
 import global.Hdfs;
@@ -17,11 +13,13 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A output stream providing basic write operations to a newly created
+ * HDFSFile. The HDFSBufferedOutputStream can be used to gain more efficiency
+ *
+ */
 public class HDFSOutputStream extends OutputStream implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7034464668035678312L;
 	private HDFSFile file;
 	private int chunk_size;

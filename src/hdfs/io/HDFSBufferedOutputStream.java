@@ -7,7 +7,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Like
+ * A buffered output stream providing a more efficient write function for 
+ * writing data to DFS
  *
  */
 public class HDFSBufferedOutputStream implements Serializable {
