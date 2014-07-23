@@ -38,7 +38,7 @@ public class Hdfs {
 		
 		public static int DATA_NODE_REGISTRY_PORT;
 		
-		public static int DATA_NODE_SERVER_PORT = 6002;  //TODO: CHANGE TO CONFIGURABLE
+		public static int DATA_NODE_SERVER_PORT;
 	}
 
 }

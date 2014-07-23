@@ -10,16 +10,18 @@
 		
 		<heartbeat-freq unit="sec"> 2 </heartbeat-freq>
 		<system-check unit="sec"> 20 </system-check>
-		
+
 		<partition-tolerance unit="sec"> 10 </partition-tolerance>
 		
+		<hdfs-tmp> ./tmp </hdfs-tmp>
+
 		<ip>128.237.222.59</ip>
 		<port>1099</port>
 	</core>
 
 	<datanode>
-		<registry-port>1200</registry-port>
-		<server-port>3000</server-port>
+		<registry-port>1201</registry-port>
+		<server-port>3001</server-port>
 	</datanode>
 
 </hdfs>

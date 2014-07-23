@@ -149,6 +149,15 @@ public class Parser {
 					throw new ConfFormatException ("partition tolerance cannot be non-positive");
 				}
 				
+				/* parse hdfs tmp file */
+				Hdfs.Core.HDFS_TMEP = eElement.getElementsByTagName("hdfs-tmp")
+								.item(0).getTextContent().trim();
+				
+				
+				if (Hdfs.Core.HDFS_TMEP.length() < 1) {
+					throw new ConfFormatException ("hdfs tmp directory cannot be empty.");
+				}
+				
 				
 				/* parse NameNode IP Address */
 				Hdfs.Core.NAME_NODE_IP =
@@ -163,6 +172,7 @@ public class Parser {
 				Hdfs.Core.NAME_NODE_REGISTRY_PORT =
 						Integer.parseInt(eElement.getElementsByTagName("port")
 								.item(0).getTextContent().trim());
+
 				
 				if (Hdfs.Core.NAME_NODE_REGISTRY_PORT  < 1024) {
 					throw new ConfFormatException ("NameNode port cannot use a well-known port.");
@@ -479,6 +489,7 @@ public class Parser {
 		System.out.println("HDFS.Core.NAME_NODE_IP = " + Hdfs.Core.NAME_NODE_IP);
 		System.out.println("Hdfs.Core.NAME_NODE_REGISTRY_PORT = " + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		System.out.println("Hdfs.Core.NAME_NODE_REGISTRY_PORT = " + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+		System.out.println("Hdfs.Core.HDFS_TMEP = " + Hdfs.Core.HDFS_TMEP);
 		System.out.println("\n");
 	}
 	
