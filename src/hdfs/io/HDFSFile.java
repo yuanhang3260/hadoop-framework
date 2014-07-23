@@ -55,11 +55,12 @@ public class HDFSFile implements Serializable {
 			int i = 0;
 			if (Hdfs.Core.DEBUG) {
 				System.out.format("DEBUG HDFSFile.addChunk(): Locations\n");
+				for (DataNodeEntry entry: locations) {
+					System.out.format("\tIP=%s\t%s\n", entry.dataNodeRegistryIP, entry.dataNodeRegistryPort);
+				}
 			}
 			
-			for (DataNodeEntry entry: locations) {
-				System.out.format("\tIP=%s\t%s\n", entry.dataNodeRegistryIP, entry.dataNodeRegistryPort);
-			}
+			
 		} catch (RemoteException e) {
 			if (Hdfs.Core.DEBUG) { e.printStackTrace(); }
 		}
