@@ -48,7 +48,10 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 		
 		try {
 			Parser.hdfsCoreConf();
-			Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+			if (MapReduce.Core.DEBUG) {
+				Parser.printConf(new ConfOpt[] {ConfOpt.HDFSCORE});
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			

@@ -169,9 +169,13 @@ public class NameNode implements NameNodeRemoteInterface{
 	}
 	
 	@Override
-	public HDFSFile open(String fileName) throws RemoteException {
-		HDFSFile file = this.fileTbl.get(fileName);
-		return file;
+	public HDFSFile open(String fileName) throws IOException {
+		if (this.fileTbl.containsKey(fileName)) {
+			HDFSFile file = this.fileTbl.get(fileName);
+			return file;
+		} else {
+			throw new IOException("Cannot find requested file:" + fileName);
+		}
 	}
 	
 	
