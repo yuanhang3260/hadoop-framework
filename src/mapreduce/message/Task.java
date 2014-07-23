@@ -37,6 +37,10 @@ public class Task implements Serializable {
 		return this.rescheduleNum;
 	}
 	
+	public void resetRescheduleNum() {
+		this.rescheduleNum = 0;
+	}
+	
 	public void increaseRescheuleNum() {
 		this.rescheduleNum++;
 	}

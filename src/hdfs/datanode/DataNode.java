@@ -37,9 +37,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A DataNode is the one who stores data as chunks in local file system
+ *
+ */
 public class DataNode implements DataNodeRemoteInterface, Runnable {
 
-	// TODO:Use XML to configure
 	private String nameNodeIp;
 	private int nameNodePort;
 	

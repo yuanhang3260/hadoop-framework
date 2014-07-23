@@ -1,6 +1,5 @@
 package mapreduce.jobtracker;
 
-import global.MapReduce;
 import global.Parser;
 
 public class runJobTracker {

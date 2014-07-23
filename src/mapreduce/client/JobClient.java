@@ -6,7 +6,6 @@ import global.Parser;
 import hdfs.io.HDFSBufferedOutputStream;
 import hdfs.io.HDFSChunk;
 import hdfs.io.HDFSFile;
-import hdfs.io.HDFSOutputStream;
 import hdfs.namenode.NameNodeRemoteInterface;
 
 import java.io.File;
@@ -28,8 +27,24 @@ import mapreduce.jobtracker.JobTrackerRemoteInterface;
 import mapreduce.jobtracker.WorkStatus;
 import mapreduce.message.Job;
 
+/**
+ * The JobClient provides methods for applications to submit jobs to the
+ * MapReduce cluster to run. Currently it just provides only one method: runJob
+ * It generally submits the job to JobTracker and periodically polls JobTracker 
+ * to get current progress of the job
+ *
+ */
 public class JobClient {
+	
 	public static String jarPath;
+	
+	/**
+	 * Application use this method to submit a specific job with its job 
+	 * configuration to the MapReduce cluster. 
+	 * 
+	 * @param conf The configuration of the job to run
+	 * @return String JobId of the submitted job upon job exit
+	 */
 	public static String runJob(JobConf conf) {
 		
 		try {
@@ -159,7 +174,7 @@ public class JobClient {
 		return jobId;
 	}
 	
-	public static List<Split> splitFile(String inputFile) throws Exception {
+	private static List<Split> splitFile(String inputFile) throws Exception {
 		try {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);

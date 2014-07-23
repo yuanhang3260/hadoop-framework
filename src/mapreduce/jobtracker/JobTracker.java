@@ -2,7 +2,6 @@ package mapreduce.jobtracker;
 
 import global.Hdfs;
 import global.MapReduce;
-import global.Parser;
 import hdfs.io.DataNodeEntry;
 import hdfs.namenode.NameNodeRemoteInterface;
 
@@ -34,6 +33,20 @@ import mapreduce.message.PartitionEntry;
 import mapreduce.message.ReducerTask;
 import mapreduce.message.Task;
 
+/**
+ * The JobTracker is the central coordinator among the MapReduce cluster, 
+ * all TaskTrackers call JobTracker to join this cluster and hearbeat JobTracker
+ * to report the status of tasks currently running on it. 
+ * 
+ * JobTracker takes the responsibility to:
+ * 		1. Initiate a job upon job submission from JobClient
+ * 		2. Slice the whole job into pieces of tasks
+ * 		3. Use its JobScheduler to schedule each task to an appropriate 
+ * 		   TaskTracker
+ * 		4. Provides fault tolerance for MapReduce cluster. The whole MapReduce
+ * 		   cluster will crash once a JobTracker is disconnected
+ *
+ */
 public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private static int MAX_NUM_MAP_TASK = 999;
@@ -52,35 +65,17 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	private AbstractMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();
 	
-	public static void main(String[] args) {
-		
-		try {
-			Parser.hdfsCoreConf();
-			Parser.mapreduceCoreConf();
-			Parser.mapreduceJobTrackerConf();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("The JobTracker rountine cannot read configuration info.\n"
-					+ "Please confirm the mapreduce.xml is placed as ./conf/mapreduce.xml.\n"
-					+ "The JobTracker routine is shutting down...");
-			System.exit(1);
-		}
-		
-		JobTracker jt = new JobTracker();
-		jt.init();
-		if (Hdfs.Core.DEBUG) {
-			System.out.println("DEBUG runJobTracker.main(): jobTracker now running");
-		}
-	}
-	
 	/**
 	 * Initialize the JobTracker by initialize the JobScheduler and 
 	 * TaskTrackerCheck, and export the JobTracker itself to RMI registry
 	 * 
 	 */
 	public void init() {
+		
 		this.jobScheduler = new JobScheduler();
+		
 		Thread t = new Thread(new TaskTrackerCheck());
+		
 		t.start();
 		
 		try {
@@ -94,6 +89,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	@Override
 	public String join(String ip, int port, int serverPort, int numSlots) {
+		
 		String taskTrackerName = ip + ":" + port;
 		
 		if (!taskTrackerTbl.containsKey(ip)) {
@@ -114,8 +110,8 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	/**
 	 * Create a map task given the job and specific split
-	 * @param job
-	 * @param split
+	 * @param job The job of that task
+	 * @param split The split for that mapper task
 	 * @return newly created MapperTask
 	 */
 	private MapperTask createMapTask(Job job, Split split) {
@@ -141,9 +137,10 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	
 	/**
 	 * Create a reducer task
-	 * @param job
-	 * @param reducerSEQ
-	 * @param partitionEntry
+	 * @param job The job of that task
+	 * @param reducerSEQ The index of partition the reducer needs to handle
+	 * @param partitionEntry entries of all TaskTracker server for this
+	 * 		  task's necessary intermediate files
 	 * @return newly created reducer task
 	 */
 	private ReducerTask createReduceTask(Job job, int reducerSEQ, PartitionEntry[] partitionEntry) {
@@ -498,19 +495,28 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				/* try to re-schedule this task */
 				Task task = this.taskTbl.get(taskStatus.taskId);
 				if (task.getRescheduleNum() < MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {				
+					
 					task.increasePriority();
+					
 					task.increaseRescheuleNum();
+					
 					if (isMapper) {
+						
 						if (Hdfs.Core.DEBUG) {
 							System.out.println(" map task");
 						}
+						
 						/* increase schedule priority of this task */
 						/* disable the bad task tracker so that the failed task
 						 * will not be scheduled to this TaskTracker */
 						TaskTrackerInfo badTaskTracker = taskTrackerTbl.get(taskStatus.taskTrackerIp);
+						
 						badTaskTracker.disable();
+						
 						this.jobScheduler.addMapTask((MapperTask) task);
+						
 						badTaskTracker.enable();
+						
 					} else {
 						if (Hdfs.Core.DEBUG) {
 							System.out.println(" reduce task");
@@ -520,7 +526,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 						
 						/* if job finished, check if all reducers are SUCCESS,
 						 * otherwise restart the whole job */
-						if (jobStatus.reduceTaskLeft == 0 /*&& !reducerAllSuccess(jobStatus.reducerStatusTbl)*/) {
+						if (jobStatus.reduceTaskLeft == 0) {
 							resetJob(jobStatus);
 						}
 					}					
@@ -564,11 +570,16 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 */
 	private void resetJob(JobStatus jobStatus) {
 		if (jobStatus.rescheduleNum >= MapReduce.JobTracker.MAX_RESCHEDULE_ATTEMPTS) {
+			
 			jobFail(jobStatus.jobId);
+			
 			return;
 		}
+		
 		jobStatus.rescheduleNum++;
+		
 		jobStatus.mapTaskLeft = jobStatus.mapTaskTotal;
+		
 		jobStatus.reduceTaskLeft = jobStatus.reduceTaskTotal;
 		
 		/* delete result on HDFS from reducer */
@@ -588,11 +599,21 @@ public class JobTracker implements JobTrackerRemoteInterface {
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
+		
 		jobStatus.reducerStatusTbl = new ConcurrentHashMap<String, TaskStatus>();
+		
 		Set<String> mapTaskIds = jobStatus.mapperStatusTbl.keySet();
+		
 		for (String id : mapTaskIds) {
+			
 			jobStatus.mapperStatusTbl.get(id).status = WorkStatus.RUNNING;
-			this.jobScheduler.addMapTask((MapperTask) this.taskTbl.get(id));
+			
+			Task taskToSchedule = this.taskTbl.get(id);
+			
+			taskToSchedule.resetRescheduleNum();
+			
+			/* push all map tasks to JobScheduler again */
+			this.jobScheduler.addMapTask((MapperTask) taskToSchedule);
 		}
 	}
 	
@@ -603,12 +624,14 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * @param jobId
 	 */
 	private void jobFail(String jobId) {
+		
 		this.jobStatusTbl.get(jobId).status = WorkStatus.FAILED;
 		
 		/* do cleaning work for intermediate files */
 		if (Hdfs.Core.DEBUG) {
 			System.out.println("DEBUG JobTracker.jobFail(): about to cleanUp job " + jobId);
 		}
+		
 		cleanUp(jobId);
 	}
 	
@@ -617,6 +640,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 	 * to kill associative tasks running on those TaskTrackers
 	 */
 	public void terminateJob(String jobId) {
+		
 		JobStatus jobStatus = this.jobStatusTbl.get(jobId);
 		
 		synchronized(jobStatus) {

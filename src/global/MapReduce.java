@@ -1,5 +1,9 @@
 package global;
 
+/**
+ * Configuration class for all configurations about MapReduce cluster
+ *
+ */
 public class MapReduce {
 	
 	public static class Core {
