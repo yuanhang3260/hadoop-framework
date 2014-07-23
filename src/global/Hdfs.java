@@ -28,13 +28,13 @@ public class Hdfs {
 		
 		public static int NAME_NODE_REGISTRY_PORT;
 		
-		public static String HDFS_TMEP = "tmp";
+		public static String HDFS_TMEP;
 		
-		public static long SYSTEM_CHECK_PERIOD = 1000 * 20; //non-configurable
+		public static long SYSTEM_CHECK_PERIOD;
 		
-		public static long HEART_BEAT_FREQ = 1000 * 2;
+		public static long HEART_BEAT_FREQ;
 		
-		public static long INCONSISTENCY_LATENCY = 3 * HEART_BEAT_FREQ;  //6s
+		public static long INCONSISTENCY_LATENCY = 5 * HEART_BEAT_FREQ;  //non-configurable
 		
 	}
 	
@@ -42,7 +42,7 @@ public class Hdfs {
 		
 		public static int DATA_NODE_REGISTRY_PORT;
 		
-		public static int DATA_NODE_SERVER_PORT = 6002;  //TODO: CHANGE TO CONFIGURABLE
+		public static int DATA_NODE_SERVER_PORT;
 	}
 
 }

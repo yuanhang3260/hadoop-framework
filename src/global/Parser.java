@@ -104,6 +104,36 @@ public class Parser {
 					throw new ConfFormatException ("write buffer size cannot be non-positive");
 				}
 				
+				/* Parse hear beat freq */
+				
+				Hdfs.Core.HEART_BEAT_FREQ =
+						Integer.parseInt(eElement.getElementsByTagName("heartbeat-freq")
+								.item(0).getTextContent().trim());
+				
+				unitType = 
+						((Element)eElement.getElementsByTagName("heartbeat-freq").item(0)).getAttribute("unit");
+				unit = parseUnit(unitType);
+				Hdfs.Core.HEART_BEAT_FREQ *= unit;
+				
+				if (Hdfs.Core.HEART_BEAT_FREQ < 1) {
+					throw new ConfFormatException ("heart beat frequency cannot be non-positive");
+				}
+				
+				
+				/* Parse system check freq */
+				Hdfs.Core.SYSTEM_CHECK_PERIOD =
+						Integer.parseInt(eElement.getElementsByTagName("system-check")
+								.item(0).getTextContent().trim());
+				
+				unitType = 
+						((Element)eElement.getElementsByTagName("system-check").item(0)).getAttribute("unit");
+				unit = parseUnit(unitType);
+				Hdfs.Core.SYSTEM_CHECK_PERIOD *= unit;
+				
+				if (Hdfs.Core.SYSTEM_CHECK_PERIOD < 1) {
+					throw new ConfFormatException ("system check frequency cannot be non-positive");
+				}
+				
 				
 				/* Parse partition tolerance */
 				Hdfs.Core.PARTITION_TOLERANCE =
@@ -117,6 +147,15 @@ public class Parser {
 				
 				if (Hdfs.Core.PARTITION_TOLERANCE < 1) {
 					throw new ConfFormatException ("partition tolerance cannot be non-positive");
+				}
+				
+				/* parse hdfs tmp file */
+				Hdfs.Core.HDFS_TMEP = eElement.getElementsByTagName("hdfs-tmp")
+								.item(0).getTextContent().trim();
+				
+				
+				if (Hdfs.Core.HDFS_TMEP.length() < 1) {
+					throw new ConfFormatException ("hdfs tmp directory cannot be empty.");
 				}
 				
 				
@@ -133,6 +172,7 @@ public class Parser {
 				Hdfs.Core.NAME_NODE_REGISTRY_PORT =
 						Integer.parseInt(eElement.getElementsByTagName("port")
 								.item(0).getTextContent().trim());
+
 				
 				if (Hdfs.Core.NAME_NODE_REGISTRY_PORT  < 1024) {
 					throw new ConfFormatException ("NameNode port cannot use a well-known port.");
@@ -165,7 +205,15 @@ public class Parser {
 			/* parse the DataNode port num */
 			try {
 				Hdfs.DataNode.DATA_NODE_REGISTRY_PORT =
-						Integer.parseInt(eElement.getElementsByTagName("port")
+						Integer.parseInt(eElement.getElementsByTagName("registry-port")
+								.item(0).getTextContent().trim());
+			} catch (NumberFormatException e) {
+				throw e;
+			}
+			
+			try {
+				Hdfs.DataNode.DATA_NODE_SERVER_PORT =
+						Integer.parseInt(eElement.getElementsByTagName("server-port")
 								.item(0).getTextContent().trim());
 			} catch (NumberFormatException e) {
 				throw e;
@@ -435,9 +483,13 @@ public class Parser {
 		System.out.println("HDFS.Core.CHUNK_SIZE = " + Hdfs.Core.CHUNK_SIZE);
 		System.out.println("HDFS.Core.WRITE_BUFF_SIZE = " + Hdfs.Core.WRITE_BUFF_SIZE);
 		System.out.println("HDFS.Core.READ_BUFF_SIZE = " + Hdfs.Core.READ_BUFF_SIZE);
+		System.out.println("Hdfs.Core.HEART_BEAT_FREQ = " + Hdfs.Core.HEART_BEAT_FREQ);
+		System.out.println("Hdfs.Core.SYSTEM_CHECK_PERIOD = " + Hdfs.Core.SYSTEM_CHECK_PERIOD);
 		System.out.println("HDFS.Core.PARTITION_TOLERANCE = " + Hdfs.Core.PARTITION_TOLERANCE);
 		System.out.println("HDFS.Core.NAME_NODE_IP = " + Hdfs.Core.NAME_NODE_IP);
 		System.out.println("Hdfs.Core.NAME_NODE_REGISTRY_PORT = " + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+		System.out.println("Hdfs.Core.NAME_NODE_REGISTRY_PORT = " + Hdfs.Core.NAME_NODE_REGISTRY_PORT);
+		System.out.println("Hdfs.Core.HDFS_TMEP = " + Hdfs.Core.HDFS_TMEP);
 		System.out.println("\n");
 	}
 	

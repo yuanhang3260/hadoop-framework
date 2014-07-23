@@ -1,25 +1,25 @@
 <?xml version="1.0"?>
 <mapreduce>
 	<core>
-		<jobtracker-ip>128.237.213.225</jobtracker-ip>
-		<jobtracker-registry-port>1100</jobtracker-registry-port>
+		<jobtracker-ip> 128.237.213.225 </jobtracker-ip>
+		<jobtracker-registry-port> 1100 </jobtracker-registry-port>
 	</core>
 	
 	<jobtracker>
-		<max-reschedule-attempt>2</max-reschedule-attempt>
-		<tasktracker-expiration unit="sec">40</tasktracker-expiration>
+		<max-reschedule-attempt> 2 </max-reschedule-attempt>
+		<tasktracker-expiration unit="sec"> 40 </tasktracker-expiration>
 	</jobtracker>	
 
 	<tasktracker>
 		<common>
-			<heartbeat-freq unit="sec">1</heartbeat-freq>
-			<tmp-dir>tmp</tmp-dir>
+			<heartbeat-freq unit="sec"> 1 </heartbeat-freq>
+			<tmp-dir> ./tmp </tmp-dir>
 		</common>
 
 		<individual>
-			<registry-port>1200</registry-port>
-			<server-port>8000</server-port>
-			<core-num>4</core-num>
+			<registry-port> 1200 </registry-port>
+			<server-port> 8000 </server-port>
+			<core-num> 4 </core-num>
 		</individual>
 
 	</tasktracker>
