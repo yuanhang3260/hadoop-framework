@@ -7,7 +7,7 @@ package global;
 public class MapReduce {
 	
 	public static class Core {
-		public static boolean DEBUG = true; //non-configurable
+		public static boolean DEBUG = false; //non-configurable
 		
 		public static String JOB_TRACKER_IP;
 		public static int JOB_TRACKER_REGISTRY_PORT;

@@ -21,7 +21,7 @@
 
 	<datanode>
 		<registry-port>1201</registry-port>
-		<server-port>3001</server-port>
+		<server-port>8001</server-port>
 	</datanode>
 
 </hdfs>
