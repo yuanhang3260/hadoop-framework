@@ -49,7 +49,7 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	/*-------------------------- Constructor ---------------------*/
 	/**
-	 * @param The registry port of NameNode for RMI
+	 * @param port The registry port of NameNode for RMI
 	 */
 	public NameNode(int port) {
 		this.dataNodeTbl = new ConcurrentHashMap<String, DataNodeAbstract>();
@@ -255,9 +255,13 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 		this.fileTbl.remove(path);
-		info = String.format("%s[result:\t%s\n", new Date().toString(), "succeeded");
-		out.write(info);
-		out.close();
+		
+		if (Hdfs.Core.DEBUG) {		
+			info = String.format("%s[result:\t%s\n", new Date().toString(), "succeeded");
+			out.write(info);
+			out.close();
+		}
+
 	}
 	
 	@Override

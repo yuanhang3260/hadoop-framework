@@ -63,7 +63,7 @@ public class OutputCollector<K extends Writable, V extends Writable> {
 	 * OutputCollector constructor: This is for mappers, which
 	 * write the outputs to different partition files on local
 	 * file system.
-	 * @param num
+	 * @param task A maper task
 	 */
 	public OutputCollector(MapperTask task) {
 		this.task = task;

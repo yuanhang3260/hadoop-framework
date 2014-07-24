@@ -54,16 +54,16 @@ public interface DataNodeRemoteInterface extends Remote{
 	 */
 	public String readLines(String chunkName, long pos, int numLine) throws RemoteException, IOException;
 	
+	
 	/**
 	 * This RMI is for NameNode to inform DataNode to commit a File. By committing a file, its chunks are
 	 * closed and the permission is changed to read only.
 	 * 
-	 * @param globalChunkName
-	 * @param valid
-	 * @param forSysCheck
+	 * @param chunkName
+	 * @return HDFSLineFeedCheck
 	 * @throws RemoteException
+	 * @throws IOException
 	 */
-	
 	public HDFSLineFeedCheck readLine(String chunkName) throws RemoteException, IOException;
 	
 	public void deleteFirstLine(String chunkName, boolean firstFile) throws RemoteException, IOException;

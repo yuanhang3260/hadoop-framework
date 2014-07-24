@@ -591,7 +591,7 @@ public class JobTracker implements JobTrackerRemoteInterface {
 				try {
 					nameNodeStub.delete(String.format("%s-part-%d", outputPath, i));
 				} catch (IOException e) {
-					e.printStackTrace();
+					
 				}
 			}
 		} catch (RemoteException e) {

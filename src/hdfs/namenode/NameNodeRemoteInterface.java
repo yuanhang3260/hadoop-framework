@@ -24,11 +24,11 @@ public interface NameNodeRemoteInterface extends Remote{
 	/**
 	 * Join RMI by which DataNode joins joins the HDFS cluster.
 	 * @param ip The IP address of DataNode itself.
-	 * @param port The port number of DataNode Registry.
+	 * @param registryPort The port number of DataNode Registry.
+	 * @param serverPort The port number of TaskTracer Server
 	 * @param chunkNameList The names of chunks scanned by DataNode 
 	 * at bootstrapping. When recovered from failure, the NameNode 
-	 * can instruct DataNode to clean up useless chunks.
-	 * @return The DataNode's name given by NameNode.
+	 * @return Message The DataNode's name given by NameNode.
 	 * @throws RemoteException
 	 */
 	public Message join(String ip, int registryPort, int serverPort, List<String> chunkNameList) throws RemoteException;
@@ -52,7 +52,7 @@ public interface NameNodeRemoteInterface extends Remote{
 
 	/**
 	 * Delete the file on HDFS.
-	 * @param The name of file to be deleted.
+	 * @param path The name of file to be deleted.
 	 * @throws RemoteException
 	 * @throws IOException Some chunk cannot be delete at the 
 	 * time requested
@@ -97,7 +97,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	
 	/**
 	 * List all files on HDFS.
-	 * @return
+	 * @return queue of all files
 	 * @throws RemoteException
 	 */
 	public PriorityQueue<String> listFiles() throws RemoteException;
