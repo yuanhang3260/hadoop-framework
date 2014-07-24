@@ -229,15 +229,20 @@ public class HDFSInputStream implements Serializable{
 	 * 
 	 * @param entries
 	 * @return the nearest entry from local host
+	 * @throws IOException 
 	 */
-	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) {
+	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) throws IOException {
 		DataNodeEntry nearestEntry = null;
 		
 		DataNodeEntry tmpNearest = null;
 		
 		Set<String> unreachable = new HashSet<String>();
 		
-		for (int i = 0; i < 3 || nearestEntry != null; i++) {
+		for (int i = 0; i < 3; i++) {
+			
+			if (nearestEntry != null) {
+				break;
+			}
 			
 			long localIp = 0;
 			
@@ -262,13 +267,13 @@ public class HDFSInputStream implements Serializable{
 			}
 			
 			if (Hdfs.Core.DEBUG) {
-				System.out.println("DEBUG HDFSInputStream() foudn tempNearest ip " + tmpNearest.dataNodeRegistryIP);
+				System.out.println("DEBUG HDFSInputStream() found tempNearest ip " + tmpNearest.dataNodeRegistryIP);
 			}
 			
 			try {
 				Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
 				if (Hdfs.Core.DEBUG) {
-					System.out.println("DEBUG HDFSInputStream() try coonnect datanode " + tmpNearest.dataNodeRegistryIP);
+					System.out.println("DEBUG HDFSInputStream() try connect datanode " + tmpNearest.dataNodeRegistryIP);
 				}
 				DataNodeRemoteInterface dataNodeS = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
 			} catch (RemoteException e) {
@@ -290,6 +295,10 @@ public class HDFSInputStream implements Serializable{
 		
 		if (Hdfs.Core.DEBUG) {
 			System.out.println("DEBUG HDFSInputStream.getNearest(): nearest ip" + nearestEntry.dataNodeRegistryIP);
+		}
+		
+		if (nearestEntry == null) {
+			throw new IOException("No available DataNode");
 		}
 		return nearestEntry;
 	}
