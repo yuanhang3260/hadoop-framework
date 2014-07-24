@@ -2,10 +2,8 @@ package mapreduce.io.writable;
 
 public class IntWritable extends Writable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1014971413849096367L;
+	
 	private Integer value;
 	
 	public IntWritable(int val) {

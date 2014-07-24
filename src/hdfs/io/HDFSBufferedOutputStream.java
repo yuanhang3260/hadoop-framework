@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * A buffered output stream providing a more efficient write function for 
+ * writing data to DFS
+ *
+ */
 public class HDFSBufferedOutputStream implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4252529741647442999L;
 	private boolean DEBUG = false;
 	private int buffOffset;

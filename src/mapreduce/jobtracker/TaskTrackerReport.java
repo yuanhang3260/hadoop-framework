@@ -13,14 +13,21 @@ import java.util.List;
 public class TaskTrackerReport implements Serializable {
 
 	private static final long serialVersionUID = 6483495489789811905L;
+	
 	public String taskTrackerIp;
+	
 	public int emptySlot;
+	
 	public List<TaskStatus> taskStatus;
 	
 	public TaskTrackerReport(String ip, int numSlot, List<TaskStatus> taskStatus) {
+		
 		this.taskTrackerIp = ip;
+		
 		this.emptySlot = numSlot;
+		
 		this.taskStatus = taskStatus;
+		
 	}
 	
 	public void printReport() {

@@ -13,6 +13,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
 
+/**
+ * Provide method to read data from a HDFSFile, the read function is implemented
+ * with buffer inside to provide efficiency
+ *
+ */
 public class HDFSInputStream implements Serializable{
 
 	private static final long serialVersionUID = 3091088429237095244L;
@@ -129,6 +134,13 @@ public class HDFSInputStream implements Serializable{
 		return data;
 	}
 	
+	/**
+	 * Read up to the size of input buffer data into the input buffer from 
+	 * the HDFSFile that this stream connects to
+	 * @param b The buffer to put data in
+	 * @return
+	 * @throws IOException
+	 */
 	public int read(byte[] b) throws IOException {
 		if (b == null || b.length == 0) {
 			return 0;

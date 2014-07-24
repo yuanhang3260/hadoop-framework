@@ -23,17 +23,6 @@ public class JobConf implements Serializable {
 	private int numReduceTasks;
 	
 	private int priorityLevel;
-//	private JarFileEntry jarFileEntry;
-//	
-//	public void setJarFileEntry(String path) throws UnknownHostException {
-//		this.jarFileEntry = new JarFileEntry(Inet4Address.getLocalHost().getHostAddress(), 
-//											 MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, 
-//										     path);
-//	}
-//	
-//	public JarFileEntry getJarFileEntry() {
-//		return this.jarFileEntry;
-//	}
 	
 	public void setPriority(int level) {
 		this.priorityLevel = level;

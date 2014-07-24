@@ -7,6 +7,10 @@ import java.util.Set;
 
 import mapreduce.message.Task;
 
+/**
+ * An abstraction of the information of a specific TaskTracker
+ *
+ */
 public class TaskTrackerInfo implements Serializable {
 	
 	private static final long serialVersionUID = 775740096383175892L;
@@ -29,12 +33,19 @@ public class TaskTrackerInfo implements Serializable {
 	private Set<String> relateTasks;
 	
 	public TaskTrackerInfo(String ip, int registryPort, int serverPort, int numSlots) {
+		
 		this.registryIp = ip;
+		
 		this.registryPort = registryPort;
+		
 		this.serverPort = serverPort;
+		
 		this.numSlots = numSlots;
+		
 		this.latestHeartBeat = System.currentTimeMillis();
+		
 		this.status = Status.RUNNING;
+		
 		this.relateTasks = new HashSet<String>();
 	}
 	
@@ -49,10 +60,15 @@ public class TaskTrackerInfo implements Serializable {
 	public void addTask(List<Task> tasks) {
 		
 		for (Task task : tasks) {
+			
 			String taskId = task.getTaskId();
+			
 			if (taskId == null) {
+				
 				System.out.println("DEBUG: taskId null");
+				
 			}
+			
 			this.relateTasks.add(taskId);
 		}
 	}

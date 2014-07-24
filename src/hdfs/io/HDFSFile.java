@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * An abstraction of files stored on DFS
+ *
+ */
 public class HDFSFile implements Serializable {
 
 
