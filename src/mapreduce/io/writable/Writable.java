@@ -2,6 +2,10 @@ package mapreduce.io.writable;
 
 import java.io.Serializable;
 
+/**
+ * 
+ *
+ */
 public abstract class Writable implements Serializable {
 
 	private static final long serialVersionUID = -7468134504127619796L;

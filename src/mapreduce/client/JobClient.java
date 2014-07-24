@@ -167,7 +167,7 @@ public class JobClient {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 		}
 		
 		
