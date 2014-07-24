@@ -158,12 +158,14 @@ public class NameNode implements NameNodeRemoteInterface{
 	
 	@Override
 	public synchronized HDFSFile create(String filePath) throws RemoteException, IOException {
+		
 		if (this.fileTbl.containsKey(filePath)) {
 			if (Hdfs.Core.DEBUG) {
 				System.out.format("File(%s) is duplicated", filePath);
 			}
 			throw new IOException(String.format("File(%s) is duplicated", filePath));
 		}
+		
 		HDFSFile newFile = new HDFSFile(filePath, Hdfs.Core.REPLICA_FACTOR, this.nameNodeStub);
 		
 		this.fileTbl.put(filePath, newFile);
@@ -255,9 +257,13 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 		this.fileTbl.remove(path);
-		info = String.format("%s[result:\t%s\n", new Date().toString(), "succeeded");
-		out.write(info);
-		out.close();
+		
+		if (Hdfs.Core.DEBUG) {
+			info = String.format("%s[result:\t%s\n", new Date().toString(), "succeeded");
+			out.write(info);
+			out.close();
+		}
+			
 	}
 	
 	@Override
@@ -336,9 +342,12 @@ public class NameNode implements NameNodeRemoteInterface{
 					taskList.add(new DeleteTempTask(tid, chunk.getChunkName()));
 				}	
 			}
+			
+			chunk.setCommitTime(new Date());
 		}
 		
-		file.setCommitTime(new Date());
+		file.setCommitTime(new Date());	
+		
 		this.fileTbl.put(file.getName(), file);
 	}
 	
@@ -499,7 +508,6 @@ public class NameNode implements NameNodeRemoteInterface{
 		 * 
 		 * */
 		else if (task instanceof DeleteOrphanTask) {
-			
 			DataNodeAbstract dataNode = this.dataNodeTbl.get(dataNodeName);
 			dataNode.chunkList.remove(((DeleteOrphanTask) task).getChunkName());
 			
@@ -714,7 +722,7 @@ public class NameNode implements NameNodeRemoteInterface{
 				
 			}
 				
-				/* Obtain chunk abstract from data node */
+			/* Obtain chunk abstract from data node */
 			Collection<DataNodeAbstract> dataNodes = NameNode.this.dataNodeTbl.values();
 			for (DataNodeAbstract dataNode : dataNodes) {
 				if (!dataNode.isAvailable()) {
@@ -745,7 +753,30 @@ public class NameNode implements NameNodeRemoteInterface{
 			}
 			
 			for (String chunkOnDataNode : chunksOnDataNode) {
+				
+				
 				if (!chunkAbstractFromNameNode.containsKey(chunkOnDataNode)) {
+					
+					boolean depthSearchFound = false;
+					Collection<HDFSFile> allFiles = NameNode.this.fileTbl.values();
+					for (HDFSFile file : allFiles) {
+						
+						for (HDFSChunk chunk : file.getChunkList()) {
+							
+							if(chunk.getChunkName().equals(chunkOnDataNode)) {
+								depthSearchFound = true;
+								break;
+							}
+							
+						}
+						if (depthSearchFound) {
+							break;
+						}
+					}
+					
+					if (depthSearchFound) {
+						break;
+					}
 					
 					if (Hdfs.Core.DEBUG) {
 						System.out.format("DEBUG NameNode.SystemCheck.run(): chunk(%s) is orphan.\n",chunkOnDataNode);
@@ -758,6 +789,7 @@ public class NameNode implements NameNodeRemoteInterface{
 						List<Task> dataNodeTaskList = NameNode.this.dataNodeTaskTbl.get(dataNodeName);
 						
 						String tid = (new Date()) + "";
+						
 						Task task = new DeleteOrphanTask(tid, chunkOnDataNode);
 						dataNodeTaskList.add(task);
 					}

@@ -15,7 +15,7 @@
 		
 		<hdfs-tmp> ./tmp </hdfs-tmp>
 
-		<ip>128.237.222.59</ip>
+		<ip>10.0.0.16</ip>
 		<port>1099</port>
 	</core>
 

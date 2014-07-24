@@ -3,6 +3,7 @@ package hdfs.io;
 import global.Hdfs;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public class HDFSChunk implements Serializable {
@@ -13,6 +14,7 @@ public class HDFSChunk implements Serializable {
 	private List<DataNodeEntry> locations;
 //	private int replicaFactor;
 	private int chunk_size;
+	private Date commitTime;
 	
 
 	
@@ -57,6 +59,14 @@ public class HDFSChunk implements Serializable {
 		
 		this.locations.remove(entry);
 		
+	}
+	
+	public void setCommitTime(Date time) {
+		this.commitTime = time;
+	}
+	
+	public Date getCommitTime() {
+		return this.commitTime;
 	}
 	
 }

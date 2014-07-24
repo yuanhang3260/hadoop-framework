@@ -216,14 +216,17 @@ public class Utility {
 			Registry nameNodeRegistry = LocateRegistry.getRegistry(Hdfs.Core.NAME_NODE_IP, Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 			NameNodeRemoteInterface nameNodeStub = (NameNodeRemoteInterface) nameNodeRegistry.lookup(Hdfs.Core.NAME_NODE_SERVICE_NAME);
 			PriorityQueue<String> rst = nameNodeStub.listFiles();
-			int i = 1;
-			for (String fileName : rst) {
-				System.out.format("%d\t%s\n", i, fileName);
-				i++;
-			}
+			
 			if (rst.size() < 1) {
 				System.out.println("No files on HDFS");
+			} else {
+				int i = 1;
+				while (!rst.isEmpty()) {
+					System.out.format("%d\t%s\n", i++, rst.poll());
+				}
 			}
+
+			
 		} catch (RemoteException e){
 			System.out.println("Error! Cannot find name node.");
 			System.exit(-1);
