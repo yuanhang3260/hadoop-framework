@@ -225,7 +225,7 @@ public class HDFSInputStream implements Serializable{
 	}
 	
 	/**
-	 * Get the nearest DataNode from local host
+	 * Get the nearest available DataNode from local host
 	 * 
 	 * @param entries
 	 * @return the nearest entry from local host
@@ -238,7 +238,7 @@ public class HDFSInputStream implements Serializable{
 		
 		Set<String> unreachable = new HashSet<String>();
 		
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < Hdfs.Core.REPLICA_FACTOR; i++) {
 			
 			if (nearestEntry != null) {
 				break;
