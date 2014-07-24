@@ -10,12 +10,16 @@ public class KeyValue<KEY extends Writable, VALUE extends Writable> implements C
 	 * 
 	 */
 	private static final long serialVersionUID = -7039424581270329250L;
+	
 	KEY key;
+	
 	VALUE value;
 
 	
 	public KeyValue (KEY k, VALUE v) {
+		
 		this.key = k;
+		
 		this.value = v;
 	}
 	

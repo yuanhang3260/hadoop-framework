@@ -1,7 +1,5 @@
 package mapreduce.message;
 
-import global.MapReduce;
-
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -27,8 +25,7 @@ public class Job implements Serializable{
 	}
 	
 	public void setJarFileEntry(String jarPath) throws UnknownHostException {
-		this.jarFileEntry = new JarFileEntry(Inet4Address.getLocalHost().getHostAddress(), 
-				 							 MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, 
+		this.jarFileEntry = new JarFileEntry(Inet4Address.getLocalHost().getHostAddress(),  
 				 							 jarPath);
 	}
 	
@@ -52,7 +49,6 @@ public class Job implements Serializable{
 		this.splits = splits;
 		/* set the number of mapper & reducer tasks */
 		this.conf.setNumMapTasks(splits.size());
-		//this.conf.setNumReduceTasks(splits.size());
 	}
 	
 	public List<Split> getSplit() {

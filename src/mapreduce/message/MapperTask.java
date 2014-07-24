@@ -2,6 +2,11 @@ package mapreduce.message;
 
 import mapreduce.io.Split;
 
+/**
+ * Represent a message from JobTracker to TaskTracker when JobTracker
+ * requires the chosen TaskTracker to run a specific mapper task
+ *
+ */
 public class MapperTask extends Task implements MapRedTask{
 	
 	private static final long serialVersionUID = -4448997561951975942L;

@@ -612,7 +612,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				
 				if (MapReduce.Core.DEBUG) {
 					System.out.println("DEBUG TaskTracker IP for downloading jar : " 
-								+ jarEntry.getTaskTrackerIp() + ":" + jarEntry.getServerPort());
+								+ jarEntry.getTaskTrackerIp());
 				}
 				
 				byte[] buff = new byte[Hdfs.Core.READ_BUFF_SIZE];

@@ -6,20 +6,27 @@ import java.io.Serializable;
 import mapreduce.jobtracker.WorkStatus;
 
 /**
- * Super calss of all tasks that JobTracker assigns to TaskTrackers
+ * Super class of all tasks that JobTracker assigns to TaskTrackers
  *
  */
 public class Task implements Serializable {
 
 	private static final long serialVersionUID = -6752330217052972746L;
+	
 	private String jobId;
+	
 	private String tid;
+	
 	transient int priorityLevel;
 	
 	private transient Process procRef;
+	
 	private transient InputStream ErrorInputStream;
+	
 	private transient InputStream inputStream;
+	
 	private int bindProcTimes = 0;
+	
 	private String filePrefix;
 	
 	/* indicate the number of times that this task has been re-scheduled after failure */
@@ -27,9 +34,13 @@ public class Task implements Serializable {
 	WorkStatus status;
 	
 	public Task(String jobId, String tid, int level) {
+		
 		this.tid = tid;
+		
 		this.jobId = jobId;
+		
 		this.priorityLevel = level;
+		
 		this.status = WorkStatus.READY;
 	}
 	
@@ -74,7 +85,9 @@ public class Task implements Serializable {
 		if (this.bindProcTimes != 0) {
 			return;
 		}
+		
 		this.procRef = p;
+		
 		this.bindProcTimes++;
 	}
 	

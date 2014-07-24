@@ -218,8 +218,6 @@ public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Wr
 
 	}
 	
-
-	
 	@SuppressWarnings("unchecked")
 	public Class<Reducer<Writable, Writable, Writable, Writable>> loadClass ()
 			throws IOException, ClassNotFoundException {

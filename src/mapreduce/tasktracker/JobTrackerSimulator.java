@@ -99,7 +99,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 		
 		for (int mapperSEQ = 0; mapperSEQ < chunksNum; mapperSEQ++) {
 			Split split = new Split(file1, mapperSEQ);
-			JarFileEntry jarEntry = new JarFileEntry("128.237.222.59", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
+			JarFileEntry jarEntry = new JarFileEntry("128.237.222.59", "/Users/JeremyFu/Dropbox/WordCount.jar");
 			jt.taskList.add(new MapperTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), split, "WordCount.WordCountMapper", reducerNum, jarEntry));
 		}
 
@@ -111,7 +111,7 @@ public class JobTrackerSimulator implements JobTrackerRemoteInterface {
 				partitionEntry[i] = new PartitionEntry(String.format("%s%03d", tidPrefix, (i+1)), "localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT);
 				System.err.println(String.format("%s%03d", tidPrefix, (i+1)));
 			}
-			JarFileEntry jarEntry = new JarFileEntry("localhost", MapReduce.TaskTracker.Individual.TASK_TRACKER_SERVER_PORT, "/Users/JeremyFu/Dropbox/WordCount.jar");
+			JarFileEntry jarEntry = new JarFileEntry("localhost", "/Users/JeremyFu/Dropbox/WordCount.jar");
 			jt.taskList.add(new ReducerTask(jid, String.format("%s%03d", tidPrefix, taskCounter++), reducerSEQ, "WordCount.WordCountReducer", partitionEntry, "output-part" + reducerSEQ, jarEntry));
 
 		}	

@@ -74,7 +74,21 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 */
 	public void terminateJob(String jobId) throws RemoteException;
 	
+	/**
+	 * This RMI is used to get the current status of all
+	 * TaskTrackers back, including the TaskTracker's latest heartbeat,
+	 * the total number of slots and its current state(FAILED / RUNNING)
+	 * 
+	 * @return a map of all TaskTrackers information
+	 * @throws RemoteException
+	 */
 	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus() throws RemoteException;
 	
+	/**
+	 * This RMI is used to get the current scheduling table on JobTracker
+	 * 
+	 * @return a map of all TaskTrakcers scheduling table on JobScheduler
+	 * @throws RemoteException
+	 */
 	public AbstractMap<String, Queue<Task>> getScheduleTbl() throws RemoteException;
 }

@@ -21,7 +21,9 @@ import mapreduce.message.ReducerTask;
 public class TextIntReconstructor {
 	
 	private String reducer_tmp_filename;
+	
 	private BufferedReader in;
+	
 	private KeyValueCollection<Text, IntWritable> nextFeed;
 	
 	int index = 0;
@@ -29,28 +31,37 @@ public class TextIntReconstructor {
 	public void sort(ReducerTask task) throws IOException {
 		
 		BufferedReader[] inputArray = new BufferedReader[task.getEntries().length];
+		
 		BufferedOutputStream out = null;
 		
 		/* Initialization */
 		for (int i = 0; i < task.getEntries().length; i++) {
+			
 			PartitionEntry entry = task.getEntries()[i];
+			
 			String filename = task.localReducerFileNameWrapper(entry.getTID());
+			
 			inputArray[i] = new BufferedReader(new FileReader(filename));
 		}
 		
 		String tmpfilename = String.format("%s/%s-%s-reduce.tmp", 
 				task.getFilePrefix(), task.getJobId(), task.getTaskId());
-		out = new BufferedOutputStream(new FileOutputStream(tmpfilename));
-		this.reducer_tmp_filename = tmpfilename;
 		
+		out = new BufferedOutputStream(new FileOutputStream(tmpfilename));
+		
+		this.reducer_tmp_filename = tmpfilename;
 		
 		Queue<FileKeyValue> heap = new PriorityQueue<FileKeyValue>();  //*
 		
 		/* External sort */
 		for (int i = 0; i < task.getEntries().length; i++) {
+			
 			String line = inputArray[i].readLine();
+			
 			if (line != null) {
+				
 				String[] comp = line.split("\t");
+				
 				heap.offer(new FileKeyValue(i, new Text(comp[0]), new IntWritable(comp[1])));
 			}
 		}
@@ -79,9 +90,13 @@ public class TextIntReconstructor {
 		
 		/* delete temp file */
 		for (int i = 0; i < task.getEntries().length; i++) {
+			
 			PartitionEntry entry = task.getEntries()[i];
+			
 			String filename = task.localReducerFileNameWrapper(entry.getTID());
+			
 			File tmpFile = new File(filename);
+			
 			tmpFile.delete();
 		}	
 		
@@ -92,10 +107,15 @@ public class TextIntReconstructor {
 		boolean hasAtLeastOneLine = ((line = in.readLine()) != null);
 		
 		if (hasAtLeastOneLine) {
+			
 			String[] comp = line.split("\t");
+			
 			List<IntWritable> valueList = new ArrayList<IntWritable>();
+			
 			valueList.add(new IntWritable(comp[1]));
+			
 			this.nextFeed = new KeyValueCollection<Text, IntWritable>(new Text(comp[0]), valueList);
+		
 		} else {
 			this.nextFeed = null;
 		}
@@ -118,13 +138,18 @@ public class TextIntReconstructor {
 			String[] comp = line.split("\t");
 			
 			if (comp[0].equals(this.nextFeed.getKey().toString())) { //merge to the list
+				
 				this.nextFeed.getValues().add(new IntWritable(comp[1]));
+			
 			} else {
 				rst = this.nextFeed;
 				
 				List<IntWritable> valueList = new ArrayList<IntWritable>();
+				
 				valueList.add(new IntWritable(comp[1]));
+				
 				this.nextFeed = new KeyValueCollection<Text, IntWritable>(new Text(comp[0]), valueList);
+				
 				break;
 			}
 		}
@@ -143,10 +168,13 @@ public class TextIntReconstructor {
 private class FileKeyValue implements Comparable<FileKeyValue> {
 		
 		private int fileSEQ;
+		
 		private KeyValue<Text, IntWritable> pair;
 		
 		public FileKeyValue (int seq, Text key, IntWritable value) {
+			
 			this.fileSEQ = seq;
+			
 			this.pair = new KeyValue<Text, IntWritable>(key, value);
 		}
 		
