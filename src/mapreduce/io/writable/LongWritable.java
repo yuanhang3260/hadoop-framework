@@ -1,10 +1,11 @@
 package mapreduce.io.writable;
 
+/**
+ * A writable class for long data
+ *
+ */
 public class LongWritable extends Writable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4469350421720870388L;	
 	private Long value;
 	

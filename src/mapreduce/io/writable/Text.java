@@ -1,5 +1,9 @@
 package mapreduce.io.writable;
 
+/**
+ * a writable class for String data
+ *
+ */
 public class Text extends Writable {
 
 	private static final long serialVersionUID = 9216926564051053141L;
