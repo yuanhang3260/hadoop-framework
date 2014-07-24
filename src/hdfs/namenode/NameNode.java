@@ -220,18 +220,24 @@ public class NameNode implements NameNodeRemoteInterface{
 	@Override
 	public void delete(String path) throws IOException {
 		
-		PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("delete.log", true)));
-		String info = String.format("%s[request]:\t%s\n", new Date().toString(), path);
-		out.write(info);
+		PrintWriter out = null;
+		String info = null;
+		if (Hdfs.Core.DEBUG) {
+			out = new PrintWriter(new BufferedWriter(new FileWriter("delete.log", true)));
+			info = String.format("%s[request]:\t%s\n", new Date().toString(), path);
+			out.write(info);
+		}
 		
 		HDFSFile file = this.fileTbl.get(path);
 		
 		
 		
 		if (file == null) {
-			info = String.format("%s[result:\t%s\n", new Date().toString(), "failure");
-			out.write(info);
-			out.close();
+			if (Hdfs.Core.DEBUG) {
+				info = String.format("%s[result:\t%s\n", new Date().toString(), "failure");
+				out.write(info);
+				out.close();
+			}
 			throw new IOException("No such file: " + path);
 		}
 		
