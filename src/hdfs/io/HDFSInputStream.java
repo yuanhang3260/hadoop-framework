@@ -230,6 +230,9 @@ public class HDFSInputStream implements Serializable{
 	 */
 	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) {
 		DataNodeEntry nearestEntry = null;
+		
+		
+		
 		try {
 			long localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
 			long minDist = Long.MAX_VALUE;
