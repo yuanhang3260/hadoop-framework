@@ -22,6 +22,9 @@ public class runNameNode {
 			
 			System.exit(1);
 		}
+		if (args.length != 0) {
+			Hdfs.Core.DEBUG = true;
+		}
 		
 		NameNode nameNode = new NameNode(Hdfs.Core.NAME_NODE_REGISTRY_PORT);
 		try {

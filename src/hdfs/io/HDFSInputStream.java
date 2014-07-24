@@ -75,7 +75,7 @@ public class HDFSInputStream implements Serializable{
 	 * Read up to numLine lines in a chunk data
 	 * @param idx
 	 * @param numLine
-	 * @return
+	 * @return String the data read from file
 	 * @throws IOException
 	 */
 	public String readLinesInChunk(int idx, int numLine) throws IOException {
@@ -140,7 +140,7 @@ public class HDFSInputStream implements Serializable{
 	 * Read up to the size of input buffer data into the input buffer from 
 	 * the HDFSFile that this stream connects to
 	 * @param b The buffer to put data in
-	 * @return
+	 * @return int Number of bytes actually read from the DFS file
 	 * @throws IOException
 	 */
 	public int read(byte[] b) throws IOException {

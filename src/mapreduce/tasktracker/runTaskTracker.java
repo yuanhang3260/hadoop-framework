@@ -1,5 +1,6 @@
 package mapreduce.tasktracker;
 
+import global.Hdfs;
 import global.MapReduce;
 import global.Parser;
 import global.Parser.ConfOpt;
@@ -26,6 +27,10 @@ public class runTaskTracker {
 					+ "Please confirm the mapreduce.xml is placed as ./conf/mapreduce.xml.\n"
 					+ "The TaskTracker routine is shutting down...");
 			System.exit(2);
+		}
+		
+		if (args.length != 0) {
+			Hdfs.Core.DEBUG = true;
 		}
 		
 		TaskTracker tt = 

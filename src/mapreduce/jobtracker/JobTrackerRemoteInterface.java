@@ -37,7 +37,7 @@ public interface JobTrackerRemoteInterface extends Remote {
 	 * some new task assignments, if there are available slots
 	 * 
 	 * @param report
-	 * @return
+	 * @return JobTrackerACK acknowledgement for SUCCESS / FAILED tasks
 	 */
 	public JobTrackerACK heartBeat(TaskTrackerReport report) throws RemoteException;
 	

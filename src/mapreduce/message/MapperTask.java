@@ -32,7 +32,7 @@ public class MapperTask extends Task implements MapRedTask{
 	 * @param jobId Job ID
 	 * @param tid Task ID
 	 * @param split The split assigned to mapper
-	 * @param theClass The mapper class submitted by client
+	 * @param theClassName The mapper class submitted by client
 	 * @param num Total partition number
 	 */
 	public MapperTask(String jobId, String tid, Split split, String theClassName, int num, JarFileEntry jarEntry) {

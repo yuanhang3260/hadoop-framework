@@ -41,9 +41,7 @@ public class HDFSFile implements Serializable {
 	
 	/**
 	 * Add new HDFS chunk to the file
-	 * @param chunkName the name of the chunk
-	 * @param locations the data node list to store the chunk
-	 * @return
+	 * 
 	 */
 	public void addChunk() {
 		String chunkName = null;

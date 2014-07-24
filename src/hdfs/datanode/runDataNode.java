@@ -27,6 +27,10 @@ public class runDataNode {
 			System.exit(1);
 		}
 		
+		if (args.length != 0) {
+			Hdfs.Core.DEBUG = true;
+		}
+		
 		DataNode dataNode = new DataNode(Hdfs.Core.NAME_NODE_IP,
 				Hdfs.Core.NAME_NODE_REGISTRY_PORT, 
 				Hdfs.DataNode.DATA_NODE_REGISTRY_PORT,
