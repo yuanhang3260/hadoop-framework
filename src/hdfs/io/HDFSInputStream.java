@@ -237,7 +237,7 @@ public class HDFSInputStream implements Serializable{
 		
 		Set<String> unreachable = new HashSet<String>();
 		
-		for (int i = 0; i < 3 && nearestEntry != null; i++) {
+		for (int i = 0; i < 3 || nearestEntry != null; i++) {
 			try {
 				
 				long localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
