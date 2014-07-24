@@ -13,7 +13,10 @@ import hdfs.message.DeleteTempTask;
 import hdfs.message.Message;
 import hdfs.message.Task;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -217,9 +220,19 @@ public class NameNode implements NameNodeRemoteInterface{
 	@Override
 	public void delete(String path) throws IOException {
 		
+		PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("delete.log", true)));
+		String info = String.format("%s[request]:\t%s\n", new Date().toString(), path);
+		out.write(info);
+		
 		HDFSFile file = this.fileTbl.get(path);
+		
+		
+		
 		if (file == null) {
-			throw new IOException("No such file:%s" + path);
+			info = String.format("%s[result:\t%s\n", new Date().toString(), "failure");
+			out.write(info);
+			out.close();
+			throw new IOException("No such file: " + path);
 		}
 		
 		for (HDFSChunk chunk : file.getChunkList()) {
@@ -236,6 +249,9 @@ public class NameNode implements NameNodeRemoteInterface{
 		}
 		
 		this.fileTbl.remove(path);
+		info = String.format("%s[result:\t%s\n", new Date().toString(), "succeeded");
+		out.write(info);
+		out.close();
 	}
 	
 	@Override

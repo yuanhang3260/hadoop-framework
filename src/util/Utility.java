@@ -394,6 +394,8 @@ public class Utility {
 		String type = args[3];
 		String jarPath = args[4];
 		String mainClassName = args[5];
+		String intputPath = args[6];
+		String outoutPath = args[7];
 		
 		JobClient.jarPath = jarPath;
 		
@@ -432,6 +434,7 @@ public class Utility {
 	    
 	    String[] newArgs = new String[args.length - 6];
 	    newArgs = Arrays.copyOfRange(args, 6, args.length);
+	    System.out.println("DEBUG Utility.subit(): newArgs = " + Arrays.toString(newArgs));
 	    m.invoke(null, new Object[] { newArgs });
 		
 	}
