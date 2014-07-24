@@ -256,6 +256,10 @@ public class HDFSInputStream implements Serializable{
 					}
 				}
 				
+				if (Hdfs.Core.DEBUG) {
+					System.out.println("DEBUG HDFSInputStream() foudn tempNearest ip " + tmpNearest.dataNodeRegistryIP);
+				}
+				
 				try {
 					Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
 					if (Hdfs.Core.DEBUG) {
