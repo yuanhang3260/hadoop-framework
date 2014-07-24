@@ -258,10 +258,13 @@ public class HDFSInputStream implements Serializable{
 				
 				try {
 					Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
+					if (Hdfs.Core.DEBUG) {
+						System.out.println("DEBUG HDFSInputStream() try coonnect datanode " + tmpNearest.dataNodeRegistryIP);
+					}
 					DataNodeRemoteInterface dataNodeS = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
 				} catch (RemoteException e) {
 					if (Hdfs.Core.DEBUG) {
-						System.out.println("DEBUG HDFSInputStream() foudn unreachable datanode: " + tmpNearest.dataNodeRegistryIP);
+						System.out.println("DEBUG HDFSInputStream() found unreachable datanode: " + tmpNearest.dataNodeRegistryIP);
 					}
 					unreachable.add(tmpNearest.dataNodeRegistryIP);
 					e.printStackTrace();
@@ -271,6 +274,7 @@ public class HDFSInputStream implements Serializable{
 					e.printStackTrace();
 					continue;
 				}
+				
 				nearestEntry = tmpNearest;
 				
 			} catch (UnknownHostException e) {
