@@ -11,7 +11,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provide method to read data from a HDFSFile, the read function is implemented
@@ -230,20 +232,46 @@ public class HDFSInputStream implements Serializable{
 	 */
 	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) {
 		DataNodeEntry nearestEntry = null;
-		try {
-			long localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
-			long minDist = Long.MAX_VALUE;
-			for (DataNodeEntry entry : entries) {
-				long thisIp = ipToLong(entry.dataNodeRegistryIP);
-				long dist = Math.abs(localIp-thisIp);
-				if (dist < minDist) {
-					minDist = dist;
-					nearestEntry = entry;
+		
+		DataNodeEntry tmpNearest = null;
+		
+		Set<String> unreachable = new HashSet<String>();
+		
+		for (int i = 0; i < 3 && nearestEntry != null; i++) {
+			try {
+				long localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
+				long minDist = Long.MAX_VALUE;
+				for (DataNodeEntry entry : entries) {
+					if (unreachable.contains(entry.dataNodeRegistryIP)) {
+						continue;
+					}
+					long thisIp = ipToLong(entry.dataNodeRegistryIP);
+					long dist = Math.abs(localIp-thisIp);
+					if (dist < minDist) {
+						minDist = dist;
+						tmpNearest = entry;
+					}
 				}
+				
+				try {
+					Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
+					DataNodeRemoteInterface dataNodeS = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+				} catch (RemoteException e) {
+					unreachable.add(tmpNearest.dataNodeRegistryIP);
+					e.printStackTrace();
+					continue;
+				} catch (NotBoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					continue;
+				}
+				nearestEntry = tmpNearest;
+				
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
 			}
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
 		}
+
 		return nearestEntry;
 	}
 	
