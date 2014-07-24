@@ -238,52 +238,54 @@ public class HDFSInputStream implements Serializable{
 		Set<String> unreachable = new HashSet<String>();
 		
 		for (int i = 0; i < 3 || nearestEntry != null; i++) {
+			
+			long localIp = 0;
+			
 			try {
-				
-				long localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
-				
-				long minDist = Long.MAX_VALUE;
-				
-				for (DataNodeEntry entry : entries) {
-					if (unreachable.contains(entry.dataNodeRegistryIP)) {
-						continue;
-					}
-					long thisIp = ipToLong(entry.dataNodeRegistryIP);
-					long dist = Math.abs(localIp-thisIp);
-					if (dist < minDist) {
-						minDist = dist;
-						tmpNearest = entry;
-					}
-				}
-				
-				if (Hdfs.Core.DEBUG) {
-					System.out.println("DEBUG HDFSInputStream() foudn tempNearest ip " + tmpNearest.dataNodeRegistryIP);
-				}
-				
-				try {
-					Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
-					if (Hdfs.Core.DEBUG) {
-						System.out.println("DEBUG HDFSInputStream() try coonnect datanode " + tmpNearest.dataNodeRegistryIP);
-					}
-					DataNodeRemoteInterface dataNodeS = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
-				} catch (RemoteException e) {
-					if (Hdfs.Core.DEBUG) {
-						System.out.println("DEBUG HDFSInputStream() found unreachable datanode: " + tmpNearest.dataNodeRegistryIP);
-					}
-					unreachable.add(tmpNearest.dataNodeRegistryIP);
-					e.printStackTrace();
-					continue;
-				} catch (NotBoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					continue;
-				}
-				
-				nearestEntry = tmpNearest;
-				
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				localIp = ipToLong(Inet4Address.getLocalHost().getHostAddress());
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
 			}
+			
+			long minDist = Long.MAX_VALUE;
+			
+			for (DataNodeEntry entry : entries) {
+				if (unreachable.contains(entry.dataNodeRegistryIP)) {
+					continue;
+				}
+				long thisIp = ipToLong(entry.dataNodeRegistryIP);
+				long dist = Math.abs(localIp-thisIp);
+				if (dist < minDist) {
+					minDist = dist;
+					tmpNearest = entry;
+				}
+			}
+			
+			if (Hdfs.Core.DEBUG) {
+				System.out.println("DEBUG HDFSInputStream() foudn tempNearest ip " + tmpNearest.dataNodeRegistryIP);
+			}
+			
+			try {
+				Registry dataNodeRegistry = LocateRegistry.getRegistry(tmpNearest.dataNodeRegistryIP, tmpNearest.dataNodeRegistryPort);
+				if (Hdfs.Core.DEBUG) {
+					System.out.println("DEBUG HDFSInputStream() try coonnect datanode " + tmpNearest.dataNodeRegistryIP);
+				}
+				DataNodeRemoteInterface dataNodeS = (DataNodeRemoteInterface) dataNodeRegistry.lookup(Hdfs.Core.DATA_NODE_SERVICE_NAME);
+			} catch (RemoteException e) {
+				if (Hdfs.Core.DEBUG) {
+					System.out.println("DEBUG HDFSInputStream() found unreachable datanode: " + tmpNearest.dataNodeRegistryIP);
+				}
+				unreachable.add(tmpNearest.dataNodeRegistryIP);
+				e.printStackTrace();
+				continue;
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				continue;
+			}
+			
+			nearestEntry = tmpNearest;
+	
 		}
 		
 		if (Hdfs.Core.DEBUG) {
