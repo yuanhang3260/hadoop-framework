@@ -9,7 +9,7 @@ public class Hdfs {
 	
 	public static class Core {
 		
-		public static boolean DEBUG = true; //non-configurable
+		public static boolean DEBUG = false; //non-configurable
 
 		public static int REPLICA_FACTOR;
 		

@@ -549,7 +549,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 					
 					if (task instanceof MapperTask) {
 						if (MapReduce.TaskTracker.Individual.JAR) {
-							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
+							pb = new ProcessBuilder("java", "-cp", "Hadoop440.jar", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						} else {
 							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunMapper", TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						}
@@ -558,7 +558,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 						}
 					} else if (task instanceof ReducerTask) {
 						if (MapReduce.TaskTracker.Individual.JAR) {
-							pb = new ProcessBuilder("java", "-cp", "hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
+							pb = new ProcessBuilder("java", "-cp", "Hadoop440.jar", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						} else {
 							pb = new ProcessBuilder("java", "-cp", "./bin", "mapreduce.core.RunReducer",TaskTracker.this.registryPort + "", task.getJobId(), task.getTaskId());
 						}
