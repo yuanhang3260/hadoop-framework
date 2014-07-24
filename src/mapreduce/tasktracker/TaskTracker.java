@@ -611,7 +611,7 @@ public class TaskTracker implements TaskTrackerRemoteInterface {
 				JarFileEntry jarEntry = ((MapRedTask)task).getJarEntry();
 				
 				if (MapReduce.Core.DEBUG) {
-					System.out.println("DEBUG TaskTracker IP for downloading jar : " 
+					System.out.println("DEBUG TaskTracker.downloadJar(): IP for downloading jar : " 
 								+ jarEntry.getTaskTrackerIp());
 				}
 				

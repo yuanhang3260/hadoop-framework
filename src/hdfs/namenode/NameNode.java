@@ -219,7 +219,7 @@ public class NameNode implements NameNodeRemoteInterface{
 		
 		HDFSFile file = this.fileTbl.get(path);
 		if (file == null) {
-			throw new IOException("No such file.");
+			throw new IOException("No such file:%s" + path);
 		}
 		
 		for (HDFSChunk chunk : file.getChunkList()) {
