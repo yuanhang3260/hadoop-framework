@@ -11,11 +11,9 @@ Our MapReduce framework consists of two major parts: (1) distributed file system
 
 ###2.1 Distributed File System(DFS)
 
-General Description
+####General Description
 
-Our DFS consists of two major parts: (1) NameNode and (2) DataNode. NameNode manages files metadata, periodically checks the status of DataNodes and files. DataNode is where data is stored and reports its overall availability.
-
-The DFS implements a 
+Our DFS consists of two major parts: (1) NameNode and (2) DataNode. NameNode manages files metadata, periodically checks the status of DataNodes and files. DataNode is where data is stored and reports its overall availability to NameNode.
 
 Each file in DFS is denoted as an HDFSFile whose metadata is managed by NameNode. Each HDFSFile consists of file name, a list of chunks into which a huge file is divided, replica factor that describes the enforced replication amount for each file, availability of a file. 
 
