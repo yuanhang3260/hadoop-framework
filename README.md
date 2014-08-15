@@ -53,6 +53,6 @@ DataNode also exposes several remote method invocations to clients such as reque
 
 Client is a machine requesting distributed file system service. Our distributed file systems provides 4 basic service to clients: (1) create a file and write to lightest-load node. (2) open a file and read from it from closet DataNode (3) remove a file on NameNode and corresponding chunks on DataNode. (4) list all files on the systems.
 
-<PIC>
+![alt tag](https://raw.githubusercontent.com/Jeremy-Fu/hadoop/master/fig1.png)
 
 To conclude, the above figure shows the general traffic between different components. NameNode takes the most heavy computation tasks. But it doesn’t take a I/O traffic burden. DataNode is in charge of I/O with client.
