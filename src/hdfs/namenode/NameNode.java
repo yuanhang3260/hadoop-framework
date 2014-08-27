@@ -130,12 +130,11 @@ public class NameNode implements NameNodeRemoteInterface{
 		/*--------- Create DataNode task queue -------------------*/
 		dataNodeTaskTbl.put(dataNodeName, Collections.synchronizedList(new ArrayList<Task>()));
 		
-		
-		/*--------- Check if these stale chunks are valuable --------*/
+		/*--------- Check if these stale chunks are available --------*/
 		List<String> dataNodeChunkList = orphanCheck(dataNodeName, chunkNameList); 
-	
-		Message message = new Message();
 		
+		Message message = new Message();
+		// ??? dataNodeTaskTbl is not empty ???
 		List<Task> taskList = this.dataNodeTaskTbl.get(dataNodeName);
 		List<Task> deletedTask = new ArrayList<Task>();
 		synchronized (taskList) {
@@ -230,10 +229,8 @@ public class NameNode implements NameNodeRemoteInterface{
 			out.write(info);
 		}
 		
+		/* get HDFSFile object  from file table */
 		HDFSFile file = this.fileTbl.get(path);
-		
-		
-		
 		if (file == null) {
 			if (Hdfs.Core.DEBUG) {
 				info = String.format("%s[result:\t%s\n", new Date().toString(), "failure");
@@ -243,14 +240,18 @@ public class NameNode implements NameNodeRemoteInterface{
 			throw new IOException("No such file: " + path);
 		}
 		
+		/* delete chunks of this file */
 		for (HDFSChunk chunk : file.getChunkList()) {
 			
+			/* each chunk has several replicas */
 			for (DataNodeEntry dataNode : chunk.getAllLocations()) {
 				
 				String tid = (new Date()).getTime() + "";
+				/* generate a deleteChunck task */
 				DeleteChunkTask task = new DeleteChunkTask(tid, chunk.getChunkName(), file.getName());
 				
 				String dataNodeName = dataNode.getNodeName();
+				/* add the task to this dataNode */
 				List<Task> taskList = this.dataNodeTaskTbl.get(dataNodeName);
 				taskList.add(task);
 			}
@@ -798,7 +799,7 @@ public class NameNode implements NameNodeRemoteInterface{
 			}
 				
 				
-				/* Compare two abstracts */
+			/* Compare two abstracts */
 			Set<String> chunksOnNameNode = chunkAbstractFromNameNode.keySet();
 			for (String chunkOnNameNode : chunksOnNameNode) {
 				
