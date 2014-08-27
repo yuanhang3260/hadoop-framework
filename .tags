@@ -1,0 +1,985 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ACK	src/hdfs/message/MessageStatus.java	/^	ENQUEUE, SENT, ACK, TIMEOUT;$/;"	e	enum:MessageStatus	file:
+BUFF_SIZE	src/mapreduce/core/RunReducer.java	/^	private static final int BUFF_SIZE = 1024;$/;"	f	class:RunReducer	file:
+BUFF_SIZE	src/mapreduce/tasktracker/TaskTracker.java	/^	public static final int BUFF_SIZE = 1024 * 1024;$/;"	f	class:TaskTracker
+CHUNK_SIZE	src/global/Hdfs.java	/^		public static int CHUNK_SIZE;$/;"	f	class:Hdfs.Core
+CLASSES	src/Makefile	/^CLASSES=$(subst .java,.class,$(SOURCE))$/;"	m
+CORE_NUM	src/global/MapReduce.java	/^			public static int CORE_NUM;$/;"	f	class:MapReduce.TaskTracker.Individual
+ChunkStatisticsForDataNode	src/hdfs/namenode/NameNode.java	/^		private class ChunkStatisticsForDataNode {$/;"	c	class:NameNode.SystemCheck
+ChunkStatisticsForNameNode	src/hdfs/namenode/NameNode.java	/^			public ChunkStatisticsForNameNode(int rf, String file) {$/;"	m	class:NameNode.SystemCheck.ChunkStatisticsForNameNode
+ChunkStatisticsForNameNode	src/hdfs/namenode/NameNode.java	/^		private class ChunkStatisticsForNameNode {$/;"	c	class:NameNode.SystemCheck
+CleanJob	src/mapreduce/tasktracker/TaskTracker.java	/^		public CleanJob(CleanerTask task) {$/;"	m	class:TaskTracker.CleanJob
+CleanJob	src/mapreduce/tasktracker/TaskTracker.java	/^	private class CleanJob implements Runnable{$/;"	c	class:TaskTracker
+CleanerTask	src/mapreduce/message/CleanerTask.java	/^	public CleanerTask(String ip, String jobId, String taskId, int partitionNum) {$/;"	m	class:CleanerTask
+CleanerTask	src/mapreduce/message/CleanerTask.java	/^public class CleanerTask extends Task {$/;"	c
+CommitBackupTask	src/hdfs/message/CommitBackupTask.java	/^	public CommitBackupTask(String tid, String chunkName) {$/;"	m	class:CommitBackupTask
+CommitBackupTask	src/hdfs/message/CommitBackupTask.java	/^public class CommitBackupTask extends Task{$/;"	c
+Common	src/global/MapReduce.java	/^		public static class Common {$/;"	c	class:MapReduce.TaskTracker
+ConfFormatException	src/global/Parser.java	/^		public ConfFormatException(String message) {$/;"	m	class:Parser.ConfFormatException
+ConfFormatException	src/global/Parser.java	/^	public static class ConfFormatException extends Exception {$/;"	c	class:Parser
+ConfOpt	src/global/Parser.java	/^	public enum ConfOpt {$/;"	g	class:Parser
+CopyChunkTask	src/hdfs/message/CopyChunkTask.java	/^	public CopyChunkTask(String tid, String chunkName, String srcDataNodeIp, int srcDataNodeServerPort, String fileName) {$/;"	m	class:CopyChunkTask
+CopyChunkTask	src/hdfs/message/CopyChunkTask.java	/^public class CopyChunkTask extends Task {$/;"	c
+Core	src/global/Hdfs.java	/^	public static class Core {$/;"	c	class:Hdfs
+Core	src/global/MapReduce.java	/^	public static class Core {$/;"	c	class:MapReduce
+DATANODE	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+DATA_NODE_REGISTRY_PORT	src/global/Hdfs.java	/^		public static int DATA_NODE_REGISTRY_PORT;$/;"	f	class:Hdfs.DataNode
+DATA_NODE_SERVER_PORT	src/global/Hdfs.java	/^		public static int DATA_NODE_SERVER_PORT;$/;"	f	class:Hdfs.DataNode
+DATA_NODE_SERVICE_NAME	src/global/Hdfs.java	/^		public static String DATA_NODE_SERVICE_NAME = "DataNode"; \/\/non-configurable$/;"	f	class:Hdfs.Core
+DEBUG	src/global/Hdfs.java	/^		public static boolean DEBUG = false; \/\/non-configurable$/;"	f	class:Hdfs.Core
+DEBUG	src/global/MapReduce.java	/^		public static boolean DEBUG = false; \/\/non-configurable$/;"	f	class:MapReduce.Core
+DEBUG	src/hdfs/io/HDFSBufferedOutputStream.java	/^	private boolean DEBUG = false;$/;"	f	class:HDFSBufferedOutputStream	file:
+DEBUG	src/hdfs/io/HDFSInputStream.java	/^	private boolean DEBUG = false;$/;"	f	class:HDFSInputStream	file:
+DEBUG	src/hdfs/io/HDFSOutputStream.java	/^	private boolean DEBUG = false;$/;"	f	class:HDFSOutputStream	file:
+DataNode	src/global/Hdfs.java	/^	public static class DataNode {$/;"	c	class:Hdfs
+DataNode	src/hdfs/datanode/DataNode.java	/^	public DataNode(String nameNodeIp, int nameNodePort, int dataNodeRegistryPort, int dataNodeServerPort) {$/;"	m	class:DataNode
+DataNode	src/hdfs/datanode/DataNode.java	/^public class DataNode implements DataNodeRemoteInterface, Runnable {$/;"	c
+DataNodeAbstract	src/hdfs/namenode/NameNode.java	/^		public DataNodeAbstract(String ip, int port, int serverPort, String name) {$/;"	m	class:NameNode.DataNodeAbstract
+DataNodeAbstract	src/hdfs/namenode/NameNode.java	/^	private class DataNodeAbstract implements Comparable<DataNodeAbstract> {$/;"	c	class:NameNode
+DataNodeEntry	src/hdfs/io/DataNodeEntry.java	/^	public DataNodeEntry (String ip, int port, String dataNodeName) {$/;"	m	class:DataNodeEntry
+DataNodeEntry	src/hdfs/io/DataNodeEntry.java	/^public class DataNodeEntry implements Serializable {$/;"	c
+DataNodeRemoteInterface	src/hdfs/datanode/DataNodeRemoteInterface.java	/^public interface DataNodeRemoteInterface extends Remote{$/;"	i
+DeleteChunkTask	src/hdfs/message/DeleteChunkTask.java	/^	public DeleteChunkTask(String tid, String chunkName, String fileName) {$/;"	m	class:DeleteChunkTask
+DeleteChunkTask	src/hdfs/message/DeleteChunkTask.java	/^public class DeleteChunkTask extends Task {$/;"	c
+DeleteOrphanTask	src/hdfs/message/DeleteOrphanTask.java	/^	public DeleteOrphanTask(String tid, String chunkName) {$/;"	m	class:DeleteOrphanTask
+DeleteOrphanTask	src/hdfs/message/DeleteOrphanTask.java	/^public class DeleteOrphanTask extends Task {$/;"	c
+DeleteTempTask	src/hdfs/message/DeleteTempTask.java	/^	public DeleteTempTask(String tid, String chunkName) {$/;"	m	class:DeleteTempTask
+DeleteTempTask	src/hdfs/message/DeleteTempTask.java	/^public class DeleteTempTask extends Task {$/;"	c
+ENQUEUE	src/hdfs/message/MessageStatus.java	/^	ENQUEUE, SENT, ACK, TIMEOUT;$/;"	e	enum:MessageStatus	file:
+ErrorInputStream	src/mapreduce/message/Task.java	/^	private transient InputStream ErrorInputStream;$/;"	f	class:Task	file:
+FAILED	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^		RUNNING, FAILED;$/;"	e	enum:TaskTrackerInfo.Status	file:
+FAILED	src/mapreduce/jobtracker/WorkStatus.java	/^	READY, RUNNING, FAILED, TERMINATED, SUCCESS;$/;"	e	enum:WorkStatus	file:
+FILE_MAX_LINES	src/global/MapReduce.java	/^		public static int FILE_MAX_LINES = 1024 * 200; \/\/non-configurable$/;"	f	class:MapReduce.Core
+FILE_MAX_LINES	src/mapreduce/io/collector/OutputCollector.java	/^	private final int FILE_MAX_LINES = MapReduce.Core.FILE_MAX_LINES;$/;"	f	class:OutputCollector	file:
+FileKeyValue	src/mapreduce/io/collector/OutputCollector.java	/^		public FileKeyValue (int seq, Text key, IntWritable value) {$/;"	m	class:OutputCollector.FileKeyValue
+FileKeyValue	src/mapreduce/io/collector/OutputCollector.java	/^	private class FileKeyValue implements Comparable<FileKeyValue> {$/;"	c	class:OutputCollector
+FileKeyValue	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		public FileKeyValue (int seq, Text key, IntWritable value) {$/;"	m	class:TextIntReconstructor.FileKeyValue
+FileKeyValue	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^private class FileKeyValue implements Comparable<FileKeyValue> {$/;"	c	class:TextIntReconstructor
+HDFSBufferedOutputStream	src/hdfs/io/HDFSBufferedOutputStream.java	/^	public HDFSBufferedOutputStream (HDFSOutputStream outputStream) {$/;"	m	class:HDFSBufferedOutputStream
+HDFSBufferedOutputStream	src/hdfs/io/HDFSBufferedOutputStream.java	/^public class HDFSBufferedOutputStream implements Serializable {$/;"	c
+HDFSCORE	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+HDFSChunk	src/hdfs/io/HDFSChunk.java	/^	public HDFSChunk(String chunkName, List<DataNodeEntry> list) {$/;"	m	class:HDFSChunk
+HDFSChunk	src/hdfs/io/HDFSChunk.java	/^public class HDFSChunk implements Serializable {$/;"	c
+HDFSFile	src/hdfs/io/HDFSFile.java	/^	public HDFSFile(String name, int rf, NameNodeRemoteInterface stub) {$/;"	m	class:HDFSFile
+HDFSFile	src/hdfs/io/HDFSFile.java	/^public class HDFSFile implements Serializable {$/;"	c
+HDFSInputStream	src/hdfs/io/HDFSInputStream.java	/^	public HDFSInputStream(List<HDFSChunk> chunkInfoList) {$/;"	m	class:HDFSInputStream
+HDFSInputStream	src/hdfs/io/HDFSInputStream.java	/^public class HDFSInputStream implements Serializable{$/;"	c
+HDFSLineFeedCheck	src/hdfs/io/HDFSLineFeedCheck.java	/^	public HDFSLineFeedCheck(String line, boolean rst) {$/;"	m	class:HDFSLineFeedCheck
+HDFSLineFeedCheck	src/hdfs/io/HDFSLineFeedCheck.java	/^public class HDFSLineFeedCheck implements Serializable {$/;"	c
+HDFSOutputStream	src/hdfs/io/HDFSOutputStream.java	/^	public HDFSOutputStream (HDFSFile file, NameNodeRemoteInterface nameNodeStub) {$/;"	m	class:HDFSOutputStream
+HDFSOutputStream	src/hdfs/io/HDFSOutputStream.java	/^public class HDFSOutputStream extends OutputStream implements Serializable {$/;"	c
+HDFS_TMEP	src/global/Hdfs.java	/^		public static String HDFS_TMEP;$/;"	f	class:Hdfs.Core
+HEART_BEAT_FREQ	src/global/Hdfs.java	/^		public static long HEART_BEAT_FREQ;$/;"	f	class:Hdfs.Core
+HEART_BEAT_FREQ	src/global/MapReduce.java	/^			public static int HEART_BEAT_FREQ; \/\/milliseconds$/;"	f	class:MapReduce.TaskTracker.Common
+Hdfs	src/global/Hdfs.java	/^public class Hdfs {$/;"	c
+HeartBeat	src/mapreduce/tasktracker/TaskTracker.java	/^	private class HeartBeat implements Runnable {$/;"	c	class:TaskTracker
+INCONSISTENCY_LATENCY	src/global/Hdfs.java	/^		public static long INCONSISTENCY_LATENCY;  \/\/non-configurable$/;"	f	class:Hdfs.Core
+IPADDRESS_PATTERN	src/global/IPAddressValidator.java	/^    private static final String IPADDRESS_PATTERN = $/;"	f	class:IPAddressValidator	file:
+IPAddressValidator	src/global/IPAddressValidator.java	/^    public IPAddressValidator(){$/;"	m	class:IPAddressValidator
+IPAddressValidator	src/global/IPAddressValidator.java	/^public class IPAddressValidator {$/;"	c
+Individual	src/global/MapReduce.java	/^		public static class Individual {$/;"	c	class:MapReduce.TaskTracker
+IntWritable	src/mapreduce/io/writable/IntWritable.java	/^	public IntWritable(String val) {$/;"	m	class:IntWritable
+IntWritable	src/mapreduce/io/writable/IntWritable.java	/^	public IntWritable(int val) {$/;"	m	class:IntWritable
+IntWritable	src/mapreduce/io/writable/IntWritable.java	/^public class IntWritable extends Writable {$/;"	c
+JAR	src/global/MapReduce.java	/^			public static boolean JAR = true; \/\/non-configurable$/;"	f	class:MapReduce.TaskTracker.Individual
+JOBTACKER	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+JOB_TRACKER_IP	src/global/MapReduce.java	/^		public static String JOB_TRACKER_IP;$/;"	f	class:MapReduce.Core
+JOB_TRACKER_REGISTRY_PORT	src/global/MapReduce.java	/^		public static int JOB_TRACKER_REGISTRY_PORT;$/;"	f	class:MapReduce.Core
+JOB_TRACKER_SERVICE_NAME	src/global/MapReduce.java	/^		public static String JOB_TRACKER_SERVICE_NAME = "JobTracker";  \/\/non-configurable$/;"	f	class:MapReduce.Core
+JarFileEntry	src/mapreduce/message/JarFileEntry.java	/^	public JarFileEntry (String taskTrackerIp, \/*int serverPort,*\/ String jarFileFullPath) {$/;"	m	class:JarFileEntry
+JarFileEntry	src/mapreduce/message/JarFileEntry.java	/^public class JarFileEntry implements Serializable {	$/;"	c
+Job	src/mapreduce/message/Job.java	/^	public Job(JobConf conf) {$/;"	m	class:Job
+Job	src/mapreduce/message/Job.java	/^public class Job implements Serializable{$/;"	c
+JobClient	src/mapreduce/client/JobClient.java	/^public class JobClient {$/;"	c
+JobConf	src/mapreduce/client/JobConf.java	/^public class JobConf implements Serializable {$/;"	c
+JobScheduler	src/mapreduce/jobtracker/JobTracker.java	/^	private class JobScheduler {$/;"	c	class:JobTracker
+JobStatus	src/mapreduce/jobtracker/JobStatus.java	/^	public JobStatus(String jobId, String jobName, int mapNum, int reduceNum) {$/;"	m	class:JobStatus
+JobStatus	src/mapreduce/jobtracker/JobStatus.java	/^public class JobStatus implements Serializable {$/;"	c
+JobTracker	src/global/MapReduce.java	/^	public static class JobTracker {$/;"	c	class:MapReduce
+JobTracker	src/mapreduce/jobtracker/JobTracker.java	/^public class JobTracker implements JobTrackerRemoteInterface {$/;"	c
+JobTrackerACK	src/mapreduce/jobtracker/JobTrackerACK.java	/^	public JobTrackerACK(List<Task> newAddedTasks, List<TaskStatus> rcvTasks) {$/;"	m	class:JobTrackerACK
+JobTrackerACK	src/mapreduce/jobtracker/JobTrackerACK.java	/^public class JobTrackerACK implements Serializable{$/;"	c
+JobTrackerRemoteInterface	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^public interface JobTrackerRemoteInterface extends Remote {$/;"	i
+JobTrackerSimulator	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^public class JobTrackerSimulator implements JobTrackerRemoteInterface {$/;"	c
+KeyValue	src/mapreduce/io/KeyValue.java	/^	public KeyValue (KEY k, VALUE v) {$/;"	m	class:KeyValue
+KeyValue	src/mapreduce/io/KeyValue.java	/^public class KeyValue<KEY extends Writable, VALUE extends Writable> implements Comparable<KeyValue<KEY, VALUE>>, Serializable{$/;"	c
+KeyValueCollection	src/mapreduce/io/KeyValueCollection.java	/^	public KeyValueCollection(K key, List<V> valueList) {$/;"	m	class:KeyValueCollection
+KeyValueCollection	src/mapreduce/io/KeyValueCollection.java	/^public class KeyValueCollection<K extends Writable, V extends Writable> {$/;"	c
+KeyValueLineRecordReader	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	public KeyValueLineRecordReader(Split s) {$/;"	m	class:KeyValueLineRecordReader
+KeyValueLineRecordReader	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^public class KeyValueLineRecordReader extends RecordReader<Text, Text>{$/;"	c
+KillJob	src/mapreduce/tasktracker/TaskTracker.java	/^		public KillJob (KillerTask task) {$/;"	m	class:TaskTracker.KillJob
+KillJob	src/mapreduce/tasktracker/TaskTracker.java	/^	private class KillJob implements Runnable {$/;"	c	class:TaskTracker
+KillerTask	src/mapreduce/message/KillerTask.java	/^	public KillerTask(String ip, String jobId, String tid, List<String> taskIds) {$/;"	m	class:KillerTask
+KillerTask	src/mapreduce/message/KillerTask.java	/^public class KillerTask extends Task {$/;"	c
+LongWritable	src/mapreduce/io/writable/LongWritable.java	/^	public LongWritable(String val) {$/;"	m	class:LongWritable
+LongWritable	src/mapreduce/io/writable/LongWritable.java	/^	public LongWritable(long val) {$/;"	m	class:LongWritable
+LongWritable	src/mapreduce/io/writable/LongWritable.java	/^public class LongWritable extends Writable{$/;"	c
+MAPPER_FAULT_TEST	src/global/MapReduce.java	/^			public static boolean MAPPER_FAULT_TEST = false;  \/\/non-configurable$/;"	f	class:MapReduce.TaskTracker.Common
+MAPREDCORE	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+MAX_KEY	src/mapreduce/io/writable/Writable.java	/^	public final int MAX_KEY = Integer.MAX_VALUE;$/;"	f	class:Writable
+MAX_NUM_MAP_TASK	src/mapreduce/jobtracker/JobTracker.java	/^	private static int MAX_NUM_MAP_TASK = 999;$/;"	f	class:JobTracker	file:
+MAX_RESCHEDULE_ATTEMPTS	src/global/MapReduce.java	/^		public static int MAX_RESCHEDULE_ATTEMPTS ;$/;"	f	class:MapReduce.JobTracker
+MIN_KEY	src/mapreduce/io/writable/Writable.java	/^	public final int MIN_KEY = Integer.MIN_VALUE;$/;"	f	class:Writable
+MapRedTask	src/mapreduce/message/MapRedTask.java	/^public interface MapRedTask {$/;"	i
+MapReduce	src/global/MapReduce.java	/^public class MapReduce {$/;"	c
+Mapper	src/mapreduce/core/Mapper.java	/^public abstract class Mapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {$/;"	c
+MapperFileReader	src/test/testMapRed/MapperFileReader.java	/^public class MapperFileReader {$/;"	c
+MapperTask	src/mapreduce/message/MapperTask.java	/^	public MapperTask(String jobId, String tid, Split split, String theClassName, int num, JarFileEntry jarEntry) {$/;"	m	class:MapperTask
+MapperTask	src/mapreduce/message/MapperTask.java	/^	public MapperTask(String jobId, String tid, int level, Split split, String theClassName, int num, JarFileEntry jarEntry) {$/;"	m	class:MapperTask
+MapperTask	src/mapreduce/message/MapperTask.java	/^public class MapperTask extends Task implements MapRedTask{$/;"	c
+Message	src/hdfs/message/Message.java	/^	public Message() {$/;"	m	class:Message
+Message	src/hdfs/message/Message.java	/^public class Message implements Serializable{$/;"	c
+MessageStatus	src/hdfs/message/MessageStatus.java	/^public enum MessageStatus {$/;"	g
+MyRunnable	src/test/testMapRed/SyncExample.java	/^    public class MyRunnable implements Runnable {$/;"	c	class:SyncExample
+NAME_NODE_IP	src/global/Hdfs.java	/^		public static String NAME_NODE_IP;$/;"	f	class:Hdfs.Core
+NAME_NODE_REGISTRY_PORT	src/global/Hdfs.java	/^		public static int NAME_NODE_REGISTRY_PORT;$/;"	f	class:Hdfs.Core
+NAME_NODE_SERVICE_NAME	src/global/Hdfs.java	/^		public static String NAME_NODE_SERVICE_NAME = "NameNode"; \/\/non-configurable$/;"	f	class:Hdfs.Core
+NUM_OF_HEART_BEAT	src/test/testMapRed/taskTrackerSimulator.java	/^	public static int NUM_OF_HEART_BEAT = 7;$/;"	f	class:taskTrackerSimulator
+NameNode	src/hdfs/namenode/NameNode.java	/^	public NameNode(int port) {$/;"	m	class:NameNode
+NameNode	src/hdfs/namenode/NameNode.java	/^public class NameNode implements NameNodeRemoteInterface{$/;"	c
+NameNodeRemoteInterface	src/hdfs/namenode/NameNodeRemoteInterface.java	/^public interface NameNodeRemoteInterface extends Remote{$/;"	i
+OutputCollector	src/mapreduce/io/collector/OutputCollector.java	/^	public OutputCollector(MapperTask task) {$/;"	m	class:OutputCollector
+OutputCollector	src/mapreduce/io/collector/OutputCollector.java	/^	public OutputCollector(String filename, String tmpFile) throws NotBoundException, IOException {$/;"	m	class:OutputCollector
+OutputCollector	src/mapreduce/io/collector/OutputCollector.java	/^public class OutputCollector<K extends Writable, V extends Writable> {$/;"	c
+PARTITION_TOLERANCE	src/global/Hdfs.java	/^		public static int PARTITION_TOLERANCE;$/;"	f	class:Hdfs.Core
+Parser	src/global/Parser.java	/^public class Parser {$/;"	c
+PartitionEntry	src/mapreduce/message/PartitionEntry.java	/^	public PartitionEntry(String tid, String host, int serverPort) {$/;"	m	class:PartitionEntry
+PartitionEntry	src/mapreduce/message/PartitionEntry.java	/^public class PartitionEntry implements Serializable {$/;"	c
+PartitionServer	src/mapreduce/tasktracker/TaskTracker.java	/^		public PartitionServer(int port) throws IOException {$/;"	m	class:TaskTracker.PartitionServer
+PartitionServer	src/mapreduce/tasktracker/TaskTracker.java	/^	private class PartitionServer implements Runnable {$/;"	c	class:TaskTracker
+Partitioner	src/mapreduce/io/Partitioner.java	/^public class Partitioner<KEY extends Writable> {$/;"	c
+ProcessList	src/mapreduce/tasktracker/TaskTracker.java	/^	List<Process> ProcessList;$/;"	f	class:TaskTracker
+ProcessUpdate	src/mapreduce/tasktracker/TaskTracker.java	/^	private class ProcessUpdate implements Runnable {$/;"	c	class:TaskTracker
+READY	src/mapreduce/jobtracker/WorkStatus.java	/^	READY, RUNNING, FAILED, TERMINATED, SUCCESS;$/;"	e	enum:WorkStatus	file:
+READ_BUFF_SIZE	src/global/Hdfs.java	/^		public static int READ_BUFF_SIZE;$/;"	f	class:Hdfs.Core
+REDUCER_FAILURE_TIMES	src/global/MapReduce.java	/^			public static int REDUCER_FAILURE_TIMES = 1;  \/\/non-configurable$/;"	f	class:MapReduce.TaskTracker.Common
+REDUCER_FAULT_TEST	src/global/MapReduce.java	/^			public static boolean REDUCER_FAULT_TEST = false;  \/\/non-configurable$/;"	f	class:MapReduce.TaskTracker.Common
+REPLICA_FACTOR	src/global/Hdfs.java	/^		public static int REPLICA_FACTOR;$/;"	f	class:Hdfs.Core
+RUNNING	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^		RUNNING, FAILED;$/;"	e	enum:TaskTrackerInfo.Status	file:
+RUNNING	src/mapreduce/jobtracker/WorkStatus.java	/^	READY, RUNNING, FAILED, TERMINATED, SUCCESS;$/;"	e	enum:WorkStatus	file:
+RecordReader	src/mapreduce/io/recordreader/RecordReader.java	/^public abstract class RecordReader<K extends Writable, V extends Writable> {$/;"	c
+Reducer	src/mapreduce/core/Reducer.java	/^public abstract class Reducer<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {$/;"	c
+ReducerTask	src/mapreduce/message/ReducerTask.java	/^	public ReducerTask(String jobId, String tid, int level, int reducerSEQ, String theClassName, PartitionEntry[] partitionEntry, String path, JarFileEntry jarEntry) {$/;"	m	class:ReducerTask
+ReducerTask	src/mapreduce/message/ReducerTask.java	/^	public ReducerTask(String jobId, String tid, int reducerSEQ, String theClassName, PartitionEntry[] partitionEntry, String path, JarFileEntry jarEntry) {$/;"	m	class:ReducerTask
+ReducerTask	src/mapreduce/message/ReducerTask.java	/^public class ReducerTask extends Task implements MapRedTask {$/;"	c
+RequestResponser	src/mapreduce/tasktracker/TaskTracker.java	/^		public RequestResponser (Socket soc) {$/;"	m	class:TaskTracker.RequestResponser
+RequestResponser	src/mapreduce/tasktracker/TaskTracker.java	/^	private class RequestResponser implements Runnable {$/;"	c	class:TaskTracker
+RunMapper	src/mapreduce/core/RunMapper.java	/^public class RunMapper<K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {$/;"	c
+RunReducer	src/mapreduce/core/RunReducer.java	/^public class RunReducer <K1 extends Writable, V1 extends Writable, K2 extends Writable, V2 extends Writable> {$/;"	c
+SENT	src/hdfs/message/MessageStatus.java	/^	ENQUEUE, SENT, ACK, TIMEOUT;$/;"	e	enum:MessageStatus	file:
+SOURCE	src/Makefile	/^SOURCE=$(shell find . -name '*.java')$/;"	m
+SUCCESS	src/mapreduce/jobtracker/WorkStatus.java	/^	READY, RUNNING, FAILED, TERMINATED, SUCCESS;$/;"	e	enum:WorkStatus	file:
+SYSTEM_CHECK_PERIOD	src/global/Hdfs.java	/^		public static long SYSTEM_CHECK_PERIOD;$/;"	f	class:Hdfs.Core
+SchedulerComparator	src/mapreduce/jobtracker/SchedulerComparator.java	/^public class SchedulerComparator implements Comparator<Task>, Serializable{$/;"	c
+Server	src/hdfs/datanode/DataNode.java	/^		public Server(int port) throws IOException {$/;"	m	class:DataNode.Server
+Server	src/hdfs/datanode/DataNode.java	/^	private class Server implements Runnable {$/;"	c	class:DataNode
+Server	src/test/testMapRed/testJVMSocket.java	/^	private class Server implements Runnable {$/;"	c	class:testJVMSocket
+Split	src/mapreduce/io/Split.java	/^	public Split(HDFSFile file, int idx) {$/;"	m	class:Split
+Split	src/mapreduce/io/Split.java	/^public class Split implements Serializable{$/;"	c
+StartTask	src/mapreduce/tasktracker/TaskTracker.java	/^		public StartTask(List<Task> newAddedTaskList) {$/;"	m	class:TaskTracker.StartTask
+StartTask	src/mapreduce/tasktracker/TaskTracker.java	/^	private class StartTask implements Runnable {$/;"	c	class:TaskTracker
+Status	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public enum Status {$/;"	g	class:TaskTrackerInfo
+SyncExample	src/test/testMapRed/SyncExample.java	/^public class SyncExample {$/;"	c
+SystemCheck	src/hdfs/namenode/NameNode.java	/^	private class SystemCheck implements Runnable {$/;"	c	class:NameNode
+TASKTRACKERCOMMON	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+TASKTRACKERINDIVIDUAL	src/global/Parser.java	/^		HDFSCORE, DATANODE, MAPREDCORE, JOBTACKER, TASKTRACKERCOMMON, TASKTRACKERINDIVIDUAL;$/;"	e	enum:Parser.ConfOpt	file:
+TASK_TRACKER_EXPIRATION	src/global/MapReduce.java	/^		public static long TASK_TRACKER_EXPIRATION;$/;"	f	class:MapReduce.JobTracker
+TASK_TRACKER_REGISTRY_PORT	src/global/MapReduce.java	/^			public static int TASK_TRACKER_REGISTRY_PORT;$/;"	f	class:MapReduce.TaskTracker.Individual
+TASK_TRACKER_SERVER_PORT	src/global/MapReduce.java	/^			public static int TASK_TRACKER_SERVER_PORT;$/;"	f	class:MapReduce.TaskTracker.Individual
+TASK_TRACKER_SERVICE_NAME	src/global/MapReduce.java	/^			public static String TASK_TRACKER_SERVICE_NAME = "TaskTracker";  \/\/non-configurable$/;"	f	class:MapReduce.TaskTracker.Common
+TEMP_FILE_DIR	src/global/MapReduce.java	/^			public static String TEMP_FILE_DIR;$/;"	f	class:MapReduce.TaskTracker.Common
+TERMINATED	src/mapreduce/jobtracker/WorkStatus.java	/^	READY, RUNNING, FAILED, TERMINATED, SUCCESS;$/;"	e	enum:WorkStatus	file:
+TIMEOUT	src/hdfs/message/MessageStatus.java	/^	ENQUEUE, SENT, ACK, TIMEOUT;$/;"	e	enum:MessageStatus	file:
+Task	src/hdfs/message/Task.java	/^	public Task(String tid) {$/;"	m	class:Task
+Task	src/hdfs/message/Task.java	/^public class Task implements Serializable {$/;"	c
+Task	src/mapreduce/message/Task.java	/^	public Task(String jobId, String tid, int level) {$/;"	m	class:Task
+Task	src/mapreduce/message/Task.java	/^public class Task implements Serializable {$/;"	c
+TaskStatus	src/mapreduce/jobtracker/TaskStatus.java	/^	public TaskStatus(String jobId, String taskId, WorkStatus status,$/;"	m	class:TaskStatus
+TaskStatus	src/mapreduce/jobtracker/TaskStatus.java	/^public class TaskStatus implements Serializable {$/;"	c
+TaskTracker	src/global/MapReduce.java	/^	public static class TaskTracker {	$/;"	c	class:MapReduce
+TaskTracker	src/mapreduce/tasktracker/TaskTracker.java	/^	public TaskTracker(String jobTrackerIp, int jobTrackerPort, $/;"	m	class:TaskTracker
+TaskTracker	src/mapreduce/tasktracker/TaskTracker.java	/^public class TaskTracker implements TaskTrackerRemoteInterface {$/;"	c
+TaskTrackerCheck	src/mapreduce/jobtracker/JobTracker.java	/^	private class TaskTrackerCheck implements Runnable {$/;"	c	class:JobTracker
+TaskTrackerInfo	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public TaskTrackerInfo(String ip, int registryPort, int serverPort, int numSlots) {$/;"	m	class:TaskTrackerInfo
+TaskTrackerInfo	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^public class TaskTrackerInfo implements Serializable {$/;"	c
+TaskTrackerRemoteInterface	src/mapreduce/tasktracker/TaskTrackerRemoteInterface.java	/^public interface TaskTrackerRemoteInterface extends Remote {$/;"	i
+TaskTrackerReport	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	public TaskTrackerReport(String ip, int numSlot, List<TaskStatus> taskStatus) {$/;"	m	class:TaskTrackerReport
+TaskTrackerReport	src/mapreduce/jobtracker/TaskTrackerReport.java	/^public class TaskTrackerReport implements Serializable {$/;"	c
+TempRunner	src/test/testMapRed/TempRunner.java	/^public abstract class TempRunner {$/;"	c
+Text	src/mapreduce/io/writable/Text.java	/^	public Text(String text) {$/;"	m	class:Text
+Text	src/mapreduce/io/writable/Text.java	/^public class Text extends Writable {$/;"	c
+TextIntReconstructor	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^public class TextIntReconstructor {$/;"	c
+URLConnectionReader	src/test/testMapRed/URLConnectionReader.java	/^public class URLConnectionReader {$/;"	c
+Utility	src/util/Utility.java	/^public class Utility {$/;"	c
+WRITE_BUFF_SIZE	src/global/Hdfs.java	/^		public static int WRITE_BUFF_SIZE;$/;"	f	class:Hdfs.Core
+WorkStatus	src/mapreduce/jobtracker/WorkStatus.java	/^public enum WorkStatus {$/;"	g
+Writable	src/mapreduce/io/writable/Writable.java	/^public abstract class Writable implements Serializable {$/;"	c
+ackTask	src/hdfs/message/Task.java	/^	public void ackTask() {$/;"	m	class:Task
+addChunk	src/hdfs/io/HDFSFile.java	/^	public void addChunk() {$/;"	m	class:HDFSFile
+addCleanTask	src/mapreduce/jobtracker/JobTracker.java	/^		public void addCleanTask(CleanerTask task) {$/;"	m	class:JobTracker.JobScheduler
+addDataNode	src/hdfs/io/HDFSChunk.java	/^	public void addDataNode(String ip, int port, String name) {$/;"	m	class:HDFSChunk
+addKillerTask	src/mapreduce/jobtracker/JobTracker.java	/^		public void addKillerTask(KillerTask task) {$/;"	m	class:JobTracker.JobScheduler
+addMapTask	src/mapreduce/jobtracker/JobTracker.java	/^		public synchronized void addMapTask(MapperTask task) {$/;"	m	class:JobTracker.JobScheduler
+addMapperFile	src/mapreduce/message/CleanerTask.java	/^	public void addMapperFile(List<String> list) {$/;"	m	class:CleanerTask
+addReduceTask	src/mapreduce/jobtracker/JobTracker.java	/^		public synchronized void addReduceTask(ReducerTask task) {$/;"	m	class:JobTracker.JobScheduler
+addReducerFile	src/mapreduce/message/CleanerTask.java	/^	public void addReducerFile(List<String> list) {$/;"	m	class:CleanerTask
+addTask	src/hdfs/message/Message.java	/^	public void addTask(Task e) {$/;"	m	class:Message
+addTask	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void addTask(List<Task> tasks) {$/;"	m	class:TaskTrackerInfo
+available	src/hdfs/io/HDFSFile.java	/^	private boolean available; \/\/TODO: define the semantics$/;"	f	class:HDFSFile	file:
+available	src/hdfs/namenode/NameNode.java	/^		private boolean available;$/;"	f	class:NameNode.DataNodeAbstract	file:
+backupChunkList	src/hdfs/io/HDFSFile.java	/^	public void backupChunkList() {$/;"	m	class:HDFSFile
+backupFileWrapper	src/hdfs/datanode/DataNode.java	/^	private String backupFileWrapper(String fileName) {$/;"	m	class:DataNode	file:
+bindProc	src/mapreduce/message/Task.java	/^	public void bindProc (Process p) {$/;"	m	class:Task
+bindProcTimes	src/mapreduce/message/Task.java	/^	private int bindProcTimes = 0;$/;"	f	class:Task	file:
+bout	src/mapreduce/io/collector/OutputCollector.java	/^	private HDFSBufferedOutputStream bout;$/;"	f	class:OutputCollector	file:
+buff	src/hdfs/io/HDFSBufferedOutputStream.java	/^	private byte[] buff;$/;"	f	class:HDFSBufferedOutputStream	file:
+buffOffset	src/hdfs/io/HDFSBufferedOutputStream.java	/^	private int buffOffset;$/;"	f	class:HDFSBufferedOutputStream	file:
+bufferOffSet	src/hdfs/io/HDFSInputStream.java	/^	private int bufferOffSet;$/;"	f	class:HDFSInputStream	file:
+bufferedOutputStreamArr	src/mapreduce/io/collector/OutputCollector.java	/^	BufferedOutputStream[] bufferedOutputStreamArr;$/;"	f	class:OutputCollector
+check	src/hdfs/namenode/NameNode.java	/^		private void check() {$/;"	m	class:NameNode.SystemCheck	file:
+checkAvailability	src/hdfs/namenode/NameNode.java	/^		private void checkAvailability() {$/;"	m	class:NameNode.DataNodeAbstract	file:
+checkMapProgress	src/mapreduce/jobtracker/JobTracker.java	/^	public int checkMapProgress(String jobId) throws RemoteException {$/;"	m	class:JobTracker
+checkMapProgress	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public int checkMapProgress(String jobId) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+checkMapProgress	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public int checkMapProgress(String jobId) throws RemoteException {$/;"	m	class:JobTrackerSimulator
+checkReduceProgress	src/mapreduce/jobtracker/JobTracker.java	/^	public int checkReduceProgress(String jobId) throws RemoteException {$/;"	m	class:JobTracker
+checkReduceProgress	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public int checkReduceProgress(String jobId) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+checkReduceProgress	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public int checkReduceProgress(String jobId) throws RemoteException {$/;"	m	class:JobTrackerSimulator
+chunkBlockPeriod	src/hdfs/datanode/DataNode.java	/^	private int chunkBlockPeriod = 3;$/;"	f	class:DataNode	file:
+chunkCounter	src/hdfs/io/HDFSInputStream.java	/^	private int chunkCounter;$/;"	f	class:HDFSInputStream	file:
+chunkIdx	src/mapreduce/io/Split.java	/^	public int chunkIdx;$/;"	f	class:Split
+chunkList	src/hdfs/io/HDFSFile.java	/^	private List<HDFSChunk> chunkList; \/\/Indicate chunk order$/;"	f	class:HDFSFile	file:
+chunkList	src/hdfs/namenode/NameNode.java	/^		private List<String> chunkList;$/;"	f	class:NameNode.DataNodeAbstract	file:
+chunkName	src/hdfs/io/HDFSChunk.java	/^	private String chunkName;$/;"	f	class:HDFSChunk	file:
+chunkName	src/hdfs/message/CommitBackupTask.java	/^	private String chunkName;$/;"	f	class:CommitBackupTask	file:
+chunkName	src/hdfs/message/CopyChunkTask.java	/^	private String chunkName;$/;"	f	class:CopyChunkTask	file:
+chunkName	src/hdfs/message/DeleteChunkTask.java	/^	private String chunkName;$/;"	f	class:DeleteChunkTask	file:
+chunkName	src/hdfs/message/DeleteOrphanTask.java	/^	private String chunkName;$/;"	f	class:DeleteOrphanTask	file:
+chunkName	src/hdfs/message/DeleteTempTask.java	/^	private String chunkName;$/;"	f	class:DeleteTempTask	file:
+chunkNameUnwrapper	src/hdfs/datanode/DataNode.java	/^	private String chunkNameUnwrapper(String localChunkName, boolean reportTmp) {$/;"	m	class:DataNode	file:
+chunkNameWrapper	src/hdfs/datanode/DataNode.java	/^	private String chunkNameWrapper(String globalChunkName) {$/;"	m	class:DataNode	file:
+chunkNaming	src/hdfs/namenode/NameNode.java	/^	volatile long chunkNaming;$/;"	f	class:NameNode
+chunkOffSet	src/hdfs/io/HDFSInputStream.java	/^	private int chunkOffSet;$/;"	f	class:HDFSInputStream	file:
+chunkReport	src/hdfs/namenode/NameNode.java	/^	public Message chunkReport(String dataNodeName, List<String> chunkList) throws RemoteException {$/;"	m	class:NameNode
+chunkReport	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public Message chunkReport(String dataNodeName, List<String> chunkList)$/;"	m	interface:NameNodeRemoteInterface
+chunk_offset	src/hdfs/io/HDFSOutputStream.java	/^	private int chunk_offset = 0;$/;"	f	class:HDFSOutputStream	file:
+chunk_size	src/hdfs/io/HDFSChunk.java	/^	private int chunk_size;$/;"	f	class:HDFSChunk	file:
+chunk_size	src/hdfs/io/HDFSOutputStream.java	/^	private int chunk_size;$/;"	f	class:HDFSOutputStream	file:
+cleanTasks	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void cleanTasks() {$/;"	m	class:TaskTrackerInfo
+cleanUp	src/mapreduce/jobtracker/JobTracker.java	/^	private void cleanUp(String jobId) {$/;"	m	class:JobTracker	file:
+cleanupChunks	src/hdfs/io/HDFSOutputStream.java	/^	private void cleanupChunks() {$/;"	m	class:HDFSOutputStream	file:
+close	src/hdfs/io/HDFSBufferedOutputStream.java	/^	public void close() throws IOException {$/;"	m	class:HDFSBufferedOutputStream
+close	src/hdfs/io/HDFSOutputStream.java	/^	public void close() throws IOException {$/;"	m	class:HDFSOutputStream
+collect	src/mapreduce/io/collector/OutputCollector.java	/^	public void collect(K key, V value) throws IOException {$/;"	m	class:OutputCollector
+collectPartition	src/mapreduce/core/RunReducer.java	/^	public void collectPartition() $/;"	m	class:RunReducer
+commitBackupTaskHandler	src/hdfs/datanode/DataNode.java	/^	private void commitBackupTaskHandler (CommitBackupTask task) {$/;"	m	class:DataNode	file:
+commitFile	src/hdfs/namenode/NameNode.java	/^	public synchronized void commitFile(HDFSFile file) throws RemoteException {$/;"	m	class:NameNode
+commitFile	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public void commitFile(HDFSFile file) throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+commitTask	src/mapreduce/message/Task.java	/^	public void commitTask() {$/;"	m	class:Task
+commitTime	src/hdfs/io/HDFSChunk.java	/^	private Date commitTime;$/;"	f	class:HDFSChunk	file:
+commitTime	src/hdfs/io/HDFSFile.java	/^	private Date commitTime;$/;"	f	class:HDFSFile	file:
+compare	src/mapreduce/jobtracker/SchedulerComparator.java	/^	public int compare(Task t1, Task t2) {$/;"	m	class:SchedulerComparator
+compareTo	src/hdfs/namenode/NameNode.java	/^		public int compareTo(DataNodeAbstract compareDataNodeInfo) {$/;"	m	class:NameNode.DataNodeAbstract
+compareTo	src/mapreduce/io/KeyValue.java	/^	public int compareTo(KeyValue<KEY, VALUE> o) {$/;"	m	class:KeyValue
+compareTo	src/mapreduce/io/collector/OutputCollector.java	/^		public int compareTo(FileKeyValue obj) {$/;"	m	class:OutputCollector.FileKeyValue
+compareTo	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		public int compareTo(FileKeyValue obj) {$/;"	m	class:TextIntReconstructor.FileKeyValue
+conf	src/mapreduce/message/Job.java	/^	private JobConf conf;$/;"	f	class:Job	file:
+copyChunkTaskHandler	src/hdfs/datanode/DataNode.java	/^	private void copyChunkTaskHandler(CopyChunkTask task) {$/;"	m	class:DataNode	file:
+create	src/hdfs/namenode/NameNode.java	/^	public synchronized HDFSFile create(String filePath) throws RemoteException, IOException {$/;"	m	class:NameNode
+create	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public HDFSFile create(String path) throws RemoteException, IOException;$/;"	m	interface:NameNodeRemoteInterface
+createCleanerTask	src/mapreduce/jobtracker/JobTracker.java	/^	private CleanerTask createCleanerTask(String ip, String jobId, int partitionNum) {$/;"	m	class:JobTracker	file:
+createKillerTask	src/mapreduce/jobtracker/JobTracker.java	/^	private KillerTask createKillerTask(String ip, String jobId, List<String> taskIds) {$/;"	m	class:JobTracker	file:
+createMapTask	src/mapreduce/jobtracker/JobTracker.java	/^	private MapperTask createMapTask(Job job, Split split) {$/;"	m	class:JobTracker	file:
+createReduceTask	src/mapreduce/jobtracker/JobTracker.java	/^	private ReducerTask createReduceTask(Job job, int reducerSEQ, PartitionEntry[] partitionEntry) {$/;"	m	class:JobTracker	file:
+currChunkInfo	src/hdfs/io/HDFSInputStream.java	/^	private HDFSChunk currChunkInfo;$/;"	f	class:HDFSInputStream	file:
+dataNodeConf	src/global/Parser.java	/^	public static void dataNodeConf() throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {$/;"	m	class:Parser
+dataNodeName	src/hdfs/datanode/DataNode.java	/^	private String dataNodeName;$/;"	f	class:DataNode	file:
+dataNodeName	src/hdfs/io/DataNodeEntry.java	/^	private String dataNodeName;$/;"	f	class:DataNodeEntry	file:
+dataNodeName	src/hdfs/namenode/NameNode.java	/^		private String dataNodeName;$/;"	f	class:NameNode.DataNodeAbstract	file:
+dataNodeRegistryIP	src/hdfs/io/DataNodeEntry.java	/^	public String dataNodeRegistryIP;$/;"	f	class:DataNodeEntry
+dataNodeRegistryIP	src/hdfs/namenode/NameNode.java	/^		private String dataNodeRegistryIP;$/;"	f	class:NameNode.DataNodeAbstract	file:
+dataNodeRegistryPort	src/hdfs/datanode/DataNode.java	/^	private int dataNodeRegistryPort;$/;"	f	class:DataNode	file:
+dataNodeRegistryPort	src/hdfs/io/DataNodeEntry.java	/^	public int dataNodeRegistryPort;$/;"	f	class:DataNodeEntry
+dataNodeRegistryPort	src/hdfs/namenode/NameNode.java	/^		private int dataNodeRegistryPort;$/;"	f	class:NameNode.DataNodeAbstract	file:
+dataNodeS	src/hdfs/namenode/NameNode.java	/^		private DataNodeRemoteInterface dataNodeS;$/;"	f	class:NameNode.DataNodeAbstract	file:
+dataNodeServerPort	src/hdfs/datanode/DataNode.java	/^	private int dataNodeServerPort;$/;"	f	class:DataNode	file:
+dataNodeServerPort	src/hdfs/namenode/NameNode.java	/^		private int dataNodeServerPort;$/;"	f	class:NameNode.DataNodeAbstract	file:
+dataNodeStub	src/hdfs/io/HDFSInputStream.java	/^	private DataNodeRemoteInterface dataNodeStub;$/;"	f	class:HDFSInputStream	file:
+dataNodeTaskTbl	src/hdfs/namenode/NameNode.java	/^	private Map<String, List<Task>> dataNodeTaskTbl;$/;"	f	class:NameNode	file:
+dataNodeTbl	src/hdfs/namenode/NameNode.java	/^	private Map<String, DataNodeAbstract> dataNodeTbl;$/;"	f	class:NameNode	file:
+dataNodeTmpFileDirPrefix	src/hdfs/datanode/DataNode.java	/^	private String dataNodeTmpFileDirPrefix;$/;"	f	class:DataNode	file:
+dataNodes	src/hdfs/namenode/NameNode.java	/^			private List<String> dataNodes = new ArrayList<String>();$/;"	f	class:NameNode.SystemCheck.ChunkStatisticsForDataNode	file:
+delete	src/hdfs/namenode/NameNode.java	/^	public void delete(String path) throws IOException {$/;"	m	class:NameNode
+delete	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public void delete(String path) throws RemoteException, IOException;$/;"	m	interface:NameNodeRemoteInterface
+deleteChunkTaskHandler	src/hdfs/datanode/DataNode.java	/^	private void deleteChunkTaskHandler(DeleteChunkTask task) {$/;"	m	class:DataNode	file:
+deleteFirstLine	src/hdfs/datanode/DataNode.java	/^	public void deleteFirstLine(String chunkName, boolean firstFile)$/;"	m	class:DataNode
+deleteFirstLine	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public void deleteFirstLine(String chunkName, boolean firstFile) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
+deleteOrphanTaskHandler	src/hdfs/datanode/DataNode.java	/^	private void deleteOrphanTaskHandler (DeleteOrphanTask task) {$/;"	m	class:DataNode	file:
+deleteTempTaskHandler	src/hdfs/datanode/DataNode.java	/^	private void deleteTempTaskHandler(DeleteTempTask task) {$/;"	m	class:DataNode	file:
+dirPrefix	src/hdfs/datanode/DataNode.java	/^	private String dirPrefix = Hdfs.Core.HDFS_TMEP;$/;"	f	class:DataNode	file:
+disable	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void disable() {$/;"	m	class:TaskTrackerInfo
+disableFile	src/hdfs/io/HDFSFile.java	/^	public void disableFile () {$/;"	m	class:HDFSFile
+downloadJar	src/mapreduce/tasktracker/TaskTracker.java	/^		private void downloadJar (MapRedTask task, String jid) throws IOException {$/;"	m	class:TaskTracker.StartTask	file:
+emptySlot	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	public int emptySlot;$/;"	f	class:TaskTrackerReport
+enable	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void enable() {$/;"	m	class:TaskTrackerInfo
+enableFile	src/hdfs/io/HDFSFile.java	/^	public void enableFile() {$/;"	m	class:HDFSFile
+endOfChunk	src/hdfs/io/HDFSInputStream.java	/^	private boolean endOfChunk;$/;"	f	class:HDFSInputStream	file:
+endOfFile	src/hdfs/io/HDFSInputStream.java	/^	private boolean endOfFile;$/;"	f	class:HDFSInputStream	file:
+failedTask	src/mapreduce/message/Task.java	/^	public void failedTask() {$/;"	m	class:Task
+failureTimes	src/mapreduce/tasktracker/TaskTracker.java	/^	int failureTimes = 0;$/;"	f	class:TaskTracker
+file	src/hdfs/io/HDFSOutputStream.java	/^	private HDFSFile file;$/;"	f	class:HDFSOutputStream	file:
+file	src/mapreduce/io/Split.java	/^	public HDFSFile file;$/;"	f	class:Split
+fileArr	src/mapreduce/io/collector/OutputCollector.java	/^	File[] fileArr;$/;"	f	class:OutputCollector
+fileChunkInfoList	src/hdfs/io/HDFSInputStream.java	/^	private List<HDFSChunk> fileChunkInfoList;$/;"	f	class:HDFSInputStream	file:
+fileCounter	src/mapreduce/io/collector/OutputCollector.java	/^	private int fileCounter = 0;$/;"	f	class:OutputCollector	file:
+fileName	src/hdfs/message/CopyChunkTask.java	/^	private String fileName;$/;"	f	class:CopyChunkTask	file:
+fileName	src/hdfs/message/DeleteChunkTask.java	/^	private String fileName;$/;"	f	class:DeleteChunkTask	file:
+fileOutputStreamArr	src/mapreduce/io/collector/OutputCollector.java	/^	FileOutputStream[] fileOutputStreamArr;$/;"	f	class:OutputCollector
+filePath	src/hdfs/namenode/NameNode.java	/^			public String filePath;$/;"	f	class:NameNode.SystemCheck.ChunkStatisticsForNameNode
+filePrefix	src/mapreduce/message/Task.java	/^	private String filePrefix;$/;"	f	class:Task	file:
+fileSEQ	src/mapreduce/io/collector/OutputCollector.java	/^		private int fileSEQ;$/;"	f	class:OutputCollector.FileKeyValue	file:
+fileSEQ	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		private int fileSEQ;$/;"	f	class:TextIntReconstructor.FileKeyValue	file:
+fileTbl	src/hdfs/namenode/NameNode.java	/^	private Map<String, HDFSFile> fileTbl;$/;"	f	class:NameNode	file:
+flush	src/hdfs/io/HDFSBufferedOutputStream.java	/^	public void flush() throws IOException {$/;"	m	class:HDFSBufferedOutputStream
+flushToHDFS	src/mapreduce/io/collector/OutputCollector.java	/^	public void flushToHDFS(boolean close) throws IOException {$/;"	m	class:OutputCollector
+flushToLocal	src/mapreduce/io/collector/OutputCollector.java	/^	public void flushToLocal() throws IOException {$/;"	m	class:OutputCollector
+forMapper	src/mapreduce/io/collector/OutputCollector.java	/^	private boolean forMapper;$/;"	f	class:OutputCollector	file:
+formChunkReport	src/hdfs/datanode/DataNode.java	/^	public List<String> formChunkReport(boolean withTmp) {$/;"	m	class:DataNode
+generateDataNodeEntry	src/hdfs/namenode/NameNode.java	/^		public DataNodeEntry generateDataNodeEntry() {$/;"	m	class:NameNode.DataNodeAbstract
+getAllJobStatus	src/mapreduce/jobtracker/JobTracker.java	/^	public AbstractMap<String, JobStatus> getAllJobStatus() throws RemoteException {$/;"	m	class:JobTracker
+getAllJobStatus	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public AbstractMap<String, JobStatus> getAllJobStatus() throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+getAllJobStatus	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public AbstractMap<String, JobStatus> getAllJobStatus()$/;"	m	class:JobTrackerSimulator
+getAllLocations	src/hdfs/io/HDFSChunk.java	/^	public List<DataNodeEntry> getAllLocations() {$/;"	m	class:HDFSChunk
+getChunkByName	src/hdfs/io/HDFSFile.java	/^	public HDFSChunk getChunkByName(String chunkName) {$/;"	m	class:HDFSFile
+getChunkIdx	src/mapreduce/io/Split.java	/^	public int getChunkIdx() {$/;"	m	class:Split
+getChunkList	src/hdfs/io/HDFSFile.java	/^	public List<HDFSChunk> getChunkList() {$/;"	m	class:HDFSFile
+getChunkName	src/hdfs/io/HDFSChunk.java	/^	public String getChunkName() {$/;"	m	class:HDFSChunk
+getChunkName	src/hdfs/message/CommitBackupTask.java	/^	public String getChunkName() {$/;"	m	class:CommitBackupTask
+getChunkName	src/hdfs/message/CopyChunkTask.java	/^	public String getChunkName() {$/;"	m	class:CopyChunkTask
+getChunkName	src/hdfs/message/DeleteChunkTask.java	/^	public String getChunkName() {$/;"	m	class:DeleteChunkTask
+getChunkName	src/hdfs/message/DeleteOrphanTask.java	/^	public String getChunkName() {$/;"	m	class:DeleteOrphanTask
+getChunkName	src/hdfs/message/DeleteTempTask.java	/^	public String getChunkName() {$/;"	m	class:DeleteTempTask
+getChunkSize	src/hdfs/io/HDFSChunk.java	/^	public int getChunkSize() {$/;"	m	class:HDFSChunk
+getCommitTime	src/hdfs/io/HDFSChunk.java	/^	public Date getCommitTime() {$/;"	m	class:HDFSChunk
+getCommitTime	src/hdfs/io/HDFSFile.java	/^	public Date getCommitTime() {$/;"	m	class:HDFSFile
+getCurrentChunk	src/hdfs/io/HDFSOutputStream.java	/^	private HDFSChunk getCurrentChunk() {$/;"	m	class:HDFSOutputStream	file:
+getDataNode	src/hdfs/io/HDFSChunk.java	/^	public DataNodeEntry getDataNode(int index) {$/;"	m	class:HDFSChunk
+getDataNodeName	src/hdfs/namenode/NameNode.java	/^		public String getDataNodeName() {$/;"	m	class:NameNode.DataNodeAbstract
+getDataNodeRegistryIp	src/hdfs/namenode/NameNode.java	/^		public String getDataNodeRegistryIp() {$/;"	m	class:NameNode.DataNodeAbstract
+getDataNodeRegistryPort	src/hdfs/namenode/NameNode.java	/^		public int getDataNodeRegistryPort() {$/;"	m	class:NameNode.DataNodeAbstract
+getDataNodeServerPort	src/hdfs/namenode/NameNode.java	/^		public int getDataNodeServerPort() {$/;"	m	class:NameNode.DataNodeAbstract
+getEntries	src/mapreduce/message/ReducerTask.java	/^	public PartitionEntry[] getEntries() {$/;"	m	class:ReducerTask
+getErrInputStream	src/mapreduce/message/Task.java	/^	public InputStream getErrInputStream() {$/;"	m	class:Task
+getFile	src/mapreduce/io/Split.java	/^	public HDFSFile getFile() {$/;"	m	class:Split
+getFileName	src/hdfs/message/CopyChunkTask.java	/^	public String getFileName() {$/;"	m	class:CopyChunkTask
+getFileName	src/hdfs/message/DeleteChunkTask.java	/^	public String getFileName() {$/;"	m	class:DeleteChunkTask
+getFilePrefix	src/mapreduce/message/Task.java	/^	public String getFilePrefix() {$/;"	m	class:Task
+getFileSEQ	src/mapreduce/io/collector/OutputCollector.java	/^		public int getFileSEQ() {$/;"	m	class:OutputCollector.FileKeyValue
+getFileSEQ	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		public int getFileSEQ() {$/;"	m	class:TextIntReconstructor.FileKeyValue
+getFromHDFS	src/util/Utility.java	/^	private static void getFromHDFS(String hdfsFilePath, String localFilePath) {$/;"	m	class:Utility	file:
+getFullPath	src/mapreduce/message/JarFileEntry.java	/^	public String getFullPath() {$/;"	m	class:JarFileEntry
+getHashValue	src/mapreduce/io/writable/IntWritable.java	/^	public int getHashValue() {$/;"	m	class:IntWritable
+getHashValue	src/mapreduce/io/writable/LongWritable.java	/^	public int getHashValue() {$/;"	m	class:LongWritable
+getHashValue	src/mapreduce/io/writable/Text.java	/^	public int getHashValue() {$/;"	m	class:Text
+getHashValue	src/mapreduce/io/writable/Writable.java	/^	public abstract int getHashValue();$/;"	m	class:Writable
+getHost	src/mapreduce/message/PartitionEntry.java	/^	public String getHost() {$/;"	m	class:PartitionEntry
+getInputPath	src/mapreduce/client/JobConf.java	/^	public String getInputPath() {$/;"	m	class:JobConf
+getInputStream	src/hdfs/io/HDFSFile.java	/^	public HDFSInputStream getInputStream() {$/;"	m	class:HDFSFile
+getInputStream	src/mapreduce/message/Task.java	/^	public InputStream getInputStream() {$/;"	m	class:Task
+getIp	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public String getIp() {$/;"	m	class:TaskTrackerInfo
+getJarEntry	src/mapreduce/message/MapRedTask.java	/^	public JarFileEntry getJarEntry();$/;"	m	interface:MapRedTask
+getJarEntry	src/mapreduce/message/MapperTask.java	/^	public JarFileEntry getJarEntry() {$/;"	m	class:MapperTask
+getJarEntry	src/mapreduce/message/ReducerTask.java	/^	public JarFileEntry getJarEntry() {$/;"	m	class:ReducerTask
+getJarFileEntry	src/mapreduce/message/Job.java	/^	public JarFileEntry getJarFileEntry() {$/;"	m	class:Job
+getJobConf	src/mapreduce/message/Job.java	/^	public JobConf getJobConf() {$/;"	m	class:Job
+getJobId	src/mapreduce/message/Job.java	/^	public String getJobId() {$/;"	m	class:Job
+getJobId	src/mapreduce/message/KillerTask.java	/^	public String getJobId() {$/;"	m	class:KillerTask
+getJobId	src/mapreduce/message/Task.java	/^	public String getJobId() {$/;"	m	class:Task
+getJobName	src/mapreduce/client/JobConf.java	/^	public String getJobName() {$/;"	m	class:JobConf
+getJobStatus	src/mapreduce/jobtracker/JobTracker.java	/^	public JobStatus getJobStatus(String jobId) throws RemoteException {$/;"	m	class:JobTracker
+getJobStatus	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public JobStatus getJobStatus(String jobId) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+getJobStatus	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public JobStatus getJobStatus(String jobId) throws RemoteException {$/;"	m	class:JobTrackerSimulator
+getKey	src/mapreduce/io/KeyValue.java	/^	public KEY getKey() {$/;"	m	class:KeyValue
+getKey	src/mapreduce/io/KeyValueCollection.java	/^	public K getKey() {$/;"	m	class:KeyValueCollection
+getLocalMapperFilePrefix	src/mapreduce/message/ReducerTask.java	/^	public String getLocalMapperFilePrefix() {$/;"	m	class:ReducerTask
+getLocalPath	src/mapreduce/message/JarFileEntry.java	/^	public String getLocalPath() {$/;"	m	class:JarFileEntry
+getLocations	src/hdfs/namenode/NameNode.java	/^			public List<String> getLocations() {$/;"	m	class:NameNode.SystemCheck.ChunkStatisticsForDataNode
+getMapOutputKeyClass	src/mapreduce/client/JobConf.java	/^	public Class<?> getMapOutputKeyClass() {$/;"	m	class:JobConf
+getMapOutputValueClass	src/mapreduce/client/JobConf.java	/^	public Class<?> getMapOutputValueClass() {$/;"	m	class:JobConf
+getMapperClassName	src/mapreduce/client/JobConf.java	/^	public String getMapperClassName() {$/;"	m	class:JobConf
+getMapperClassName	src/mapreduce/message/MapperTask.java	/^	public String getMapperClassName() {$/;"	m	class:MapperTask
+getMapperFile	src/mapreduce/message/CleanerTask.java	/^	public List<String> getMapperFile() {$/;"	m	class:CleanerTask
+getName	src/hdfs/io/HDFSFile.java	/^	public String getName() {$/;"	m	class:HDFSFile
+getNearestDataNode	src/hdfs/io/HDFSInputStream.java	/^	private DataNodeEntry getNearestDataNode(List<DataNodeEntry> entries) throws IOException {$/;"	m	class:HDFSInputStream	file:
+getNodeName	src/hdfs/io/DataNodeEntry.java	/^	public String getNodeName() {$/;"	m	class:DataNodeEntry
+getNumMapTasks	src/mapreduce/client/JobConf.java	/^	public int getNumMapTasks() {$/;"	m	class:JobConf
+getNumReduceTasks	src/mapreduce/client/JobConf.java	/^	public int getNumReduceTasks() {$/;"	m	class:JobConf
+getNumSlots	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public int getNumSlots() {$/;"	m	class:TaskTrackerInfo
+getOutputKeyClass	src/mapreduce/client/JobConf.java	/^	public Class<?> getOutputKeyClass() {$/;"	m	class:JobConf
+getOutputPath	src/mapreduce/client/JobConf.java	/^	public String getOutputPath() {$/;"	m	class:JobConf
+getOutputPath	src/mapreduce/message/ReducerTask.java	/^	public String getOutputPath() {$/;"	m	class:ReducerTask
+getOutputStream	src/hdfs/io/HDFSFile.java	/^	public HDFSOutputStream getOutputStream() {$/;"	m	class:HDFSFile
+getOutputValueClass	src/mapreduce/client/JobConf.java	/^	public Class<?> getOutputValueClass() {$/;"	m	class:JobConf
+getPair	src/mapreduce/io/collector/OutputCollector.java	/^		public KeyValue<Text, IntWritable> getPair() {$/;"	m	class:OutputCollector.FileKeyValue
+getPair	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		public KeyValue<Text, IntWritable> getPair() {$/;"	m	class:TextIntReconstructor.FileKeyValue
+getPartition	src/mapreduce/io/Partitioner.java	/^	public int getPartition(KEY key, int partitionNum) {$/;"	m	class:Partitioner
+getPartitionNum	src/mapreduce/message/CleanerTask.java	/^	public int getPartitionNum() {$/;"	m	class:CleanerTask
+getPartitionNum	src/mapreduce/message/MapperTask.java	/^	public int getPartitionNum() {$/;"	m	class:MapperTask
+getPort	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public int getPort() {$/;"	m	class:TaskTrackerInfo
+getPort	src/mapreduce/message/PartitionEntry.java	/^	public int getPort() {$/;"	m	class:PartitionEntry
+getPriority	src/mapreduce/client/JobConf.java	/^	public int getPriority() {$/;"	m	class:JobConf
+getPriority	src/mapreduce/message/Task.java	/^	public int getPriority() {$/;"	m	class:Task
+getProcRef	src/mapreduce/message/Task.java	/^	public Process getProcRef() {$/;"	m	class:Task
+getReducerClassName	src/mapreduce/client/JobConf.java	/^	public String getReducerClassName() {$/;"	m	class:JobConf
+getReducerClassName	src/mapreduce/message/ReducerTask.java	/^	public String getReducerClassName() {$/;"	m	class:ReducerTask
+getReducerFile	src/mapreduce/message/CleanerTask.java	/^	public List<String> getReducerFile() {$/;"	m	class:CleanerTask
+getReducerTempFile	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	public String getReducerTempFile () {$/;"	m	class:TextIntReconstructor
+getRelatedTasks	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public Set<String> getRelatedTasks() {$/;"	m	class:TaskTrackerInfo
+getReplicaFactor	src/hdfs/io/HDFSFile.java	/^	public int getReplicaFactor() {$/;"	m	class:HDFSFile
+getReplicaNumber	src/hdfs/io/HDFSChunk.java	/^	public int getReplicaNumber() {$/;"	m	class:HDFSChunk
+getRescheduleNum	src/mapreduce/message/Task.java	/^	public int getRescheduleNum() {$/;"	m	class:Task
+getSEQ	src/mapreduce/message/ReducerTask.java	/^	public int getSEQ() {$/;"	m	class:ReducerTask
+getScheduleTbl	src/mapreduce/jobtracker/JobTracker.java	/^	public AbstractMap<String, Queue<Task>> getScheduleTbl() {$/;"	m	class:JobTracker
+getScheduleTbl	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public AbstractMap<String, Queue<Task>> getScheduleTbl() throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+getScheduleTbl	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public AbstractMap<String, Queue<Task>> getScheduleTbl()$/;"	m	class:JobTrackerSimulator
+getServerPort	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public int getServerPort() {$/;"	m	class:TaskTrackerInfo
+getSplit	src/mapreduce/message/Job.java	/^	public List<Split> getSplit() {$/;"	m	class:Job
+getSplit	src/mapreduce/message/MapperTask.java	/^	public Split getSplit() {$/;"	m	class:MapperTask
+getSrcDataNodeIp	src/hdfs/message/CopyChunkTask.java	/^	public String getSrcDataNodeIp() {$/;"	m	class:CopyChunkTask
+getSrcDataNodeServerPort	src/hdfs/message/CopyChunkTask.java	/^	public int getSrcDataNodeServerPort() {$/;"	m	class:CopyChunkTask
+getStatus	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public Status getStatus() {$/;"	m	class:TaskTrackerInfo
+getTID	src/mapreduce/message/PartitionEntry.java	/^	public String getTID() {$/;"	m	class:PartitionEntry
+getTask	src/mapreduce/tasktracker/TaskTracker.java	/^	public Task getTask(String jid, String tid) throws RemoteException {$/;"	m	class:TaskTracker
+getTask	src/mapreduce/tasktracker/TaskTrackerRemoteInterface.java	/^	public Task getTask(String jid, String tid) throws RemoteException;$/;"	m	interface:TaskTrackerRemoteInterface
+getTaskId	src/mapreduce/message/Task.java	/^	public String getTaskId() {$/;"	m	class:Task
+getTaskIds	src/mapreduce/message/KillerTask.java	/^	public List<String> getTaskIds() {$/;"	m	class:KillerTask
+getTaskList	src/hdfs/message/Message.java	/^	public List<Task> getTaskList() {$/;"	m	class:Message
+getTaskStatus	src/mapreduce/message/Task.java	/^	public WorkStatus getTaskStatus() {$/;"	m	class:Task
+getTaskTrackerIp	src/mapreduce/message/CleanerTask.java	/^	public String getTaskTrackerIp() {$/;"	m	class:CleanerTask
+getTaskTrackerIp	src/mapreduce/message/JarFileEntry.java	/^	public String getTaskTrackerIp() {$/;"	m	class:JarFileEntry
+getTaskTrackerIp	src/mapreduce/message/KillerTask.java	/^	public String getTaskTrackerIp() {$/;"	m	class:KillerTask
+getTaskTrackerStatus	src/mapreduce/jobtracker/JobTracker.java	/^	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()$/;"	m	class:JobTracker
+getTaskTrackerStatus	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus() throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+getTaskTrackerStatus	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public AbstractMap<String, TaskTrackerInfo> getTaskTrackerStatus()$/;"	m	class:JobTrackerSimulator
+getText	src/mapreduce/io/writable/Text.java	/^	public String getText() {$/;"	m	class:Text
+getTid	src/hdfs/message/Task.java	/^	public String getTid() {$/;"	m	class:Task
+getTimeStamp	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public long getTimeStamp() {$/;"	m	class:TaskTrackerInfo
+getTotalChunkList	src/hdfs/io/HDFSFile.java	/^	public List<HDFSChunk> getTotalChunkList() {$/;"	m	class:HDFSFile
+getValue	src/mapreduce/io/KeyValue.java	/^	public VALUE getValue() {$/;"	m	class:KeyValue
+getValue	src/mapreduce/io/writable/IntWritable.java	/^	public int getValue() {$/;"	m	class:IntWritable
+getValue	src/mapreduce/io/writable/LongWritable.java	/^	public long getValue() {$/;"	m	class:LongWritable
+getValues	src/mapreduce/io/KeyValueCollection.java	/^	public List<V> getValues() {$/;"	m	class:KeyValueCollection
+global	src/global/Hdfs.java	/^package global;$/;"	p
+global	src/global/IPAddressValidator.java	/^package global;$/;"	p
+global	src/global/MapReduce.java	/^package global;$/;"	p
+global	src/global/Parser.java	/^package global;$/;"	p
+hasNext	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	public boolean hasNext() {$/;"	m	class:KeyValueLineRecordReader
+hasNext	src/mapreduce/io/recordreader/RecordReader.java	/^	public abstract boolean hasNext();$/;"	m	class:RecordReader
+hasNext	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	public boolean hasNext() throws IOException {$/;"	m	class:TextIntReconstructor
+hdfs.datanode	src/hdfs/datanode/DataNode.java	/^package hdfs.datanode;$/;"	p
+hdfs.datanode	src/hdfs/datanode/DataNodeRemoteInterface.java	/^package hdfs.datanode;$/;"	p
+hdfs.datanode	src/hdfs/datanode/runDataNode.java	/^package hdfs.datanode;$/;"	p
+hdfs.io	src/hdfs/io/DataNodeEntry.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSBufferedOutputStream.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSChunk.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSFile.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSInputStream.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSLineFeedCheck.java	/^package hdfs.io;$/;"	p
+hdfs.io	src/hdfs/io/HDFSOutputStream.java	/^package hdfs.io;$/;"	p
+hdfs.message	src/hdfs/message/CommitBackupTask.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/CopyChunkTask.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/DeleteChunkTask.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/DeleteOrphanTask.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/DeleteTempTask.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/Message.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/MessageStatus.java	/^package hdfs.message;$/;"	p
+hdfs.message	src/hdfs/message/Task.java	/^package hdfs.message;$/;"	p
+hdfs.namenode	src/hdfs/namenode/NameNode.java	/^package hdfs.namenode;$/;"	p
+hdfs.namenode	src/hdfs/namenode/NameNodeRemoteInterface.java	/^package hdfs.namenode;$/;"	p
+hdfs.namenode	src/hdfs/namenode/runNameNode.java	/^package hdfs.namenode;$/;"	p
+hdfsCoreConf	src/global/Parser.java	/^	public static void hdfsCoreConf() throws ParserConfigurationException, $/;"	m	class:Parser
+heartBeat	src/hdfs/namenode/NameNode.java	/^	public synchronized Message heartBeat(String dataNodeName) {$/;"	m	class:NameNode
+heartBeat	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public Message heartBeat(String dataNodeName) throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+heartBeat	src/mapreduce/jobtracker/JobTracker.java	/^	public JobTrackerACK heartBeat(TaskTrackerReport report) {$/;"	m	class:JobTracker
+heartBeat	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public JobTrackerACK heartBeat(TaskTrackerReport report) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+heartBeat	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public JobTrackerACK heartBeat(TaskTrackerReport report) {$/;"	m	class:JobTrackerSimulator
+host	src/mapreduce/message/PartitionEntry.java	/^	private String host;$/;"	f	class:PartitionEntry	file:
+in	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	private BufferedReader in;$/;"	f	class:TextIntReconstructor	file:
+increasePriority	src/mapreduce/message/Task.java	/^	public void increasePriority() {$/;"	m	class:Task
+increaseRescheuleNum	src/mapreduce/message/Task.java	/^	public void increaseRescheuleNum() {$/;"	m	class:Task
+index	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	private int index;$/;"	f	class:KeyValueLineRecordReader	file:
+index	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	int index = 0;$/;"	f	class:TextIntReconstructor
+init	src/hdfs/datanode/DataNode.java	/^	public void init() throws NotBoundException,$/;"	m	class:DataNode
+init	src/hdfs/namenode/NameNode.java	/^	public void init() throws RemoteException {$/;"	m	class:NameNode
+init	src/mapreduce/jobtracker/JobTracker.java	/^	public void init() {$/;"	m	class:JobTracker
+init	src/mapreduce/tasktracker/TaskTracker.java	/^	public void init() throws RemoteException, UnknownHostException, NotBoundException, IOException {$/;"	m	class:TaskTracker
+init	src/test/testMapRed/SyncExample.java	/^    public Thread init() {$/;"	m	class:SyncExample
+init	src/test/testMapRed/testJVMSocket.java	/^	private void init () {$/;"	m	class:testJVMSocket	file:
+initJob	src/mapreduce/jobtracker/JobTracker.java	/^	private void initJob(Job job) {$/;"	m	class:JobTracker	file:
+initMapTasks	src/mapreduce/jobtracker/JobTracker.java	/^	private synchronized void initMapTasks(Job job) {$/;"	m	class:JobTracker	file:
+initReduceTasks	src/mapreduce/jobtracker/JobTracker.java	/^	private void initReduceTasks(Job job) {$/;"	m	class:JobTracker	file:
+initReduceTasks	src/mapreduce/jobtracker/JobTracker.java	/^	private void initReduceTasks(String jobId) {$/;"	m	class:JobTracker	file:
+inputPath	src/mapreduce/client/JobConf.java	/^	private String inputPath;$/;"	f	class:JobConf	file:
+inputStream	src/mapreduce/message/Task.java	/^	private transient InputStream inputStream;$/;"	f	class:Task	file:
+ipToLong	src/hdfs/io/HDFSInputStream.java	/^	private static long ipToLong(String ip) {$/;"	m	class:HDFSInputStream	file:
+isAvailable	src/hdfs/namenode/NameNode.java	/^		private boolean isAvailable() {$/;"	m	class:NameNode.DataNodeAbstract	file:
+isFileAvailable	src/hdfs/io/HDFSFile.java	/^	public boolean isFileAvailable() {$/;"	m	class:HDFSFile
+isNOTRunning	src/mapreduce/message/Task.java	/^	public boolean isNOTRunning() {$/;"	m	class:Task
+isRunning	src/mapreduce/message/Task.java	/^	public boolean isRunning() {$/;"	m	class:Task
+jarEntry	src/mapreduce/message/MapperTask.java	/^	private JarFileEntry jarEntry;$/;"	f	class:MapperTask	file:
+jarEntry	src/mapreduce/message/ReducerTask.java	/^	private JarFileEntry jarEntry;$/;"	f	class:ReducerTask	file:
+jarFileEntry	src/mapreduce/message/Job.java	/^	private JarFileEntry jarFileEntry;$/;"	f	class:Job	file:
+jarFileFullPath	src/mapreduce/message/JarFileEntry.java	/^	private String jarFileFullPath;$/;"	f	class:JarFileEntry	file:
+jarFileLocalPath	src/mapreduce/message/JarFileEntry.java	/^	private String jarFileLocalPath;$/;"	f	class:JarFileEntry	file:
+jarPath	src/mapreduce/client/JobClient.java	/^	public static String jarPath;$/;"	f	class:JobClient
+jobFail	src/mapreduce/jobtracker/JobTracker.java	/^	private void jobFail(String jobId) {$/;"	m	class:JobTracker	file:
+jobId	src/mapreduce/jobtracker/JobStatus.java	/^	public String jobId;$/;"	f	class:JobStatus
+jobId	src/mapreduce/jobtracker/TaskStatus.java	/^	public String jobId;$/;"	f	class:TaskStatus
+jobId	src/mapreduce/message/Job.java	/^	private String jobId;$/;"	f	class:Job	file:
+jobId	src/mapreduce/message/KillerTask.java	/^	private String jobId;$/;"	f	class:KillerTask	file:
+jobId	src/mapreduce/message/Task.java	/^	private String jobId;$/;"	f	class:Task	file:
+jobName	src/mapreduce/client/JobConf.java	/^	private String jobName;$/;"	f	class:JobConf	file:
+jobName	src/mapreduce/jobtracker/JobStatus.java	/^	public String jobName;$/;"	f	class:JobStatus
+jobScheduler	src/mapreduce/jobtracker/JobTracker.java	/^	private JobScheduler jobScheduler;$/;"	f	class:JobTracker	file:
+jobStatusTbl	src/mapreduce/jobtracker/JobTracker.java	/^	private AbstractMap<String, JobStatus> jobStatusTbl = new ConcurrentHashMap<String, JobStatus>();$/;"	f	class:JobTracker	file:
+jobTbl	src/mapreduce/jobtracker/JobTracker.java	/^	private AbstractMap<String, Job> jobTbl = new ConcurrentHashMap<String, Job>();$/;"	f	class:JobTracker	file:
+jobTrackerIp	src/mapreduce/tasktracker/TaskTracker.java	/^	String jobTrackerIp;$/;"	f	class:TaskTracker
+jobTrackerPort	src/mapreduce/tasktracker/TaskTracker.java	/^	int jobTrackerPort;$/;"	f	class:TaskTracker
+jobTrackerStub	src/mapreduce/tasktracker/TaskTracker.java	/^	JobTrackerRemoteInterface jobTrackerStub;$/;"	f	class:TaskTracker
+join	src/hdfs/namenode/NameNode.java	/^	public Message join(String ip, int registryPort, int serverPort, List<String> chunkNameList) throws RemoteException {$/;"	m	class:NameNode
+join	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public Message join(String ip, int registryPort, int serverPort, List<String> chunkNameList) throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+join	src/mapreduce/jobtracker/JobTracker.java	/^	public String join(String ip, int port, int serverPort, int numSlots) {$/;"	m	class:JobTracker
+join	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public String join(String ip, int port, int serverPort, int numSlots) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+join	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public String join(String ip, int port, int serverPort, int mapSlots)$/;"	m	class:JobTrackerSimulator
+key	src/mapreduce/io/KeyValue.java	/^	KEY key;$/;"	f	class:KeyValue
+key	src/mapreduce/io/KeyValueCollection.java	/^	private K key;$/;"	f	class:KeyValueCollection	file:
+keyvalueQueue	src/mapreduce/io/collector/OutputCollector.java	/^	private Queue<KeyValue<K, V>> keyvalueQueue; $/;"	f	class:OutputCollector	file:
+kill	src/util/Utility.java	/^	private static void kill(String[] args) {$/;"	m	class:Utility	file:
+killJobTask	src/mapreduce/tasktracker/TaskTracker.java	/^		private KillerTask killJobTask;$/;"	f	class:TaskTracker.KillJob	file:
+latestHeartBeat	src/hdfs/namenode/NameNode.java	/^		private long latestHeartBeat;$/;"	f	class:NameNode.DataNodeAbstract	file:
+latestHeartBeat	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private long latestHeartBeat;$/;"	f	class:TaskTrackerInfo	file:
+line	src/hdfs/io/HDFSLineFeedCheck.java	/^	public String line;$/;"	f	class:HDFSLineFeedCheck
+listFileTbl	src/hdfs/namenode/NameNode.java	/^	public String listFileTbl() throws RemoteException {$/;"	m	class:NameNode
+listFileTbl	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public String listFileTbl() throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+listFiles	src/hdfs/namenode/NameNode.java	/^	public PriorityQueue<String> listFiles() throws RemoteException {$/;"	m	class:NameNode
+listFiles	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public PriorityQueue<String> listFiles() throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+listFiles	src/util/Utility.java	/^	private static void listFiles() {$/;"	m	class:Utility	file:
+loadClass	src/mapreduce/core/RunMapper.java	/^	public Class<Mapper<Writable, Writable, Writable, Writable>> loadClass ()$/;"	m	class:RunMapper
+loadClass	src/mapreduce/core/RunReducer.java	/^	public Class<Reducer<Writable, Writable, Writable, Writable>> loadClass ()$/;"	m	class:RunReducer
+localFileNameWrapper	src/mapreduce/message/Task.java	/^	public String localFileNameWrapper(int partitionSEQ) {$/;"	m	class:Task
+localMapperFilePrefix	src/mapreduce/message/ReducerTask.java	/^	private String localMapperFilePrefix;$/;"	f	class:ReducerTask	file:
+localReducerFileNameWrapper	src/mapreduce/message/Task.java	/^	public String localReducerFileNameWrapper(String mapperTid) {$/;"	m	class:Task
+locations	src/hdfs/io/HDFSChunk.java	/^	private List<DataNodeEntry> locations;$/;"	f	class:HDFSChunk	file:
+lsjob	src/util/Utility.java	/^	private static void lsjob() {$/;"	m	class:Utility	file:
+lsonejob	src/util/Utility.java	/^	private static void lsonejob(String jobId, AbstractMap<String, JobStatus> jobStatusTbl) {$/;"	m	class:Utility	file:
+lsschedule	src/util/Utility.java	/^	private static void lsschedule() {$/;"	m	class:Utility	file:
+lstt	src/util/Utility.java	/^	private static void lstt(String[] args) {$/;"	m	class:Utility	file:
+main	src/global/Parser.java	/^	public static void main (String[] args) throws NumberFormatException, ParserConfigurationException, SAXException, IOException, ConfFormatException {$/;"	m	class:Parser
+main	src/hdfs/datanode/runDataNode.java	/^	public static void main(String[] args) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {$/;"	m	class:runDataNode
+main	src/hdfs/namenode/runNameNode.java	/^	public static void main(String[] args) {$/;"	m	class:runNameNode
+main	src/mapreduce/core/RunMapper.java	/^	public static void main(String[] args) {$/;"	m	class:RunMapper
+main	src/mapreduce/core/RunReducer.java	/^	public static void main(String[] args) {$/;"	m	class:RunReducer
+main	src/mapreduce/jobtracker/runJobTracker.java	/^	public static void main(String[] args) {$/;"	m	class:runJobTracker
+main	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public static void main(String[] args) throws RemoteException, AlreadyBoundException, NotBoundException, InterruptedException {$/;"	m	class:JobTrackerSimulator
+main	src/mapreduce/tasktracker/runTaskTracker.java	/^	public static void main(String[] args) {$/;"	m	class:runTaskTracker
+main	src/test/testHDFS/testArrayListBehavior.java	/^	public static void main(String[] args) {$/;"	m	class:testArrayListBehavior
+main	src/test/testHDFS/testBufferedOutputStream.java	/^	public static void main(String[] args) throws IOException, NotBoundException {$/;"	m	class:testBufferedOutputStream
+main	src/test/testHDFS/testDeleteFile.java	/^	public static void main (String[] args) throws RemoteException, NotBoundException {$/;"	m	class:testDeleteFile
+main	src/test/testHDFS/testNewOutputStream.java	/^	public static void main (String[] args) throws NotBoundException, IOException {$/;"	m	class:testNewOutputStream
+main	src/test/testHDFS/testPutToHDFS.java	/^	public static void main(String[] args) throws IOException, NotBoundException {$/;"	m	class:testPutToHDFS
+main	src/test/testHDFS/testReadFile.java	/^	public static void main(String[] args) throws NotBoundException, IOException {$/;"	m	class:testReadFile
+main	src/test/testHDFS/testReadLine.java	/^	public static void main(String[] args) {$/;"	m	class:testReadLine
+main	src/test/testHDFS/testWriteFile.java	/^	public static void main (String[] args) throws NotBoundException, IOException {$/;"	m	class:testWriteFile
+main	src/test/testMapRed/MapperFileReader.java	/^	public static void main(String[] args) throws IOException, ClassNotFoundException {$/;"	m	class:MapperFileReader
+main	src/test/testMapRed/SyncExample.java	/^    public static final void main(String[] args) throws InterruptedException {$/;"	m	class:SyncExample
+main	src/test/testMapRed/URLConnectionReader.java	/^    public static void main(String[] args) throws Exception {$/;"	m	class:URLConnectionReader
+main	src/test/testMapRed/taskTrackerSimulator.java	/^	public static void main(String[] args) {$/;"	m	class:taskTrackerSimulator
+main	src/test/testMapRed/testCleanFiles.java	/^	public static void main (String[] args) {$/;"	m	class:testCleanFiles
+main	src/test/testMapRed/testJVMSocket.java	/^	public static void main(String[] args) {$/;"	m	class:testJVMSocket
+main	src/test/testMapRed/testJarLoader.java	/^	public static void main (String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException {$/;"	m	class:testJarLoader
+main	src/test/testMapRed/testJobSubmit_Ngram.java	/^	public static void main(String[] args) {$/;"	m	class:testJobSubmit_Ngram
+main	src/test/testMapRed/testJobSubmit_WordCount.java	/^	public static void main(String[] args) {$/;"	m	class:testJobSubmit_WordCount
+main	src/util/Utility.java	/^	public static void main(String[] args) throws IllegalArgumentException, SecurityException, IOException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {$/;"	m	class:Utility
+map	src/mapreduce/core/Mapper.java	/^	public abstract void map(K1 key, V1 value, OutputCollector<K2, V2> output) throws IOException;$/;"	m	class:Mapper
+mapOutputKeyClass	src/mapreduce/client/JobConf.java	/^	private Class<?> mapOutputKeyClass;$/;"	f	class:JobConf	file:
+mapOutputValueClass	src/mapreduce/client/JobConf.java	/^	private Class<?> mapOutputValueClass;$/;"	f	class:JobConf	file:
+mapTaskLeft	src/mapreduce/jobtracker/JobStatus.java	/^	public int mapTaskLeft;$/;"	f	class:JobStatus
+mapTaskTotal	src/mapreduce/jobtracker/JobStatus.java	/^	public int mapTaskTotal;$/;"	f	class:JobStatus
+mapper	src/mapreduce/core/RunMapper.java	/^	public Mapper<K1, V1, K2, V2> mapper;$/;"	f	class:RunMapper
+mapperClassName	src/mapreduce/client/JobConf.java	/^	private String mapperClassName;$/;"	f	class:JobConf	file:
+mapperClassName	src/mapreduce/message/MapperTask.java	/^	private String mapperClassName;$/;"	f	class:MapperTask	file:
+mapperFileName	src/mapreduce/message/CleanerTask.java	/^	private List<String> mapperFileName;$/;"	f	class:CleanerTask	file:
+mapperStatusTbl	src/mapreduce/jobtracker/JobStatus.java	/^	public AbstractMap<String, TaskStatus> mapperStatusTbl;$/;"	f	class:JobStatus
+mapredUtility	src/util/Utility.java	/^	private static void mapredUtility(String[] args) throws IllegalArgumentException, SecurityException, IOException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {$/;"	m	class:Utility	file:
+mapreduce.client	src/mapreduce/client/JobClient.java	/^package mapreduce.client;$/;"	p
+mapreduce.client	src/mapreduce/client/JobConf.java	/^package mapreduce.client;$/;"	p
+mapreduce.core	src/mapreduce/core/Mapper.java	/^package mapreduce.core;$/;"	p
+mapreduce.core	src/mapreduce/core/Reducer.java	/^package mapreduce.core;$/;"	p
+mapreduce.core	src/mapreduce/core/RunMapper.java	/^package mapreduce.core;$/;"	p
+mapreduce.core	src/mapreduce/core/RunReducer.java	/^package mapreduce.core;$/;"	p
+mapreduce.io	src/mapreduce/io/KeyValue.java	/^package mapreduce.io;$/;"	p
+mapreduce.io	src/mapreduce/io/KeyValueCollection.java	/^package mapreduce.io;$/;"	p
+mapreduce.io	src/mapreduce/io/Partitioner.java	/^package mapreduce.io;$/;"	p
+mapreduce.io	src/mapreduce/io/Split.java	/^package mapreduce.io;$/;"	p
+mapreduce.io.collector	src/mapreduce/io/collector/OutputCollector.java	/^package mapreduce.io.collector;$/;"	p
+mapreduce.io.recordreader	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^package mapreduce.io.recordreader;$/;"	p
+mapreduce.io.recordreader	src/mapreduce/io/recordreader/RecordReader.java	/^package mapreduce.io.recordreader;$/;"	p
+mapreduce.io.recordreader	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^package mapreduce.io.recordreader;$/;"	p
+mapreduce.io.writable	src/mapreduce/io/writable/IntWritable.java	/^package mapreduce.io.writable;$/;"	p
+mapreduce.io.writable	src/mapreduce/io/writable/LongWritable.java	/^package mapreduce.io.writable;$/;"	p
+mapreduce.io.writable	src/mapreduce/io/writable/Text.java	/^package mapreduce.io.writable;$/;"	p
+mapreduce.io.writable	src/mapreduce/io/writable/Writable.java	/^package mapreduce.io.writable;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/JobStatus.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/JobTracker.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/JobTrackerACK.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/SchedulerComparator.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/TaskStatus.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/TaskTrackerReport.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/WorkStatus.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.jobtracker	src/mapreduce/jobtracker/runJobTracker.java	/^package mapreduce.jobtracker;$/;"	p
+mapreduce.message	src/mapreduce/message/CleanerTask.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/JarFileEntry.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/Job.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/KillerTask.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/MapRedTask.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/MapperTask.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/PartitionEntry.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/ReducerTask.java	/^package mapreduce.message;$/;"	p
+mapreduce.message	src/mapreduce/message/Task.java	/^package mapreduce.message;$/;"	p
+mapreduce.tasktracker	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^package mapreduce.tasktracker;$/;"	p
+mapreduce.tasktracker	src/mapreduce/tasktracker/TaskTracker.java	/^package mapreduce.tasktracker;$/;"	p
+mapreduce.tasktracker	src/mapreduce/tasktracker/TaskTrackerRemoteInterface.java	/^package mapreduce.tasktracker;$/;"	p
+mapreduce.tasktracker	src/mapreduce/tasktracker/runTaskTracker.java	/^package mapreduce.tasktracker;$/;"	p
+mapreduceCoreConf	src/global/Parser.java	/^	public static void mapreduceCoreConf() throws ParserConfigurationException, $/;"	m	class:Parser
+mapreduceJobTrackerConf	src/global/Parser.java	/^	public static void mapreduceJobTrackerConf() throws ParserConfigurationException, $/;"	m	class:Parser
+mapreduceTaskTrackerCommonConf	src/global/Parser.java	/^	public static void mapreduceTaskTrackerCommonConf() throws ParserConfigurationException, $/;"	m	class:Parser
+mapreduceTaskTrackerIndividualConf	src/global/Parser.java	/^	public static void mapreduceTaskTrackerIndividualConf() throws ParserConfigurationException, $/;"	m	class:Parser
+matcher	src/global/IPAddressValidator.java	/^    private Matcher matcher;$/;"	f	class:IPAddressValidator	file:
+messageConstructor	src/hdfs/namenode/NameNode.java	/^	private Message messageConstructor(String dataNodeName) {$/;"	m	class:NameNode	file:
+metLineFeed	src/hdfs/io/HDFSLineFeedCheck.java	/^	public boolean metLineFeed;$/;"	f	class:HDFSLineFeedCheck
+name	src/hdfs/io/HDFSFile.java	/^	private String name;$/;"	f	class:HDFSFile	file:
+name	src/mapreduce/tasktracker/TaskTracker.java	/^	String name;$/;"	f	class:TaskTracker
+nameChunk	src/hdfs/namenode/NameNode.java	/^	public synchronized String nameChunk() {$/;"	m	class:NameNode
+nameChunk	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public String nameChunk() throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+nameJob	src/mapreduce/jobtracker/JobTracker.java	/^	private synchronized String nameJob() {$/;"	m	class:JobTracker	file:
+nameNodeIp	src/hdfs/datanode/DataNode.java	/^	private String nameNodeIp;$/;"	f	class:DataNode	file:
+nameNodePort	src/hdfs/datanode/DataNode.java	/^	private int nameNodePort;$/;"	f	class:DataNode	file:
+nameNodeS	src/hdfs/datanode/DataNode.java	/^	private NameNodeRemoteInterface nameNodeS = null;$/;"	f	class:DataNode	file:
+nameNodeStub	src/hdfs/io/HDFSFile.java	/^	private NameNodeRemoteInterface nameNodeStub;$/;"	f	class:HDFSFile	file:
+nameNodeStub	src/hdfs/io/HDFSOutputStream.java	/^	private NameNodeRemoteInterface nameNodeStub;$/;"	f	class:HDFSOutputStream	file:
+nameNodeStub	src/hdfs/namenode/NameNode.java	/^	private NameNodeRemoteInterface nameNodeStub;$/;"	f	class:NameNode	file:
+nameTask	src/mapreduce/jobtracker/JobTracker.java	/^	private synchronized String nameTask() {$/;"	m	class:JobTracker	file:
+namer	src/hdfs/namenode/NameNode.java	/^	private long namer;$/;"	f	class:NameNode	file:
+newAddedTasks	src/mapreduce/jobtracker/JobTrackerACK.java	/^	public List<Task> newAddedTasks;$/;"	f	class:JobTrackerACK
+newOutputStream	src/hdfs/io/HDFSFile.java	/^	private HDFSOutputStream newOutputStream = null;$/;"	f	class:HDFSFile	file:
+nextFeed	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	private KeyValueCollection<Text, IntWritable> nextFeed;$/;"	f	class:TextIntReconstructor	file:
+nextKeyValue	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	public KeyValue<Text, Text> nextKeyValue() {$/;"	m	class:KeyValueLineRecordReader
+nextKeyValue	src/mapreduce/io/recordreader/RecordReader.java	/^	public abstract KeyValue<K, V> nextKeyValue();$/;"	m	class:RecordReader
+nextKeyValueCollection	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	public KeyValueCollection<Text, IntWritable> nextKeyValueCollection() throws IOException {$/;"	m	class:TextIntReconstructor
+numMapTasks	src/mapreduce/client/JobConf.java	/^	private int numMapTasks;$/;"	f	class:JobConf	file:
+numReduceTasks	src/mapreduce/client/JobConf.java	/^	private int numReduceTasks;$/;"	f	class:JobConf	file:
+numSlots	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private int numSlots;$/;"	f	class:TaskTrackerInfo	file:
+open	src/hdfs/namenode/NameNode.java	/^	public HDFSFile open(String fileName) throws IOException {$/;"	m	class:NameNode
+open	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public HDFSFile open(String filePath) throws RemoteException, IOException;$/;"	m	interface:NameNodeRemoteInterface
+orphanCheck	src/hdfs/namenode/NameNode.java	/^	private List<String> orphanCheck(String dataNodeName, List<String> chunkNameList_DataNode) {$/;"	m	class:NameNode	file:
+outputKeyClass	src/mapreduce/client/JobConf.java	/^	private Class<?> outputKeyClass;$/;"	f	class:JobConf	file:
+outputPath	src/mapreduce/client/JobConf.java	/^	private String outputPath;$/;"	f	class:JobConf	file:
+outputPath	src/mapreduce/message/ReducerTask.java	/^	private String outputPath;$/;"	f	class:ReducerTask	file:
+outputStream	src/hdfs/io/HDFSBufferedOutputStream.java	/^	private HDFSOutputStream outputStream;$/;"	f	class:HDFSBufferedOutputStream	file:
+outputValueClass	src/mapreduce/client/JobConf.java	/^	private Class<?> outputValueClass;$/;"	f	class:JobConf	file:
+pair	src/mapreduce/io/collector/OutputCollector.java	/^		private KeyValue<Text, IntWritable> pair;$/;"	f	class:OutputCollector.FileKeyValue	file:
+pair	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^		private KeyValue<Text, IntWritable> pair;$/;"	f	class:TextIntReconstructor.FileKeyValue	file:
+parseRecords	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	public void parseRecords () throws IOException {$/;"	m	class:KeyValueLineRecordReader
+parseUnit	src/global/Parser.java	/^	private static int parseUnit (String unitType) {$/;"	m	class:Parser	file:
+partitionEntry	src/mapreduce/message/ReducerTask.java	/^	private PartitionEntry[] partitionEntry;$/;"	f	class:ReducerTask	file:
+partitionNum	src/mapreduce/io/collector/OutputCollector.java	/^	int partitionNum;$/;"	f	class:OutputCollector
+partitionNum	src/mapreduce/message/CleanerTask.java	/^	private int partitionNum;$/;"	f	class:CleanerTask	file:
+partitionNum	src/mapreduce/message/MapperTask.java	/^	private int partitionNum;$/;"	f	class:MapperTask	file:
+pattern	src/global/IPAddressValidator.java	/^    private Pattern pattern;$/;"	f	class:IPAddressValidator	file:
+port	src/hdfs/namenode/NameNode.java	/^	private int port;$/;"	f	class:NameNode	file:
+pos	src/hdfs/io/HDFSInputStream.java	/^	private long pos;$/;"	f	class:HDFSInputStream	file:
+printConf	src/global/Parser.java	/^	public static void printConf(ConfOpt[] args) {$/;"	m	class:Parser
+printGetUsage	src/util/Utility.java	/^	private static void printGetUsage() {$/;"	m	class:Utility	file:
+printHDFSCoreConf	src/global/Parser.java	/^	public static void printHDFSCoreConf() {$/;"	m	class:Parser
+printHDFSDataNodeConf	src/global/Parser.java	/^	private static void printHDFSDataNodeConf() {$/;"	m	class:Parser	file:
+printInfo	src/hdfs/io/HDFSInputStream.java	/^	public void printInfo() {$/;"	m	class:HDFSInputStream
+printInfo	src/mapreduce/message/Task.java	/^	public void printInfo() {$/;"	m	class:Task
+printKillUsage	src/util/Utility.java	/^	private static void printKillUsage() {$/;"	m	class:Utility	file:
+printList	src/test/testMapRed/SyncExample.java	/^    public void printList() {$/;"	m	class:SyncExample
+printLsjobUsage	src/util/Utility.java	/^	private static void printLsjobUsage() {$/;"	m	class:Utility	file:
+printLsscheduleUsage	src/util/Utility.java	/^	private static void printLsscheduleUsage() {$/;"	m	class:Utility	file:
+printLsttUsage	src/util/Utility.java	/^	private static void printLsttUsage() {$/;"	m	class:Utility	file:
+printMapRedCoreConf	src/global/Parser.java	/^	private static void printMapRedCoreConf() {$/;"	m	class:Parser	file:
+printMapRedJobTrackerConf	src/global/Parser.java	/^	private static void printMapRedJobTrackerConf() {$/;"	m	class:Parser	file:
+printMapRedTaskTrackerCommonConf	src/global/Parser.java	/^	private static void printMapRedTaskTrackerCommonConf() {$/;"	m	class:Parser	file:
+printMapRedTaskTrackerIndividualConf	src/global/Parser.java	/^	private static void printMapRedTaskTrackerIndividualConf() {$/;"	m	class:Parser	file:
+printNameNodeFileTbl	src/util/Utility.java	/^	private static void printNameNodeFileTbl() {$/;"	m	class:Utility	file:
+printPutUsage	src/util/Utility.java	/^	private static void printPutUsage() {$/;"	m	class:Utility	file:
+printReport	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	public void printReport() {$/;"	m	class:TaskTrackerReport
+printRmUsage	src/util/Utility.java	/^	private static void printRmUsage() {$/;"	m	class:Utility	file:
+printScheduleTbl	src/mapreduce/jobtracker/JobTracker.java	/^		private void printScheduleTbl() {$/;"	m	class:JobTracker.JobScheduler	file:
+printSubmitUsage	src/util/Utility.java	/^	private static void printSubmitUsage() {$/;"	m	class:Utility	file:
+printUsage	src/util/Utility.java	/^	public static void printUsage() {$/;"	m	class:Utility
+priorityLevel	src/mapreduce/client/JobConf.java	/^	private int priorityLevel;$/;"	f	class:JobConf	file:
+priorityLevel	src/mapreduce/message/Task.java	/^	transient int priorityLevel;$/;"	f	class:Task
+procRef	src/mapreduce/message/Task.java	/^	private transient Process procRef;$/;"	f	class:Task	file:
+putToHDFS	src/util/Utility.java	/^	private static void putToHDFS(String localFilePath, String hdfsFilePath) {$/;"	m	class:Utility	file:
+randomStatusGen	src/test/testMapRed/taskTrackerSimulator.java	/^	public static boolean randomStatusGen = true;$/;"	f	class:taskTrackerSimulator
+randomStatusGenerator	src/test/testMapRed/taskTrackerSimulator.java	/^	public static WorkStatus randomStatusGenerator() {$/;"	m	class:taskTrackerSimulator
+rcvTasks	src/mapreduce/jobtracker/JobTrackerACK.java	/^	public List<TaskStatus> rcvTasks;$/;"	f	class:JobTrackerACK
+read	src/hdfs/datanode/DataNode.java	/^	public byte[] read(String chunkName, int offSet) throws IOException {$/;"	m	class:DataNode
+read	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public byte[] read(String chunkName, int offSet) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
+read	src/hdfs/io/HDFSInputStream.java	/^	public int read(byte[] b) throws IOException {$/;"	m	class:HDFSInputStream
+readBuffer	src/hdfs/io/HDFSInputStream.java	/^	private byte[] readBuffer;$/;"	f	class:HDFSInputStream	file:
+readChunk	src/hdfs/datanode/DataNode.java	/^	public String readChunk(String chunkName) throws IOException {$/;"	m	class:DataNode
+readChunk	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public String readChunk(String chunkName) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
+readChunk	src/hdfs/io/HDFSInputStream.java	/^	public String readChunk(int idx) throws IOException {$/;"	m	class:HDFSInputStream
+readLine	src/hdfs/datanode/DataNode.java	/^	public HDFSLineFeedCheck readLine(String chunkName) throws RemoteException,$/;"	m	class:DataNode
+readLine	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public HDFSLineFeedCheck readLine(String chunkName) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
+readLines	src/hdfs/datanode/DataNode.java	/^	public String readLines(String chunkName, long pos, int numLine)$/;"	m	class:DataNode
+readLines	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public String readLines(String chunkName, long pos, int numLine) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
+readLinesInChunk	src/hdfs/io/HDFSInputStream.java	/^	public String readLinesInChunk(int idx, int numLine) throws IOException {$/;"	m	class:HDFSInputStream
+rearrangeChunks	src/hdfs/io/HDFSOutputStream.java	/^	private void rearrangeChunks() {$/;"	m	class:HDFSOutputStream	file:
+reduce	src/mapreduce/core/Reducer.java	/^	public abstract void reduce(Text key, Iterator<IntWritable> values, OutputCollector<K2, V2> output) throws IOException;$/;"	m	class:Reducer
+reduceTaskLeft	src/mapreduce/jobtracker/JobStatus.java	/^	public int reduceTaskLeft;$/;"	f	class:JobStatus
+reduceTaskTotal	src/mapreduce/jobtracker/JobStatus.java	/^	public int reduceTaskTotal;$/;"	f	class:JobStatus
+reducer	src/mapreduce/core/RunReducer.java	/^	public Reducer<K1, V1, K2, V2> reducer;$/;"	f	class:RunReducer
+reducerAllSuccess	src/mapreduce/jobtracker/JobTracker.java	/^	private boolean reducerAllSuccess(AbstractMap<String, TaskStatus> reducerStatusTbl) {$/;"	m	class:JobTracker	file:
+reducerClassName	src/mapreduce/client/JobConf.java	/^	private String reducerClassName;$/;"	f	class:JobConf	file:
+reducerClassName	src/mapreduce/message/ReducerTask.java	/^	private String reducerClassName;$/;"	f	class:ReducerTask	file:
+reducerFileName	src/mapreduce/message/CleanerTask.java	/^	private List<String> reducerFileName;$/;"	f	class:CleanerTask	file:
+reducerStatusTbl	src/mapreduce/jobtracker/JobStatus.java	/^	public AbstractMap<String, TaskStatus> reducerStatusTbl;$/;"	f	class:JobStatus
+reducerTmpFile	src/mapreduce/io/collector/OutputCollector.java	/^	private String reducerTmpFile;$/;"	f	class:OutputCollector	file:
+reducer_tmp_filename	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	private String reducer_tmp_filename;$/;"	f	class:TextIntReconstructor	file:
+registryIp	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private String registryIp;$/;"	f	class:TaskTrackerInfo	file:
+registryPort	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private int registryPort;$/;"	f	class:TaskTrackerInfo	file:
+registryPort	src/mapreduce/tasktracker/TaskTracker.java	/^	int registryPort;$/;"	f	class:TaskTracker
+relateTasks	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private Set<String> relateTasks;$/;"	f	class:TaskTrackerInfo	file:
+remoteFileNameWrapper	src/mapreduce/message/Task.java	/^	public String remoteFileNameWrapper(int partitionSEQ, String mapperTid) {$/;"	m	class:Task
+removeChunk	src/hdfs/io/HDFSFile.java	/^	public void removeChunk(int index) {$/;"	m	class:HDFSFile
+removeDataNodeEntry	src/hdfs/io/HDFSChunk.java	/^	public void removeDataNodeEntry(DataNodeEntry entry) {$/;"	m	class:HDFSChunk
+removeFromHDFS	src/util/Utility.java	/^	private static void removeFromHDFS(String path) {$/;"	m	class:Utility	file:
+removeTask	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void removeTask(String taskId) {$/;"	m	class:TaskTrackerInfo
+replicaFactor	src/hdfs/io/HDFSFile.java	/^	private int replicaFactor; $/;"	f	class:HDFSFile	file:
+replicaFactor	src/hdfs/namenode/NameNode.java	/^			public int replicaFactor;$/;"	f	class:NameNode.SystemCheck.ChunkStatisticsForNameNode
+replicaNum	src/hdfs/namenode/NameNode.java	/^			public int replicaNum;$/;"	f	class:NameNode.SystemCheck.ChunkStatisticsForDataNode
+reporter	src/mapreduce/tasktracker/TaskTracker.java	/^		private TaskTrackerReport reporter() {  \/\/This is within the heart beat thread$/;"	m	class:TaskTracker.HeartBeat	file:
+rescheduleNum	src/mapreduce/jobtracker/JobStatus.java	/^	public int rescheduleNum;$/;"	f	class:JobStatus
+rescheduleNum	src/mapreduce/message/Task.java	/^	transient int rescheduleNum;$/;"	f	class:Task
+resetJob	src/mapreduce/jobtracker/JobTracker.java	/^	private void resetJob(JobStatus jobStatus) {$/;"	m	class:JobTracker	file:
+resetRescheduleNum	src/mapreduce/message/Task.java	/^	public void resetRescheduleNum() {$/;"	m	class:Task
+respond	src/hdfs/datanode/DataNode.java	/^		private void respond() throws IOException {$/;"	m	class:DataNode.Server	file:
+rmTask	src/mapreduce/tasktracker/TaskTracker.java	/^	private void rmTask(String jid, String tid) {$/;"	m	class:TaskTracker	file:
+run	src/hdfs/datanode/DataNode.java	/^		public void run() {$/;"	m	class:DataNode.Server
+run	src/hdfs/datanode/DataNode.java	/^	public void run() {$/;"	m	class:DataNode
+run	src/hdfs/namenode/NameNode.java	/^		public void run() {$/;"	m	class:NameNode.SystemCheck
+run	src/mapreduce/jobtracker/JobTracker.java	/^		public void run() {$/;"	m	class:JobTracker.TaskTrackerCheck
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.CleanJob
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.HeartBeat
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.KillJob
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.PartitionServer
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.ProcessUpdate
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.RequestResponser
+run	src/mapreduce/tasktracker/TaskTracker.java	/^		public void run() {$/;"	m	class:TaskTracker.StartTask
+run	src/test/testMapRed/SyncExample.java	/^        public void run() {$/;"	m	class:SyncExample.MyRunnable
+run	src/test/testMapRed/TempRunner.java	/^	public abstract void run();$/;"	m	class:TempRunner
+run	src/test/testMapRed/testJVMSocket.java	/^		public void run() {$/;"	m	class:testJVMSocket.Server
+runDataNode	src/hdfs/datanode/runDataNode.java	/^public class runDataNode {$/;"	c
+runJob	src/mapreduce/client/JobClient.java	/^	public static String runJob(JobConf conf) {$/;"	m	class:JobClient
+runJobTracker	src/mapreduce/jobtracker/runJobTracker.java	/^public class runJobTracker {$/;"	c
+runNameNode	src/hdfs/namenode/runNameNode.java	/^public class runNameNode {$/;"	c
+runTaskTracker	src/mapreduce/tasktracker/runTaskTracker.java	/^public class runTaskTracker {$/;"	c
+select	src/hdfs/namenode/NameNode.java	/^	public synchronized List<DataNodeEntry> select(int replicaFactor) {$/;"	m	class:NameNode
+select	src/hdfs/namenode/NameNodeRemoteInterface.java	/^	public List<DataNodeEntry> select(int replicaFactor) throws RemoteException;$/;"	m	interface:NameNodeRemoteInterface
+sendHeartBeat	src/hdfs/datanode/DataNode.java	/^	private Message sendHeartBeat(boolean reportChunk) {$/;"	m	class:DataNode	file:
+sentTask	src/hdfs/message/Task.java	/^	public void sentTask() {$/;"	m	class:Task
+sentTime	src/hdfs/message/Task.java	/^	private Date sentTime;$/;"	f	class:Task	file:
+seq	src/mapreduce/message/ReducerTask.java	/^	private int seq;$/;"	f	class:ReducerTask	file:
+serialVersionUID	src/global/Parser.java	/^		private static final long serialVersionUID = 8494918500253529934L;$/;"	f	class:Parser.ConfFormatException	file:
+serialVersionUID	src/hdfs/io/DataNodeEntry.java	/^	private static final long serialVersionUID = -4553871129664598137L;$/;"	f	class:DataNodeEntry	file:
+serialVersionUID	src/hdfs/io/HDFSBufferedOutputStream.java	/^	private static final long serialVersionUID = 4252529741647442999L;$/;"	f	class:HDFSBufferedOutputStream	file:
+serialVersionUID	src/hdfs/io/HDFSChunk.java	/^	private static final long serialVersionUID = -253895999225595586L;$/;"	f	class:HDFSChunk	file:
+serialVersionUID	src/hdfs/io/HDFSFile.java	/^	private static final long serialVersionUID = -6302186159396021997L;$/;"	f	class:HDFSFile	file:
+serialVersionUID	src/hdfs/io/HDFSInputStream.java	/^	private static final long serialVersionUID = 3091088429237095244L;$/;"	f	class:HDFSInputStream	file:
+serialVersionUID	src/hdfs/io/HDFSLineFeedCheck.java	/^	private static final long serialVersionUID = -1451262205640257069L;$/;"	f	class:HDFSLineFeedCheck	file:
+serialVersionUID	src/hdfs/io/HDFSOutputStream.java	/^	private static final long serialVersionUID = -7034464668035678312L;$/;"	f	class:HDFSOutputStream	file:
+serialVersionUID	src/hdfs/message/CommitBackupTask.java	/^	private static final long serialVersionUID = -5046848030063774783L;$/;"	f	class:CommitBackupTask	file:
+serialVersionUID	src/hdfs/message/CopyChunkTask.java	/^	private static final long serialVersionUID = -8879563816291392296L;$/;"	f	class:CopyChunkTask	file:
+serialVersionUID	src/hdfs/message/DeleteChunkTask.java	/^	private static final long serialVersionUID = 9117359058802268355L;$/;"	f	class:DeleteChunkTask	file:
+serialVersionUID	src/hdfs/message/DeleteOrphanTask.java	/^	private static final long serialVersionUID = -796516399560749016L;$/;"	f	class:DeleteOrphanTask	file:
+serialVersionUID	src/hdfs/message/DeleteTempTask.java	/^	private static final long serialVersionUID = 439160601414370959L;$/;"	f	class:DeleteTempTask	file:
+serialVersionUID	src/hdfs/message/Message.java	/^	private static final long serialVersionUID = -8813886744764292033L;$/;"	f	class:Message	file:
+serialVersionUID	src/hdfs/message/Task.java	/^	private static final long serialVersionUID = 8427383144164863802L;$/;"	f	class:Task	file:
+serialVersionUID	src/mapreduce/client/JobConf.java	/^	private static final long serialVersionUID = 1437439113195756219L;$/;"	f	class:JobConf	file:
+serialVersionUID	src/mapreduce/io/KeyValue.java	/^	private static final long serialVersionUID = -7039424581270329250L;$/;"	f	class:KeyValue	file:
+serialVersionUID	src/mapreduce/io/Split.java	/^	private static final long serialVersionUID = 9178405296046575926L;$/;"	f	class:Split	file:
+serialVersionUID	src/mapreduce/io/writable/IntWritable.java	/^	private static final long serialVersionUID = -1014971413849096367L;$/;"	f	class:IntWritable	file:
+serialVersionUID	src/mapreduce/io/writable/LongWritable.java	/^	private static final long serialVersionUID = -4469350421720870388L;	$/;"	f	class:LongWritable	file:
+serialVersionUID	src/mapreduce/io/writable/Text.java	/^	private static final long serialVersionUID = 9216926564051053141L;$/;"	f	class:Text	file:
+serialVersionUID	src/mapreduce/io/writable/Writable.java	/^	private static final long serialVersionUID = -7468134504127619796L;$/;"	f	class:Writable	file:
+serialVersionUID	src/mapreduce/jobtracker/JobStatus.java	/^	private static final long serialVersionUID = -1476068839650049825L;$/;"	f	class:JobStatus	file:
+serialVersionUID	src/mapreduce/jobtracker/JobTrackerACK.java	/^	private static final long serialVersionUID = 1004271801317456453L;$/;"	f	class:JobTrackerACK	file:
+serialVersionUID	src/mapreduce/jobtracker/SchedulerComparator.java	/^	private static final long serialVersionUID = -5398685035241499479L;$/;"	f	class:SchedulerComparator	file:
+serialVersionUID	src/mapreduce/jobtracker/TaskStatus.java	/^	private static final long serialVersionUID = 8889285369480650292L;$/;"	f	class:TaskStatus	file:
+serialVersionUID	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private static final long serialVersionUID = 775740096383175892L;$/;"	f	class:TaskTrackerInfo	file:
+serialVersionUID	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	private static final long serialVersionUID = 6483495489789811905L;$/;"	f	class:TaskTrackerReport	file:
+serialVersionUID	src/mapreduce/message/CleanerTask.java	/^	private static final long serialVersionUID = 2967629977082519094L;$/;"	f	class:CleanerTask	file:
+serialVersionUID	src/mapreduce/message/JarFileEntry.java	/^	private static final long serialVersionUID = -3616669982439495255L;$/;"	f	class:JarFileEntry	file:
+serialVersionUID	src/mapreduce/message/Job.java	/^	private static final long serialVersionUID = -280531931740408893L;$/;"	f	class:Job	file:
+serialVersionUID	src/mapreduce/message/KillerTask.java	/^	private static final long serialVersionUID = -2032059767414904871L;$/;"	f	class:KillerTask	file:
+serialVersionUID	src/mapreduce/message/MapperTask.java	/^	private static final long serialVersionUID = -4448997561951975942L;$/;"	f	class:MapperTask	file:
+serialVersionUID	src/mapreduce/message/PartitionEntry.java	/^	private static final long serialVersionUID = -3630399948649412039L;$/;"	f	class:PartitionEntry	file:
+serialVersionUID	src/mapreduce/message/ReducerTask.java	/^	private static final long serialVersionUID = -9087455093923296482L;$/;"	f	class:ReducerTask	file:
+serialVersionUID	src/mapreduce/message/Task.java	/^	private static final long serialVersionUID = -6752330217052972746L;$/;"	f	class:Task	file:
+serverPort	src/hdfs/datanode/DataNode.java	/^		int serverPort;$/;"	f	class:DataNode.Server
+serverPort	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private int serverPort;$/;"	f	class:TaskTrackerInfo	file:
+serverPort	src/mapreduce/message/PartitionEntry.java	/^	private int serverPort;$/;"	f	class:PartitionEntry	file:
+serverPort	src/mapreduce/tasktracker/TaskTracker.java	/^	int serverPort;$/;"	f	class:TaskTracker
+serverSoc	src/hdfs/datanode/DataNode.java	/^		ServerSocket serverSoc;$/;"	f	class:DataNode.Server
+serverSoc	src/mapreduce/tasktracker/TaskTracker.java	/^		ServerSocket serverSoc;$/;"	f	class:TaskTracker.PartitionServer
+setCommitTime	src/hdfs/io/HDFSChunk.java	/^	public void setCommitTime(Date time) {$/;"	m	class:HDFSChunk
+setCommitTime	src/hdfs/io/HDFSFile.java	/^	public void setCommitTime(Date time) {$/;"	m	class:HDFSFile
+setDataNodeStub	src/hdfs/namenode/NameNode.java	/^		private void setDataNodeStub(DataNodeRemoteInterface stub) {$/;"	m	class:NameNode.DataNodeAbstract	file:
+setFilePrefix	src/mapreduce/message/Task.java	/^	public void setFilePrefix(String prefix) {$/;"	m	class:Task
+setInputPath	src/mapreduce/client/JobConf.java	/^	public void setInputPath(String inputPath) {$/;"	m	class:JobConf
+setJarFileEntry	src/mapreduce/message/Job.java	/^	public void setJarFileEntry(String jarPath) throws UnknownHostException {$/;"	m	class:Job
+setJobId	src/mapreduce/message/Job.java	/^	public void setJobId(String id) {$/;"	m	class:Job
+setJobName	src/mapreduce/client/JobConf.java	/^	public void setJobName(String jobName) {$/;"	m	class:JobConf
+setLocalMapperFilePrefix	src/mapreduce/message/ReducerTask.java	/^	public void setLocalMapperFilePrefix(String prefix) {$/;"	m	class:ReducerTask
+setLocalPath	src/mapreduce/message/JarFileEntry.java	/^	public void setLocalPath(String localPath) {$/;"	m	class:JarFileEntry
+setMapOutputKeyClass	src/mapreduce/client/JobConf.java	/^	public void setMapOutputKeyClass(Class<?> theClass) {$/;"	m	class:JobConf
+setMapOutputValueClass	src/mapreduce/client/JobConf.java	/^	public void setMapOutputValueClass(Class<?> theClass) {$/;"	m	class:JobConf
+setMapperClassName	src/mapreduce/client/JobConf.java	/^	public void setMapperClassName(String theClassName) {$/;"	m	class:JobConf
+setNumMapTasks	src/mapreduce/client/JobConf.java	/^	public void setNumMapTasks(int num) {$/;"	m	class:JobConf
+setNumReduceTasks	src/mapreduce/client/JobConf.java	/^	public void setNumReduceTasks(int num) {$/;"	m	class:JobConf
+setOutputKeyClass	src/mapreduce/client/JobConf.java	/^	public void setOutputKeyClass(Class<?> theClass) {$/;"	m	class:JobConf
+setOutputPath	src/mapreduce/client/JobConf.java	/^	public void setOutputPath(String outputPath) {$/;"	m	class:JobConf
+setOutputValueClass	src/mapreduce/client/JobConf.java	/^	public void setOutputValueClass(Class<?> theClass) {$/;"	m	class:JobConf
+setPriority	src/mapreduce/client/JobConf.java	/^	public void setPriority(int level) {$/;"	m	class:JobConf
+setProcRef	src/mapreduce/message/Task.java	/^	public void setProcRef(Process p) {$/;"	m	class:Task
+setReducerClassName	src/mapreduce/client/JobConf.java	/^	public void setReducerClassName(String theClassName) {$/;"	m	class:JobConf
+setSplit	src/mapreduce/message/Job.java	/^	public void setSplit(List<Split> splits) {$/;"	m	class:Job
+setStatus	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void setStatus(Status newStat) {$/;"	m	class:TaskTrackerInfo
+slots	src/mapreduce/tasktracker/TaskTracker.java	/^	int slots;$/;"	f	class:TaskTracker
+soc	src/mapreduce/tasktracker/TaskTracker.java	/^		Socket soc;$/;"	f	class:TaskTracker.RequestResponser
+sort	src/mapreduce/io/collector/OutputCollector.java	/^	public void sort() throws IOException {$/;"	m	class:OutputCollector
+sort	src/mapreduce/io/recordreader/TextIntReconstructor.java	/^	public void sort(ReducerTask task) throws IOException {$/;"	m	class:TextIntReconstructor
+split	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	private Split split;$/;"	f	class:KeyValueLineRecordReader	file:
+split	src/mapreduce/message/MapperTask.java	/^	public Split split;$/;"	f	class:MapperTask
+splitChunks	src/mapreduce/client/JobClient.java	/^	private static List<Split> splitChunks(HDFSFile file) {$/;"	m	class:JobClient	file:
+splitFile	src/mapreduce/client/JobClient.java	/^	private static List<Split> splitFile(String inputFile) throws Exception {$/;"	m	class:JobClient	file:
+splits	src/mapreduce/message/Job.java	/^	private List<Split> splits;$/;"	f	class:Job	file:
+srcDataNodeIp	src/hdfs/message/CopyChunkTask.java	/^	private String srcDataNodeIp;$/;"	f	class:CopyChunkTask	file:
+srcDataNodeServerPort	src/hdfs/message/CopyChunkTask.java	/^	private int srcDataNodeServerPort;$/;"	f	class:CopyChunkTask	file:
+startTask	src/mapreduce/message/Task.java	/^	public void startTask() {$/;"	m	class:Task
+status	src/hdfs/message/Task.java	/^	private MessageStatus status;$/;"	f	class:Task	file:
+status	src/mapreduce/jobtracker/JobStatus.java	/^	public WorkStatus status;$/;"	f	class:JobStatus
+status	src/mapreduce/jobtracker/TaskStatus.java	/^	public WorkStatus status;$/;"	f	class:TaskStatus
+status	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	private Status status;$/;"	f	class:TaskTrackerInfo	file:
+status	src/mapreduce/message/Task.java	/^	WorkStatus status;$/;"	f	class:Task
+strList	src/test/testMapRed/SyncExample.java	/^    List<String> strList = new ArrayList<String>();$/;"	f	class:SyncExample
+submit	src/util/Utility.java	/^	private static void submit(String[] args) throws IOException, ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {$/;"	m	class:Utility	file:
+submitJob	src/mapreduce/jobtracker/JobTracker.java	/^	public String submitJob(Job job) {$/;"	m	class:JobTracker
+submitJob	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public String submitJob(Job job) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+submitJob	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public String submitJob(Job job) throws RemoteException {$/;"	m	class:JobTrackerSimulator
+synStrList	src/test/testMapRed/SyncExample.java	/^    List<String> synStrList = Collections.synchronizedList(strList);$/;"	f	class:SyncExample
+syncTaskList	src/mapreduce/tasktracker/TaskTracker.java	/^	List<Task> syncTaskList;$/;"	f	class:TaskTracker
+task	src/mapreduce/core/RunMapper.java	/^	public MapperTask task;$/;"	f	class:RunMapper
+task	src/mapreduce/core/RunReducer.java	/^	public ReducerTask task;$/;"	f	class:RunReducer
+task	src/mapreduce/io/collector/OutputCollector.java	/^	Task task;$/;"	f	class:OutputCollector
+task	src/mapreduce/tasktracker/TaskTracker.java	/^		private CleanerTask task;$/;"	f	class:TaskTracker.CleanJob	file:
+taskCounter	src/mapreduce/tasktracker/TaskTracker.java	/^	int taskCounter = 0;$/;"	f	class:TaskTracker
+taskHandler	src/hdfs/datanode/DataNode.java	/^	private void taskHandler(Task task) {$/;"	m	class:DataNode	file:
+taskHandler	src/hdfs/namenode/NameNode.java	/^	private void taskHandler(Task task, String dataNodeName) {$/;"	m	class:NameNode	file:
+taskId	src/mapreduce/jobtracker/TaskStatus.java	/^	public String taskId;$/;"	f	class:TaskStatus
+taskIds	src/mapreduce/message/KillerTask.java	/^	private List<String> taskIds;$/;"	f	class:KillerTask	file:
+taskJarFolder	src/mapreduce/tasktracker/TaskTracker.java	/^	File taskJarFolder;$/;"	f	class:TaskTracker
+taskList	src/hdfs/message/Message.java	/^	private List<Task> taskList;$/;"	f	class:Message	file:
+taskList	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	private List<Task> taskList = Collections.synchronizedList(new LinkedList<Task>());$/;"	f	class:JobTrackerSimulator	file:
+taskList	src/mapreduce/tasktracker/TaskTracker.java	/^		private List<Task> taskList;$/;"	f	class:TaskTracker.StartTask	file:
+taskNaming	src/mapreduce/jobtracker/JobTracker.java	/^	private long taskNaming = 1;$/;"	f	class:JobTracker	file:
+taskScheduleTbl	src/mapreduce/jobtracker/JobTracker.java	/^		public AbstractMap<String, Queue<Task>> taskScheduleTbl = $/;"	f	class:JobTracker.JobScheduler
+taskStatus	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	public List<TaskStatus> taskStatus;$/;"	f	class:TaskTrackerReport
+taskSuccessRate	src/test/testMapRed/taskTrackerSimulator.java	/^	public static int taskSuccessRate = 101; \/\/x %$/;"	f	class:taskTrackerSimulator
+taskTbl	src/mapreduce/jobtracker/JobTracker.java	/^	private AbstractMap<String, Task> taskTbl = new ConcurrentHashMap<String, Task>();$/;"	f	class:JobTracker	file:
+taskTrackerIp	src/mapreduce/jobtracker/TaskStatus.java	/^	public String taskTrackerIp;$/;"	f	class:TaskStatus
+taskTrackerIp	src/mapreduce/jobtracker/TaskTrackerReport.java	/^	public String taskTrackerIp;$/;"	f	class:TaskTrackerReport
+taskTrackerIp	src/mapreduce/message/CleanerTask.java	/^	private String taskTrackerIp;$/;"	f	class:CleanerTask	file:
+taskTrackerIp	src/mapreduce/message/JarFileEntry.java	/^	private String taskTrackerIp;$/;"	f	class:JarFileEntry	file:
+taskTrackerIp	src/mapreduce/message/KillerTask.java	/^	private transient String taskTrackerIp;$/;"	f	class:KillerTask	file:
+taskTrackerIp	src/mapreduce/tasktracker/TaskTracker.java	/^	String taskTrackerIp;$/;"	f	class:TaskTracker
+taskTrackerMapperFolderName	src/mapreduce/tasktracker/TaskTracker.java	/^	String taskTrackerMapperFolderName;$/;"	f	class:TaskTracker
+taskTrackerPort	src/mapreduce/jobtracker/TaskStatus.java	/^	public int taskTrackerPort;$/;"	f	class:TaskStatus
+taskTrackerReducerFolderName	src/mapreduce/tasktracker/TaskTracker.java	/^	String taskTrackerReducerFolderName;$/;"	f	class:TaskTracker
+taskTrackerSimulator	src/test/testMapRed/taskTrackerSimulator.java	/^public class taskTrackerSimulator {$/;"	c
+taskTrackerTbl	src/mapreduce/jobtracker/JobTracker.java	/^	private AbstractMap<String, TaskTrackerInfo> taskTrackerTbl = new ConcurrentHashMap<String, TaskTrackerInfo>();$/;"	f	class:JobTracker	file:
+taskTrackerTmpFolder	src/mapreduce/tasktracker/TaskTracker.java	/^	String taskTrackerTmpFolder;$/;"	f	class:TaskTracker
+terminateJob	src/mapreduce/jobtracker/JobTracker.java	/^	public void terminateJob(String jobId) {$/;"	m	class:JobTracker
+terminateJob	src/mapreduce/jobtracker/JobTrackerRemoteInterface.java	/^	public void terminateJob(String jobId) throws RemoteException;$/;"	m	interface:JobTrackerRemoteInterface
+terminateJob	src/mapreduce/tasktracker/JobTrackerSimulator.java	/^	public void terminateJob(String jobId) throws RemoteException {$/;"	m	class:JobTrackerSimulator
+test.testHDFS	src/test/testHDFS/testArrayListBehavior.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testBufferedOutputStream.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testDeleteFile.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testNewOutputStream.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testPutToHDFS.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testReadFile.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testReadLine.java	/^package test.testHDFS;$/;"	p
+test.testHDFS	src/test/testHDFS/testWriteFile.java	/^package test.testHDFS;$/;"	p
+test.testMapRed	src/test/testMapRed/MapperFileReader.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/SyncExample.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/TempRunner.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/URLConnectionReader.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/taskTrackerSimulator.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/testCleanFiles.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/testJVMSocket.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/testJarLoader.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/testJobSubmit_Ngram.java	/^package test.testMapRed;$/;"	p
+test.testMapRed	src/test/testMapRed/testJobSubmit_WordCount.java	/^package test.testMapRed;$/;"	p
+testArrayListBehavior	src/test/testHDFS/testArrayListBehavior.java	/^public class testArrayListBehavior {$/;"	c
+testBufferedOutputStream	src/test/testHDFS/testBufferedOutputStream.java	/^public class testBufferedOutputStream {$/;"	c
+testCleanFiles	src/test/testMapRed/testCleanFiles.java	/^public class testCleanFiles {$/;"	c
+testDeleteFile	src/test/testHDFS/testDeleteFile.java	/^public class testDeleteFile {$/;"	c
+testJVMSocket	src/test/testMapRed/testJVMSocket.java	/^public class testJVMSocket {$/;"	c
+testJarLoader	src/test/testMapRed/testJarLoader.java	/^public class testJarLoader {$/;"	c
+testJobSubmit_Ngram	src/test/testMapRed/testJobSubmit_Ngram.java	/^public class testJobSubmit_Ngram {$/;"	c
+testJobSubmit_WordCount	src/test/testMapRed/testJobSubmit_WordCount.java	/^public class testJobSubmit_WordCount {$/;"	c
+testNewOutputStream	src/test/testHDFS/testNewOutputStream.java	/^public class testNewOutputStream {$/;"	c
+testPutToHDFS	src/test/testHDFS/testPutToHDFS.java	/^public class testPutToHDFS {$/;"	c
+testReadFile	src/test/testHDFS/testReadFile.java	/^public class testReadFile {$/;"	c
+testReadLine	src/test/testHDFS/testReadLine.java	/^public class testReadLine {$/;"	c
+testWriteFile	src/test/testHDFS/testWriteFile.java	/^public class testWriteFile {$/;"	c
+tid	src/hdfs/message/Task.java	/^	private String tid;$/;"	f	class:Task	file:
+tid	src/mapreduce/message/PartitionEntry.java	/^	private String tid;$/;"	f	class:PartitionEntry	file:
+tid	src/mapreduce/message/Task.java	/^	private String tid;$/;"	f	class:Task	file:
+timestamp	src/hdfs/namenode/NameNode.java	/^		public void timestamp() {$/;"	m	class:NameNode.DataNodeAbstract
+tmpFileWrapper	src/hdfs/datanode/DataNode.java	/^	private String tmpFileWrapper(String name) {$/;"	m	class:DataNode	file:
+toString	src/mapreduce/io/writable/IntWritable.java	/^	public String toString() {$/;"	m	class:IntWritable
+toString	src/mapreduce/io/writable/LongWritable.java	/^	public String toString() {$/;"	m	class:LongWritable
+toString	src/mapreduce/io/writable/Text.java	/^	public String toString() {$/;"	m	class:Text
+toString	src/mapreduce/io/writable/Writable.java	/^	public abstract String toString();$/;"	m	class:Writable
+totalChunkList	src/hdfs/io/HDFSFile.java	/^	private List<HDFSChunk> totalChunkList; \/\/Contains all chunks. Some chunks may be excluded after rearrange.$/;"	f	class:HDFSFile	file:
+updateChunkSize	src/hdfs/io/HDFSChunk.java	/^	public void updateChunkSize(int len) {$/;"	m	class:HDFSChunk
+updateTaskStatus	src/mapreduce/jobtracker/JobTracker.java	/^	public void updateTaskStatus(TaskStatus taskStatus) {$/;"	m	class:JobTracker
+updateTimeStamp	src/mapreduce/jobtracker/TaskTrackerInfo.java	/^	public void updateTimeStamp() {$/;"	m	class:TaskTrackerInfo
+util	src/util/Utility.java	/^package util;$/;"	p
+validate	src/global/IPAddressValidator.java	/^    public boolean validate(final String ip){		  $/;"	m	class:IPAddressValidator
+value	src/mapreduce/io/KeyValue.java	/^	VALUE value;$/;"	f	class:KeyValue
+value	src/mapreduce/io/writable/IntWritable.java	/^	private Integer value;$/;"	f	class:IntWritable	file:
+value	src/mapreduce/io/writable/LongWritable.java	/^	private Long value;$/;"	f	class:LongWritable	file:
+value	src/mapreduce/io/writable/Text.java	/^	private String value;$/;"	f	class:Text	file:
+valueList	src/mapreduce/io/KeyValueCollection.java	/^	private List<V> valueList;$/;"	f	class:KeyValueCollection	file:
+values	src/mapreduce/io/recordreader/KeyValueLineRecordReader.java	/^	private String[] values;$/;"	f	class:KeyValueLineRecordReader	file:
+write	src/hdfs/io/HDFSBufferedOutputStream.java	/^	public void write(byte[] b) throws ArrayIndexOutOfBoundsException, IOException {$/;"	m	class:HDFSBufferedOutputStream
+write	src/hdfs/io/HDFSBufferedOutputStream.java	/^	public void write(byte[] b, int offset, int len) throws ArrayIndexOutOfBoundsException, IOException {$/;"	m	class:HDFSBufferedOutputStream
+write	src/hdfs/io/HDFSOutputStream.java	/^	public void write(byte[] b) throws IOException {$/;"	m	class:HDFSOutputStream
+write	src/hdfs/io/HDFSOutputStream.java	/^	public void write(byte[] b, int offset, int len) throws IOException {$/;"	m	class:HDFSOutputStream
+write	src/hdfs/io/HDFSOutputStream.java	/^	public void write(int arg0) throws IOException {$/;"	m	class:HDFSOutputStream
+writeToDataNode	src/hdfs/io/HDFSOutputStream.java	/^	private void writeToDataNode(byte[] b, DataNodeEntry dataNode, String chunkName) throws IOException {$/;"	m	class:HDFSOutputStream	file:
+writeToLocal	src/hdfs/datanode/DataNode.java	/^	public void writeToLocal(byte[] b, String chunkName, int offset) throws IOException {$/;"	m	class:DataNode
+writeToLocal	src/hdfs/datanode/DataNodeRemoteInterface.java	/^	public void writeToLocal(byte[] b, String chunkName, int offset) throws RemoteException, IOException;$/;"	m	interface:DataNodeRemoteInterface
