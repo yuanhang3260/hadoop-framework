@@ -49,7 +49,7 @@ public interface NameNodeRemoteInterface extends Remote{
 	 * @throws RemoteException
 	 */
 	public HDFSFile open(String filePath) throws RemoteException, IOException;
-
+	
 	/**
 	 * Delete the file on HDFS.
 	 * @param path The name of file to be deleted.

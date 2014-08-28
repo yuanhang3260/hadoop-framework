@@ -37,13 +37,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class NameNode implements NameNodeRemoteInterface{
 	volatile long chunkNaming;
-	private Map<String, DataNodeAbstract> dataNodeTbl;
-	private Map<String, HDFSFile> fileTbl;
+	private Map<String, DataNodeAbstract> dataNodeTbl; //DataNodeName -> DataNodeAbstract Object
+	private Map<String, HDFSFile> fileTbl; //Path -> HDFSFile
 
 	private NameNodeRemoteInterface nameNodeStub;
 	private int port;
 	
-	private Map<String, List<Task>> dataNodeTaskTbl;
+	private Map<String, List<Task>> dataNodeTaskTbl; //DataNodeName -> task list of this DataNode
 	private long namer;
 //	private Object sysCheckSync = new Object();
 	
@@ -501,7 +501,7 @@ public class NameNode implements NameNodeRemoteInterface{
 			
 			DataNodeAbstract dataNode = this.dataNodeTbl.get(dataNodeName);
 			dataNode.chunkList.remove(((DeleteChunkTask) task).getChunkName());
-		} 
+		}
 		
 		/*
 		 * Delete the orphan chunk from DataNode's chunk list 
